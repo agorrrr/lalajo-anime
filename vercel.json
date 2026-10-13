@@ -9,6 +9,8 @@
     { "source": "/anime", "destination": "/pages/anime.html" },
     { "source": "/watch", "destination": "/pages/watch.html" },
     { "source": "/admin", "destination": "/pages/admin.html" },
+    { "source": "/login", "destination": "/pages/login.html" },
+    { "source": "/user", "destination": "/pages/user.html" },
     { "source": "/pages/:path*", "destination": "/pages/:path*.html" }
   ]
 }

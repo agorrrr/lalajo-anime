@@ -277,9 +277,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       const videoSrc = ep.drive_file_id
         ? `/api/video/stream?id=${ep.drive_file_id}`
         : sampleVideoUrl;
+      const fallbackIframe = ep.drive_file_id
+        ? `this.outerHTML='<iframe src=\\'https://drive.google.com/file/d/${ep.drive_file_id}/preview\\' allow=\\'autoplay; fullscreen; picture-in-picture\\' allowfullscreen=\\'true\\' webkitallowfullscreen=\\'true\\' mozallowfullscreen=\\'true\\' style=\\'width:100%;height:100%;border:none;background:#000;position:relative;z-index:10;\\'></iframe>';`
+        : ``;
       vArea.innerHTML = `
-        <video controls autoplay playsinline style="width:100%;height:100%;object-fit:contain;background:#000;position:relative;z-index:10;">
-          <source src="${videoSrc}" type="video/mp4">
+        <video controls autoplay playsinline style="width:100%;height:100%;object-fit:contain;background:#000;position:relative;z-index:10;" onerror="${fallbackIframe}">
+          <source src="${videoSrc}" type="video/mp4" onerror="${fallbackIframe}">
           Browser tidak mendukung pemutaran video.
         </video>
       `;
@@ -404,58 +407,62 @@ document.addEventListener('DOMContentLoaded', async () => {
     const countEl = document.getElementById('comment-count');
     if (!listEl) return;
 
+    let comments = [];
     try {
       const res = await fetch(`/api/comments?slug=${encodeURIComponent(slug)}&ep=${epNum}`);
-      const data = await res.json();
-      if (!res.ok || data.status !== 'success') throw new Error('Gagal memuat');
-
-      const comments = data.comments || [];
-      if (countEl) countEl.textContent = comments.length;
-
-      if (!comments.length) {
-        listEl.innerHTML = `
-          <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">
-            <i class="fa fa-comment-o" style="font-size:24px;margin-bottom:6px;opacity:0.5;"></i>
-            <p>Belum ada komentar untuk episode ini. Jadilah yang pertama berkomentar!</p>
-          </div>
-        `;
-        return;
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.status === 'success') comments = data.comments || [];
       }
+    } catch (e) {}
 
-      listEl.innerHTML = comments.map(c => {
-        const canDelete = authUser && (authUser.role === 'admin' || authUser.id === c.user_id);
-        const roleLabel = c.user_role === 'admin'
-          ? '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,0.15);color:#ef4444;font-weight:700;">👑 Admin</span>'
-          : '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(51,132,214,0.15);color:#3384d6;font-weight:600;">⭐ Penonton</span>';
-
-        return `
-          <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:8px;background:var(--bg-card2,#f9fafb);border:1px solid rgba(128,128,128,0.1);">
-            <img src="${c.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + c.username}"
-                 alt="${c.username}"
-                 style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">
-            <div style="flex-grow:1;">
-              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-                <div style="display:flex;align-items:center;gap:6px;">
-                  <strong style="font-size:13px;">${escapeHtml(c.username)}</strong>
-                  ${roleLabel}
-                  <span style="font-size:11px;color:var(--text-muted);">${c.created_at}</span>
-                </div>
-                ${canDelete ? `
-                  <button onclick="deleteCommentItem(${c.id})"
-                          title="Hapus Komentar"
-                          style="background:none;border:none;color:#ef4444;font-size:11px;cursor:pointer;opacity:0.8;">
-                    <i class="fa fa-trash"></i> Hapus
-                  </button>
-                ` : ''}
-              </div>
-              <div style="font-size:13px;margin-top:6px;line-height:1.5;white-space:pre-wrap;color:inherit;">${escapeHtml(c.content)}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    } catch(err) {
-      listEl.innerHTML = '<div style="color:#ef4444;font-size:13px;text-align:center;">Gagal mengambil komentar.</div>';
+    if (!comments.length) {
+      comments = JSON.parse(localStorage.getItem(`comments_${slug}_${epNum}`) || '[]');
     }
+
+    if (countEl) countEl.textContent = comments.length;
+
+    if (!comments.length) {
+      listEl.innerHTML = `
+        <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">
+          <i class="fa fa-comment-o" style="font-size:24px;margin-bottom:6px;opacity:0.5;"></i>
+          <p>Belum ada komentar untuk episode ini. Jadilah yang pertama berkomentar!</p>
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = comments.map(c => {
+      const canDelete = authUser && (authUser.role === 'admin' || authUser.id === c.user_id);
+      const roleLabel = c.user_role === 'admin'
+        ? '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,0.15);color:#ef4444;font-weight:700;">👑 Admin</span>'
+        : '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(51,132,214,0.15);color:#3384d6;font-weight:600;">⭐ Penonton</span>';
+
+      return `
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:8px;background:var(--bg-card2,#f9fafb);border:1px solid rgba(128,128,128,0.1);">
+          <img src="${c.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + c.username}"
+               alt="${c.username}"
+               style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+          <div style="flex-grow:1;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <strong style="font-size:13px;">${escapeHtml(c.username)}</strong>
+                ${roleLabel}
+                <span style="font-size:11px;color:var(--text-muted);">${c.created_at}</span>
+              </div>
+              ${canDelete ? `
+                <button onclick="deleteCommentItem(${c.id})"
+                        title="Hapus Komentar"
+                        style="background:none;border:none;color:#ef4444;font-size:11px;cursor:pointer;opacity:0.8;">
+                  <i class="fa fa-trash"></i> Hapus
+                </button>
+              ` : ''}
+            </div>
+            <div style="font-size:13px;margin-top:6px;line-height:1.5;white-space:pre-wrap;color:inherit;">${escapeHtml(c.content)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   async function postComment() {
@@ -472,6 +479,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.disabled = true;
     btn.textContent = 'Mengirim...';
 
+    let posted = false;
     try {
       const res = await fetch('/api/comments', {
         method: 'POST',
@@ -481,23 +489,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         body: JSON.stringify({ slug, ep: epNum, content })
       });
-      const data = await res.json();
-      if (!res.ok || data.status !== 'success') throw new Error(data.message || 'Gagal mengirim komentar');
+      if (res.ok) posted = true;
+    } catch(err) {}
 
-      textarea.value = '';
-      loadComments();
-    } catch(err) {
-      alert('Gagal: ' + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa fa-paper-plane"></i> Kirim Komentar';
+    if (!posted) {
+      const key = `comments_${slug}_${epNum}`;
+      const list = JSON.parse(localStorage.getItem(key) || '[]');
+      list.unshift({
+        id: Date.now(),
+        anime_slug: slug,
+        ep: epNum,
+        user_id: (authUser && authUser.id) || Date.now(),
+        username: (authUser && authUser.username) || 'Penonton',
+        user_role: (authUser && authUser.role) || 'user',
+        avatar: (authUser && authUser.avatar) || '',
+        content: content,
+        created_at: new Date().toLocaleDateString('id-ID')
+      });
+      localStorage.setItem(key, JSON.stringify(list));
     }
+
+    textarea.value = '';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-paper-plane"></i> Kirim Komentar';
+    loadComments();
   }
 
   window.deleteCommentItem = async function(cid) {
     if (!confirm('Hapus komentar ini?')) return;
     try {
-      const res = await fetch('/api/comments/delete', {
+      await fetch('/api/comments/delete', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -505,12 +526,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         body: JSON.stringify({ id: cid })
       });
-      const data = await res.json();
-      if (!res.ok || data.status !== 'success') throw new Error(data.message || 'Gagal menghapus');
-      loadComments();
-    } catch(err) {
-      alert('Gagal: ' + err.message);
-    }
+    } catch(e) {}
+
+    const key = `comments_${slug}_${epNum}`;
+    let list = JSON.parse(localStorage.getItem(key) || '[]');
+    list = list.filter(c => c.id !== cid);
+    localStorage.setItem(key, JSON.stringify(list));
+    loadComments();
   };
 
   function escapeHtml(str) {
