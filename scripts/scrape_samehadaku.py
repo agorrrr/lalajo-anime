@@ -90,11 +90,17 @@ def extract_episode_stream(ep_url):
             if s_url and s_url not in servers:
                 servers.append(s_url)
 
-    iframes = re.findall(r'<iframe[^>]+src=[\"\']([^\"\']+)[\"\']', html)
+    iframes = re.findall(r'<iframe[^>]+src=[\"\']([^\"\']+)[\"\']', html, re.I)
     for ifr in iframes:
         ifr = ifr.strip()
         if ifr and ifr not in servers and not ifr.startswith('chrome') and 'ads' not in ifr:
             servers.append(ifr)
+
+    sources = re.findall(r'<source[^>]+src=[\"\']([^\"\']+)[\"\']', html, re.I)
+    for src in sources:
+        src = src.strip()
+        if src and src not in servers:
+            servers.append(src)
 
     stream_url = servers[0] if servers else ""
     return stream_url, servers
@@ -104,67 +110,115 @@ def scrape_anime_detail(slug, url, max_eps=12):
     if not html:
         return None
 
-    title_m = re.search(r'<h1[^>]*itemprop=[\"\']headline[\"\'][^>]*>(.*?)</h1>', html, re.DOTALL)
-    if title_m:
-        title = re.sub(r'<[^>]+>', '', title_m.group(1)).replace('Sub Indo', '').strip()
+    # Title: OG -> H1 -> Fallback
+    og_title = re.search(r'<meta[^>]+property=[\"\']og:title[\"\'][^>]+content=[\"\']([^\"\']+)[\"\']', html, re.I) \
+        or re.search(r'<meta[^>]+content=[\"\']([^\"\']+)[\"\'][^>]+property=[\"\']og:title[\"\']', html, re.I)
+    h1_title = re.search(r'<h1[^>]*itemprop=[\"\']headline[\"\'][^>]*>(.*?)</h1>', html, re.DOTALL) \
+        or re.search(r'<h1[^>]*class=[\"\'][^\"\']*jdlcontent[^\"\']*[\"\'][^>]*>(.*?)</h1>', html, re.DOTALL) \
+        or re.search(r'<h1[^>]*>(.*?)</h1>', html, re.DOTALL)
+
+    if og_title:
+        title = og_title.group(1)
+    elif h1_title:
+        title = re.sub(r'<[^>]+>', '', h1_title.group(1))
     else:
         title = slug.replace('-', ' ').title()
 
-    thumb_m = re.search(r'<div[^>]*class=[\"\'][^\"\']*w-48 aspect-\[3/4\][^\"\']*[\"\'][^>]*>.*?<img[^>]+src=[\"\']([^\"\']+)[\"\']', html, re.DOTALL)
-    if thumb_m:
+    title = re.sub(r'(?i)(?:Subtitle\s*Indonesia|Sub\s*Indo|Samehadaku|Otakudesu|Kuramanime)', '', title)
+    title = re.sub(r'[\s\-_|:]+$', '', title).strip()
+
+    # Thumbnail: OG -> CSS -> First Upload Image
+    og_thumb = re.search(r'<meta[^>]+property=[\"\']og:image[\"\'][^>]+content=[\"\']([^\"\']+)[\"\']', html, re.I) \
+        or re.search(r'<meta[^>]+content=[\"\']([^\"\']+)[\"\'][^>]+property=[\"\']og:image[\"\']', html, re.I)
+    thumb_m = re.search(r'class=[\"\'][^\"\']*(?:w-48|fotoanime|thumb|poster|cover)[^\"\']*[\"\'][^>]*>.*?<img[^>]+(?:src|data-src)=[\"\']([^\"\']+)[\"\']', html, re.DOTALL)
+
+    if og_thumb:
+        thumbnail = og_thumb.group(1).strip()
+    elif thumb_m:
         thumbnail = thumb_m.group(1).strip()
     else:
-        fb_thumb = re.search(r'src=[\"\'](https?://v2\.samehadaku\.how/wp-content/uploads/[^\"\']+\.(?:jpg|jpeg|png|webp))[\"\']', html)
+        fb_thumb = re.search(r'src=[\"\'](https?://[^\"\']+\.(?:jpg|jpeg|png|webp))[\"\']', html)
         thumbnail = fb_thumb.group(1) if fb_thumb else ""
 
-    score_m = re.search(r'<span[^>]*class=[\"\'][^\"\']*font-extrabold[^\"\']*[\"\']>([\d\.]+)</span>', html)
+    # Score
+    score_m = re.search(r'class=[\"\'][^\"\']*(?:font-extrabold|score|rating|skor)[^\"\']*[\"\']>([\d\.]+)</span>', html, re.I) \
+        or re.search(r'(?:Skor|Rating)\s*:\s*(?:</b>\s*)?([\d\.]+)', html, re.I)
     try:
         score = float(score_m.group(1)) if score_m else 7.5
     except:
         score = 7.5
 
+    # Genres
     genres = []
-    g_matches = re.findall(r'href=[\"\']https?://v2\.samehadaku\.how/genre/[^/\"\'\s]+/?[\"\'][^>]*>(.*?)</a>', html)
+    g_matches = re.findall(r'href=[\"\']https?://[^/]+/genres?/[^/\"\'\s]+/?[\"\'][^>]*>(.*?)</a>', html, re.I)
     for g in g_matches:
         cg = re.sub(r'<[^>]+>', '', g).strip()
         if cg and cg not in genres:
             genres.append(cg)
 
+    # Status, Type, Studio
     status_raw = "Ongoing"
     anime_type = "TV"
     studio = "Unknown"
 
-    status_m = re.search(r'Status</span>\s*<span[^>]*>(.*?)</span>', html, re.DOTALL)
+    status_m = re.search(r'Status\s*</span>\s*<span[^>]*>(.*?)</span>', html, re.DOTALL | re.I) \
+        or re.search(r'Status\s*:\s*(?:</b>\s*)?([^<]+)', html, re.I)
     if status_m:
         status_raw = re.sub(r'<[^>]+>', '', status_m.group(1)).strip()
 
     status = "Currently Airing" if "ongoing" in status_raw.lower() else "Finished Airing"
 
-    type_m = re.search(r'Type</span>\s*<span[^>]*>(.*?)</span>', html, re.DOTALL)
+    type_m = re.search(r'Type\s*</span>\s*<span[^>]*>(.*?)</span>', html, re.DOTALL | re.I) \
+        or re.search(r'(?:Type|Tipe)\s*:\s*(?:</b>\s*)?([^<]+)', html, re.I)
     if type_m:
         anime_type = re.sub(r'<[^>]+>', '', type_m.group(1)).strip()
 
-    studio_m = re.search(r'Studio</span>\s*<span[^>]*>(.*?)</span>', html, re.DOTALL)
+    studio_m = re.search(r'Studio\s*</span>\s*<span[^>]*>(.*?)</span>', html, re.DOTALL | re.I) \
+        or re.search(r'Studio\s*:\s*(?:</b>\s*)?([^<]+)', html, re.I)
     if studio_m:
         studio = re.sub(r'<[^>]+>', '', studio_m.group(1)).strip()
 
-    syn_m = re.search(r'<div[^>]*class=[\"\'][^\"\']*entry-content entry-content-single[^\"\']*[\"\'][^>]*>(.*?)</div>', html, re.DOTALL)
+    # Synopsis
+    syn_m = re.search(r'<div[^>]*class=[\"\'][^\"\']*(?:entry-content|sinopc|synopsis|desc)[^\"\']*[\"\'][^>]*>(.*?)</div>', html, re.DOTALL)
+    og_desc = re.search(r'<meta[^>]+property=[\"\']og:description[\"\'][^>]+content=[\"\']([^\"\']+)[\"\']', html, re.I) \
+        or re.search(r'<meta[^>]+name=[\"\']description[\"\'][^>]+content=[\"\']([^\"\']+)[\"\']', html, re.I)
+
     if syn_m:
         synopsis = re.sub(r'<[^>]+>', '', syn_m.group(1)).strip()
         synopsis = re.sub(r'\s+', ' ', synopsis)
+    elif og_desc:
+        synopsis = og_desc.group(1).strip()
     else:
         synopsis = "Sinopsis belum tersedia."
 
-    ep_blocks = re.findall(r'<div[^>]*class=[\"\']flex items-center gap-3 p-2[^\"\']*[\"\']>.*?<a[^>]+href=[\"\'](https?://v2\.samehadaku\.how/[^/\"\'\s]+-episode-[^/\"\'\s]+/?)[^>]*>.*?</a>.*?<h4[^>]*>.*?<a[^>]*>(.*?)</a>.*?<span[^>]*class=[\"\'][^\"\']*text-\[11px\][^\"\']*[\"\']>(.*?)</span>', html, re.DOTALL)
-
-    if not ep_blocks:
-        raw_eps = re.findall(r'href=[\"\'](https?://v2\.samehadaku\.how/[^/\"\'\s]*-episode-(\d+)/?)[\"\']', html)
+    # Episodes Finder
+    ep_blocks = []
+    # Pattern 1: Samehadaku blocks
+    sh_blocks = re.findall(r'<div[^>]*class=[\"\']flex items-center gap-3 p-2[^\"\']*[\"\']>.*?<a[^>]+href=[\"\'](https?://[^/\"\'\s]+/[^/\"\'\s]+-episode-[^/\"\'\s]+/?)[^>]*>.*?</a>.*?<h4[^>]*>.*?<a[^>]*>(.*?)</a>.*?<span[^>]*class=[\"\'][^\"\']*text-\[11px\][^\"\']*[\"\']>(.*?)</span>', html, re.DOTALL)
+    if sh_blocks:
+        ep_blocks = sh_blocks
+    else:
+        # Pattern 2: Generic links with episode/eps
+        raw_eps = re.findall(r'href=[\"\'](https?://[^\"\'#\s]*(?:-episode-|\/episode\/|\/eps\/|-eps-)[^\"\'#\s]*)[\"\']', html, re.I)
         seen_ep = set()
-        for ep_u, ep_n in raw_eps:
-            if ep_n in seen_ep:
-                continue
-            seen_ep.add(ep_n)
-            ep_blocks.append((ep_u, f"Episode {ep_n}", "Terbaru"))
+        for ep_u in raw_eps:
+            num_m = re.search(r'(?:episode|eps)[-_/ ]?(\d+)', ep_u, re.I) or re.search(r'-(\d+)(?:-sub-indo|/)?$', ep_u)
+            ep_n = int(num_m.group(1)) if num_m else None
+            if ep_n and ep_n not in seen_ep:
+                seen_ep.add(ep_n)
+                ep_blocks.append((ep_u, f"Episode {ep_n}", "Terbaru"))
+
+        # Pattern 3: Anchor text Episode X
+        if not ep_blocks:
+            generic_anchors = re.findall(r'<a[^>]+href=[\"\']([^\"\']+)[\"\'][^>]*>(.*?)</a>', html, re.DOTALL | re.I)
+            seen_a = set()
+            for u, t in generic_anchors:
+                num_m = re.search(r'Episode\s*(\d+)', t, re.I) or re.search(r'(?:episode|eps)[-_/ ]?(\d+)', u, re.I)
+                if num_m:
+                    n = int(num_m.group(1))
+                    if n not in seen_a and u.startswith('http'):
+                        seen_a.add(n)
+                        ep_blocks.append((u, f"Episode {n}", "Terbaru"))
 
     episodes_list = []
     blocks_to_process = ep_blocks if (max_eps == 0 or max_eps is None) else ep_blocks[:max_eps]
@@ -173,7 +227,7 @@ def scrape_anime_detail(slug, url, max_eps=12):
         raw_title = re.sub(r'<[^>]+>', '', item[1]).strip()
         ep_date = re.sub(r'<[^>]+>', '', item[2]).strip()
         
-        ep_num_m = re.search(r'episode-(\d+)', ep_url)
+        ep_num_m = re.search(r'(?:episode|eps)[-_/ ]?(\d+)', ep_url, re.I) or re.search(r'(\d+)', raw_title)
         ep_num = int(ep_num_m.group(1)) if ep_num_m else (idx + 1)
 
         stream_url, servers = extract_episode_stream(ep_url)
@@ -229,7 +283,11 @@ def run_sync(pages=1, fetch_all=False, limit=None, max_eps=12, single_url=None):
 
     if single_url:
         slug_m = re.search(r'/anime/([^/]+)/?', single_url)
-        slug = slug_m.group(1) if slug_m else "scraped-anime"
+        if slug_m:
+            slug = slug_m.group(1)
+        else:
+            slug = single_url.rstrip('/').split('/')[-1] or "scraped-anime"
+        slug = re.sub(r'[^a-zA-Z0-9-_]', '-', slug).lower()
         target_list = [(slug, single_url)]
     else:
         print(f"Mengumpulkan daftar anime (Pages: {pages}, All: {fetch_all}, Limit: {limit})...")

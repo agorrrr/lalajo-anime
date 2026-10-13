@@ -625,16 +625,16 @@
           </div>
         </div>
 
-        <!-- SEKSI 2: SCRAPE SATU ANIME LANGSUNG (URL / SLUG) -->
+        <!-- SEKSI 2: SCRAPE SATU ANIME LANGSUNG DARI URL WEB MANA SAJA -->
         <div style="background: var(--bg-card2, rgba(128,128,128,0.04)); border: 1px solid var(--border-dark, #e5e7eb); border-radius: 10px; padding: 20px; margin-bottom: 24px;">
           <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-            <i class="fa fa-bolt" style="color: #f59e0b;"></i> 2. Scrape Cepat 1 Anime Tertentu
+            <i class="fa fa-bolt" style="color: #f59e0b;"></i> 2. Scrape Manual dari URL Web Mana Saja
           </h4>
           <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
-            Masukkan link halaman anime Samehadaku (misal: <code>https://v2.samehadaku.how/anime/boruto/</code>) atau slug-nya:
+            Masukkan link anime dari web mana saja (Samehadaku, Otakudesu, Kuramanime, dsb). Sistem akan otomatis membaca judul, poster, sinopsis, dan link embed videonya:
           </p>
           <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
-            <input type="text" id="scraper-input-url" class="form-control" placeholder="Contoh: https://v2.samehadaku.how/anime/zombie-sagashitemasu/ atau slug" style="flex: 1; min-width: 250px;">
+            <input type="text" id="scraper-input-url" class="form-control" placeholder="Contoh: https://v2.samehadaku.how/anime/boruto/ atau https://otakudesu.../anime/.../" style="flex: 1; min-width: 250px;">
             <button type="button" id="scraper-btn-single" class="btn btn-success" onclick="runSingleScrape()">
               <span class="fa fa-download"></span> Scrape & Masukkan ke Web
             </button>

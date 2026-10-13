@@ -6,8 +6,12 @@ on:
     - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
+      url:
+        description: 'URL Anime spesifik (dari web mana saja: Samehadaku, Otakudesu, dll)'
+        required: false
+        default: ''
       pages:
-        description: 'Jumlah halaman untuk di-scrape (1-57)'
+        description: 'Jumlah halaman untuk di-scrape (1-57) jika url kosong'
         required: false
         default: '2'
       limit:
@@ -30,7 +34,11 @@ jobs:
       - name: Jalankan Scraper
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            python scripts/scrape_samehadaku.py --pages ${{ github.event.inputs.pages }} --limit ${{ github.event.inputs.limit }}
+            if [ -n "${{ github.event.inputs.url }}" ]; then
+              python scripts/scrape_samehadaku.py --url "${{ github.event.inputs.url }}"
+            else
+              python scripts/scrape_samehadaku.py --pages ${{ github.event.inputs.pages }} --limit ${{ github.event.inputs.limit }}
+            fi
           else
             python scripts/scrape_samehadaku.py --hourly
           fi
