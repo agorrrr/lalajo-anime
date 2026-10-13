@@ -544,21 +544,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  window.toggleReplyBox = function(cid, targetUsername) {
-    if (!authToken || !authUser) {
-      alert('Silakan masuk atau daftar terlebih dahulu untuk membalas komentar');
-      window.location.href = 'login.html';
+  window.toggleReplyBox = function(cid, encodedUsername) {
+    const box = document.getElementById(`reply-box-${cid}`);
+    if (!box) {
+      console.warn('Reply box tidak ditemukan untuk ID:', cid);
       return;
     }
-    const box = document.getElementById(`reply-box-${cid}`);
-    if (!box) return;
-    if (box.style.display === 'none' || !box.style.display) {
+
+    const isHidden = box.style.display === 'none' || !box.style.display;
+    if (isHidden) {
       box.style.display = 'block';
       const ta = document.getElementById(`reply-textarea-${cid}`);
       if (ta) {
-        if (!ta.value && targetUsername) ta.value = `@${targetUsername} `;
-        ta.focus();
+        const uName = encodedUsername ? decodeURIComponent(encodedUsername) : '';
+        if (uName && !ta.value.trim()) {
+          ta.value = `@${uName} `;
+        }
+        setTimeout(() => ta.focus(), 60);
       }
+      try {
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (e) {}
     } else {
       box.style.display = 'none';
     }
@@ -636,7 +642,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         return `
           <div style="display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:6px;background:rgba(128,128,128,0.05);border:1px solid rgba(128,128,128,0.08);">
-            <img src="${r.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + r.username}"
+            <img src="${r.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + encodeURIComponent(r.username)}"
                  alt="${r.username}"
                  style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">
             <div style="flex-grow:1;">
@@ -646,11 +652,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                   ${rRoleLabel}
                   <span style="font-size:10px;color:var(--text-muted);">${r.created_at}</span>
                 </div>
-                ${canDeleteReply ? `
-                  <button onclick="deleteCommentItem(${r.id})" title="Hapus Balasan" style="background:none;border:none;color:#ef4444;font-size:11px;cursor:pointer;opacity:0.8;">
-                    <i class="fa fa-trash"></i>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <button type="button" onclick="toggleReplyBox('${c.id}', '${encodeURIComponent(r.username)}')" title="Balas balasan ini" style="background:none;border:none;color:#3384d6;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:4px;">
+                    <i class="fa fa-reply"></i> Balas
                   </button>
-                ` : ''}
+                  ${canDeleteReply ? `
+                    <button type="button" onclick="deleteCommentItem('${r.id}')" title="Hapus Balasan" style="background:none;border:none;color:#ef4444;font-size:11px;cursor:pointer;opacity:0.8;">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                  ` : ''}
+                </div>
               </div>
               <div style="font-size:12px;margin-top:4px;line-height:1.5;white-space:pre-wrap;color:inherit;">${escapeHtml(r.content)}</div>
             </div>
@@ -661,7 +672,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return `
         <div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:8px;background:var(--bg-card2,#f9fafb);border:1px solid rgba(128,128,128,0.1);">
           <div style="display:flex;gap:12px;align-items:flex-start;">
-            <img src="${c.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + c.username}"
+            <img src="${c.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + encodeURIComponent(c.username)}"
                  alt="${c.username}"
                  style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">
             <div style="flex-grow:1;">
@@ -672,13 +683,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                   <span style="font-size:11px;color:var(--text-muted);">${c.created_at}</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;">
-                  <button onclick="toggleReplyBox(${c.id}, '${escapeHtml(c.username)}')"
+                  <button type="button"
+                          onclick="toggleReplyBox('${c.id}', '${encodeURIComponent(c.username)}')"
                           title="Balas komentar ini"
-                          style="background:none;border:none;color:#3384d6;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                          style="background:none;border:none;color:#3384d6;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border-radius:4px;">
                     <i class="fa fa-reply"></i> Balas
                   </button>
                   ${canDelete ? `
-                    <button onclick="deleteCommentItem(${c.id})"
+                    <button type="button"
+                            onclick="deleteCommentItem('${c.id}')"
                             title="Hapus Komentar"
                             style="background:none;border:none;color:#ef4444;font-size:11px;cursor:pointer;opacity:0.8;">
                       <i class="fa fa-trash"></i>
@@ -691,26 +704,32 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
 
           <!-- Form Balas Komentar (Inline Drawer) -->
-          <div id="reply-box-${c.id}" style="display:none;margin-left:48px;padding:10px 12px;border-radius:8px;background:rgba(51,132,214,0.06);border:1px solid rgba(51,132,214,0.2);">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;color:#3384d6;font-weight:700;">
+          <div id="reply-box-${c.id}" style="display:none;margin-left:48px;padding:12px;border-radius:8px;background:rgba(51,132,214,0.06);border:1px solid rgba(51,132,214,0.25);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;color:#3384d6;font-weight:700;">
               <span><i class="fa fa-reply"></i> Membalas @${escapeHtml(c.username)}</span>
-              <button type="button" onclick="toggleReplyBox(${c.id})" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;">Batal</button>
+              <button type="button" onclick="toggleReplyBox('${c.id}')" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;">✕ Batal</button>
             </div>
+            ${!authUser ? `
+              <div style="margin-bottom:8px;">
+                <input type="text" id="reply-name-${c.id}" placeholder="Nama kamu (opsional, default: Penonton)" style="width:100%;box-sizing:border-box;padding:6px 10px;border-radius:6px;border:1px solid rgba(128,128,128,0.25);background:var(--bg-card,#fff);color:inherit;font-size:12px;outline:none;">
+              </div>
+            ` : ''}
             <textarea id="reply-textarea-${c.id}"
                       rows="2"
                       placeholder="Tulis balasan kamu..."
-                      style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:6px;border:1px solid rgba(128,128,128,0.2);background:var(--bg-card,#fff);color:inherit;font-size:12px;outline:none;resize:vertical;"></textarea>
+                      style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:6px;border:1px solid rgba(128,128,128,0.25);background:var(--bg-card,#fff);color:inherit;font-size:12px;outline:none;resize:vertical;"></textarea>
             
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;flex-wrap:wrap;gap:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:6px;">
               <div style="display:flex;align-items:center;gap:3px;flex-wrap:wrap;">
-                ${['👍', '❤️', '🔥', '😂', '😭', '👏'].map(em => `<button type="button" onclick="insertEmoji('reply-textarea-${c.id}', '${em}')" style="background:none;border:none;font-size:14px;cursor:pointer;padding:2px 4px;">${em}</button>`).join('')}
-                <button type="button" onclick="toggleEmojiModal('reply-textarea-${c.id}')" style="background:rgba(128,128,128,0.12);border:none;font-size:11px;font-weight:700;cursor:pointer;padding:2px 6px;border-radius:4px;color:inherit;">
+                ${['👍', '❤️', '🔥', '😂', '😭', '👏'].map(em => `<button type="button" onclick="insertEmoji('reply-textarea-${c.id}', '${em}')" style="background:none;border:none;font-size:15px;cursor:pointer;padding:2px 4px;">${em}</button>`).join('')}
+                <button type="button" onclick="toggleEmojiModal('reply-textarea-${c.id}')" style="background:rgba(128,128,128,0.12);border:none;font-size:11px;font-weight:700;cursor:pointer;padding:3px 7px;border-radius:4px;color:inherit;">
                   😀
                 </button>
               </div>
-              <button onclick="postComment(${c.id})"
+              <button type="button"
+                      onclick="postComment('${c.id}')"
                       id="btn-submit-reply-${c.id}"
-                      style="background:#3384d6;color:#fff;border:none;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">
+                      style="background:#3384d6;color:#fff;border:none;padding:6px 16px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">
                 <i class="fa fa-paper-plane"></i> Kirim Balasan
               </button>
             </div>
@@ -718,7 +737,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
           <!-- Daftar Balasan (Nested) -->
           ${childReplies.length ? `
-            <div style="margin-left:48px;border-left:2px solid rgba(51,132,214,0.3);padding-left:12px;display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+            <div style="margin-left:48px;border-left:2px solid rgba(51,132,214,0.3);padding-left:12px;display:flex;flex-direction:column;gap:8px;margin-top:4px;">
               <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:2px;">
                 💬 ${childReplies.length} Balasan
               </div>
@@ -749,15 +768,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.textContent = 'Mengirim...';
     }
 
+    let customName = null;
+    if (isReply) {
+      const nameInput = document.getElementById(`reply-name-${parentId}`);
+      if (nameInput) customName = nameInput.value.trim();
+    }
+
     const payload = {
       slug,
       ep: epNum,
       content,
-      parent_id: parentId,
+      parent_id: parentId ? parseInt(parentId) : null,
       user_id: (authUser && authUser.id) || Date.now(),
-      username: (authUser && authUser.username) || 'Penonton',
+      username: (authUser && authUser.username) || customName || 'Penonton',
       user_role: (authUser && authUser.role) || 'user',
-      avatar: (authUser && authUser.avatar) || ''
+      avatar: (authUser && authUser.avatar) || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent((authUser && authUser.username) || customName || 'Penonton')}`
     };
 
     let posted = false;
