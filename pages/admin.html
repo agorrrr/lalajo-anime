@@ -143,6 +143,9 @@
       <button class="admin-nav-btn" data-tab="tab-ads">
         <span class="fa fa-bullhorn"></span> Banner & Iklan
       </button>
+      <button class="admin-nav-btn" data-tab="tab-scraper">
+        <span class="fa fa-refresh"></span> Auto Scraper Samehadaku
+      </button>
     </nav>
 
     <!-- TAB 1: LIST ANIME -->
@@ -568,6 +571,107 @@
       </div>
     </div> <!-- Tutup tab-ads -->
 
+    <!-- TAB 6: AUTO SCRAPER SAMEHADAKU -->
+    <div id="tab-scraper" class="tab-content" style="display: none;">
+      <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h3 style="font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+              <span class="fa fa-refresh" style="color: #3384d6;"></span> Auto Scraper & Sync Samehadaku
+            </h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+              Tarik judul anime, poster, sinopsis, episode, dan multi-server embed video secara otomatis tanpa upload manual.
+            </p>
+          </div>
+          <span class="badge badge-success" style="font-size: 12px; padding: 6px 12px;">
+            <i class="fa fa-clock-o"></i> Auto-Sync: Tiap 1 Jam Aktif
+          </span>
+        </div>
+
+        <!-- Status Bar -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px;">
+          <div style="background: rgba(128,128,128,0.08); border-radius: 8px; padding: 14px; border: 1px solid rgba(128,128,128,0.15);">
+            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Jadwal Otomatis</div>
+            <div style="font-size: 15px; font-weight: 800; margin-top: 4px; color: #10b981;">Setiap Jam (0 * * * *)</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Via GitHub Actions Cloud</div>
+          </div>
+          <div style="background: rgba(128,128,128,0.08); border-radius: 8px; padding: 14px; border: 1px solid rgba(128,128,128,0.15);">
+            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Total Anime di Web</div>
+            <div style="font-size: 15px; font-weight: 800; margin-top: 4px; color: #3384d6;" id="scraper-total-anime">Memuat...</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Tersimpan di anime.json</div>
+          </div>
+          <div style="background: rgba(128,128,128,0.08); border-radius: 8px; padding: 14px; border: 1px solid rgba(128,128,128,0.15);">
+            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Server Stream Video</div>
+            <div style="font-size: 15px; font-weight: 800; margin-top: 4px; color: #8b5cf6;">Multi-Server Player</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Blogger, Mega.nz, Filedon</div>
+          </div>
+        </div>
+
+        <!-- SEKSI 1: TRIGGER SYNC MANUAL VIA GITHUB ACTIONS -->
+        <div style="background: var(--bg-card2, rgba(128,128,128,0.04)); border: 1px solid var(--border-dark, #e5e7eb); border-radius: 10px; padding: 20px; margin-bottom: 24px;">
+          <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa fa-github" style="font-size: 18px;"></i> 1. Jalankan Sync Massal di Cloud (GitHub Actions)
+          </h4>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+            Scraper akan jalan langsung di server cloud GitHub (gratis), mendownload update anime Samehadaku, lalu otomatis meng-update Vercel dalam hitungan detik.
+          </p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="https://github.com/agorrrr/lalajo-anime/actions/workflows/sync_anime.yml" target="_blank" class="btn btn-brand" style="text-decoration: none;">
+              <span class="fa fa-play"></span> Buka GitHub Actions (Klik "Run workflow")
+            </a>
+          </div>
+        </div>
+
+        <!-- SEKSI 2: SCRAPE SATU ANIME LANGSUNG (URL / SLUG) -->
+        <div style="background: var(--bg-card2, rgba(128,128,128,0.04)); border: 1px solid var(--border-dark, #e5e7eb); border-radius: 10px; padding: 20px; margin-bottom: 24px;">
+          <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa fa-bolt" style="color: #f59e0b;"></i> 2. Scrape Cepat 1 Anime Tertentu
+          </h4>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+            Masukkan link halaman anime Samehadaku (misal: <code>https://v2.samehadaku.how/anime/boruto/</code>) atau slug-nya:
+          </p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+            <input type="text" id="scraper-input-url" class="form-control" placeholder="Contoh: https://v2.samehadaku.how/anime/zombie-sagashitemasu/ atau slug" style="flex: 1; min-width: 250px;">
+            <button type="button" id="scraper-btn-single" class="btn btn-success" onclick="runSingleScrape()">
+              <span class="fa fa-download"></span> Scrape & Masukkan ke Web
+            </button>
+          </div>
+          <div id="scraper-single-status" style="display: none; padding: 12px; border-radius: 8px; font-size: 13px;"></div>
+        </div>
+
+        <!-- SEKSI 3: PERINTAH TERMINAL LOKAL (UNTUK SEMUA 57 HALAMAN) -->
+        <div style="background: var(--bg-card2, rgba(128,128,128,0.04)); border: 1px solid var(--border-dark, #e5e7eb); border-radius: 10px; padding: 20px; margin-bottom: 24px;">
+          <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa fa-terminal"></i> 3. Perintah Terminal (Scrape Semua Halaman di Komputer)
+          </h4>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+            Untuk menarik seluruh anime (57 halaman / 1000+ anime) sekaligus langsung dari komputer Anda:
+          </p>
+          <div style="background: #1e1e1e; color: #e5e7eb; padding: 12px 16px; border-radius: 8px; font-family: monospace; font-size: 13px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <code>python scripts/scrape_samehadaku.py --all</code>
+            <button type="button" onclick="navigator.clipboard.writeText('python scripts/scrape_samehadaku.py --all'); alert('Perintah disalin!');" class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">Copy</button>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted);">
+            Atau untuk scrape 5 halaman saja (~100 anime): <code>python scripts/scrape_samehadaku.py --pages 5</code>
+          </p>
+        </div>
+
+        <!-- SEKSI 4: ROLLBACK KE DATA MANUAL -->
+        <div style="background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 20px;">
+          <h4 style="font-size: 15px; font-weight: 700; color: #ef4444; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa fa-history"></i> 4. Rollback / Kembalikan ke Manual Backup
+          </h4>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+            Jika data hasil scraper tidak sesuai dan Anda ingin kembali ke versi manual awal:
+          </p>
+          <button type="button" onclick="rollbackToManual()" class="btn btn-danger">
+            <span class="fa fa-undo"></span> Kembalikan ke Versi Manual Backup
+          </button>
+        </div>
+
+      </div>
+    </div>
+
   </div> <!-- Tutup dashboard-section -->
 
   <!-- Modal Edit Anime Lengkap (Overlay Mandiri di Luar Tab) -->
@@ -799,8 +903,90 @@ document.querySelectorAll('.admin-nav-btn').forEach(btn => {
     const target = document.getElementById(tabId);
     if (target) target.style.display = 'block';
     if (tabId === 'tab-upload') populateAnimeSelect();
+    if (tabId === 'tab-scraper') updateScraperAnimeCount();
   });
 });
+
+// ── Scraper Tab Logic ──
+async function updateScraperAnimeCount() {
+  const el = document.getElementById('scraper-total-anime');
+  if (!el) return;
+  const list = await DB.load();
+  el.textContent = `${list.length} Judul Anime`;
+}
+
+async function runSingleScrape() {
+  const input = document.getElementById('scraper-input-url');
+  const btn = document.getElementById('scraper-btn-single');
+  const statusEl = document.getElementById('scraper-single-status');
+  const url = input.value.trim();
+  if (!url) {
+    alert('Masukkan URL atau slug anime terlebih dahulu!');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="fa fa-spinner fa-spin"></span> Sedang Men-scrape...';
+  statusEl.style.display = 'block';
+  statusEl.style.background = 'rgba(51,132,214,0.12)';
+  statusEl.style.color = '#3384d6';
+  statusEl.style.border = '1px solid rgba(51,132,214,0.3)';
+  statusEl.innerHTML = 'Mengambil data dari Samehadaku... Harap tunggu sebentar.';
+
+  try {
+    const res = await fetch(`/api/scrape?url=${encodeURIComponent(url)}`);
+    const data = await res.json();
+    if (!res.ok || data.status !== 'success') {
+      throw new Error(data.message || 'Gagal mengambil data');
+    }
+
+    const newAnime = data.anime;
+    const currentList = await DB.load();
+    const idx = currentList.findIndex(a => a.slug === newAnime.slug);
+    if (idx >= 0) {
+      newAnime.id = currentList[idx].id;
+      currentList[idx] = newAnime;
+    } else {
+      newAnime.id = Date.now();
+      currentList.unshift(newAnime);
+    }
+
+    await DriveService.saveAnimeData(currentList);
+    loadAnimeTable();
+    updateScraperAnimeCount();
+
+    statusEl.style.background = 'rgba(16,185,129,0.12)';
+    statusEl.style.color = '#10b981';
+    statusEl.style.border = '1px solid rgba(16,185,129,0.3)';
+    statusEl.innerHTML = `<strong>Berhasil!</strong> Anime <strong>${newAnime.title}</strong> (${newAnime.episodes_list.length} episode) berhasil ditambahkan ke web! <a href="watch?slug=${newAnime.slug}&ep=1" target="_blank" style="color:#10b981;font-weight:700;margin-left:8px;text-decoration:underline;">Tonton Sekarang →</a>`;
+    input.value = '';
+  } catch (err) {
+    statusEl.style.background = 'rgba(239,68,68,0.12)';
+    statusEl.style.color = '#ef4444';
+    statusEl.style.border = '1px solid rgba(239,68,68,0.3)';
+    statusEl.innerHTML = `<strong>Gagal:</strong> ${err.message}. Pastikan URL anime Samehadaku benar.`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="fa fa-download"></span> Scrape & Masukkan ke Web';
+  }
+}
+
+async function rollbackToManual() {
+  if (!confirm('Yakin ingin mengembalikan seluruh anime ke versi manual backup? Data hasil scraper akan diganti dengan data manual awal.')) {
+    return;
+  }
+  try {
+    const res = await fetch('../data/anime_manual_backup.json?t=' + Date.now());
+    if (!res.ok) throw new Error('File backup manual tidak ditemukan');
+    const manualData = await res.json();
+    await DriveService.saveAnimeData(manualData);
+    loadAnimeTable();
+    updateScraperAnimeCount();
+    alert('Berhasil! Data anime dikembalikan ke versi manual backup.');
+  } catch (err) {
+    alert('Gagal rollback: ' + err.message);
+  }
+}
 
 // ── Table Rendering & Management ──
 async function loadAnimeTable() {

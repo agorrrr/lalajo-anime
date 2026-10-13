@@ -1,10 +1,19 @@
-name: Sync Anime dari Samehadaku
+name: Auto-Sync Samehadaku Anime
 
 on:
   schedule:
-    # Jalan tiap 6 jam otomatis
-    - cron: '0 */6 * * *'
-  workflow_dispatch: # Bisa di-klik tombol 'Run workflow' manual di GitHub
+    # Jalan otomatis setiap 1 jam
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      pages:
+        description: 'Jumlah halaman untuk di-scrape (1-57)'
+        required: false
+        default: '2'
+      limit:
+        description: 'Batas maksimal anime (kosongkan jika sesuai halaman)'
+        required: false
+        default: '30'
 
 jobs:
   sync:
@@ -19,7 +28,12 @@ jobs:
           python-version: '3.11'
 
       - name: Jalankan Scraper
-        run: python scripts/scrape_samehadaku.py 15
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python scripts/scrape_samehadaku.py --pages ${{ github.event.inputs.pages }} --limit ${{ github.event.inputs.limit }}
+          else
+            python scripts/scrape_samehadaku.py --hourly
+          fi
 
       - name: Commit & Push jika ada update
         run: |

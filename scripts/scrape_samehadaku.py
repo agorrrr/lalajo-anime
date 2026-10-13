@@ -5,6 +5,7 @@ import json
 import time
 import os
 import sys
+import argparse
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 DB_FILE = os.path.join(DATA_DIR, "anime.json")
@@ -28,8 +29,8 @@ def fetch_url(url, retries=2):
             time.sleep(1)
     return ""
 
-def get_homepage_anime():
-    html = fetch_url('https://v2.samehadaku.how/')
+def get_anime_from_url(listing_url):
+    html = fetch_url(listing_url)
     if not html:
         return []
     raw = re.findall(r'href=[\"\'](https?://v2\.samehadaku\.how/anime/([^/\"\'\s]+)/?)[\"\']', html)
@@ -41,6 +42,38 @@ def get_homepage_anime():
         seen.add(slug)
         anime_list.append((slug, full_url if full_url.endswith('/') else full_url + '/'))
     return anime_list
+
+def collect_anime_list(pages=1, fetch_all=False, limit=None):
+    seen = set()
+    all_anime = []
+
+    # Always grab homepage recent updates first
+    hp = get_anime_from_url('https://v2.samehadaku.how/')
+    for item in hp:
+        if item[0] not in seen:
+            seen.add(item[0])
+            all_anime.append(item)
+
+    max_p = 57 if fetch_all else pages
+    for p in range(1, max_p + 1):
+        if limit and len(all_anime) >= limit:
+            break
+        page_url = f'https://v2.samehadaku.how/anime/page/{p}/'
+        print(f"[Crawling Listing] Page {p}: {page_url}")
+        items = get_anime_from_url(page_url)
+        if not items:
+            break
+        for item in items:
+            if item[0] not in seen:
+                seen.add(item[0])
+                all_anime.append(item)
+                if limit and len(all_anime) >= limit:
+                    break
+        time.sleep(0.5)
+
+    if limit:
+        all_anime = all_anime[:limit]
+    return all_anime
 
 def extract_episode_stream(ep_url):
     html = fetch_url(ep_url)
@@ -66,7 +99,7 @@ def extract_episode_stream(ep_url):
     stream_url = servers[0] if servers else ""
     return stream_url, servers
 
-def scrape_anime_detail(slug, url, max_eps=6):
+def scrape_anime_detail(slug, url, max_eps=12):
     html = fetch_url(url)
     if not html:
         return None
@@ -134,7 +167,8 @@ def scrape_anime_detail(slug, url, max_eps=6):
             ep_blocks.append((ep_u, f"Episode {ep_n}", "Terbaru"))
 
     episodes_list = []
-    for idx, item in enumerate(ep_blocks[:max_eps]):
+    blocks_to_process = ep_blocks if (max_eps == 0 or max_eps is None) else ep_blocks[:max_eps]
+    for idx, item in enumerate(blocks_to_process):
         ep_url = item[0]
         raw_title = re.sub(r'<[^>]+>', '', item[1]).strip()
         ep_date = re.sub(r'<[^>]+>', '', item[2]).strip()
@@ -152,7 +186,7 @@ def scrape_anime_detail(slug, url, max_eps=6):
             "servers": servers,
             "drive_file_id": ""
         })
-        time.sleep(0.3)
+        time.sleep(0.2)
 
     episodes_list.sort(key=lambda x: x["ep"])
 
@@ -168,13 +202,16 @@ def scrape_anime_detail(slug, url, max_eps=6):
         "genres": genres,
         "synopsis": synopsis,
         "episodes_list": episodes_list,
-        "views": 1200,
+        "views": 1500,
         "release_year": 2026,
         "rating": "PG-13"
     }
 
-def sync_data(limit=5, max_eps=5):
-    # Ensure backup exists before any changes
+def save_current_data(data):
+    with open(DB_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def run_sync(pages=1, fetch_all=False, limit=None, max_eps=12, single_url=None):
     if not os.path.exists(BACKUP_FILE) and os.path.exists(DB_FILE):
         import shutil
         shutil.copyfile(DB_FILE, BACKUP_FILE)
@@ -190,20 +227,27 @@ def sync_data(limit=5, max_eps=5):
     existing_slugs = {a["slug"]: a for a in current_data}
     max_id = max([a.get("id", 0) for a in current_data], default=0)
 
-    print(f"Scanning Samehadaku for {limit} anime...")
-    homepage_anime = get_homepage_anime()[:limit]
+    if single_url:
+        slug_m = re.search(r'/anime/([^/]+)/?', single_url)
+        slug = slug_m.group(1) if slug_m else "scraped-anime"
+        target_list = [(slug, single_url)]
+    else:
+        print(f"Mengumpulkan daftar anime (Pages: {pages}, All: {fetch_all}, Limit: {limit})...")
+        target_list = collect_anime_list(pages=pages, fetch_all=fetch_all, limit=limit)
+
+    total_target = len(target_list)
+    print(f"Total anime untuk diproses: {total_target}")
 
     new_count = 0
     updated_count = 0
 
-    for slug, url in homepage_anime:
-        print(f"-> Processing: {slug}")
+    for i, (slug, url) in enumerate(target_list, 1):
+        print(f"[{i}/{total_target}] Scraping: {slug}...")
         scraped = scrape_anime_detail(slug, url, max_eps=max_eps)
         if not scraped:
             continue
 
         if slug in existing_slugs:
-            # Update episodes or metadata
             target = existing_slugs[slug]
             ep_dict = {e["ep"]: e for e in target.get("episodes_list", [])}
             for new_ep in scraped["episodes_list"]:
@@ -221,16 +265,27 @@ def sync_data(limit=5, max_eps=5):
             existing_slugs[slug] = scraped
             new_count += 1
 
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(current_data, f, ensure_ascii=False, indent=2)
+        # Progressive save every anime
+        save_current_data(current_data)
 
-    print(f"Sync selesai! Ditambahkan: {new_count}, Diperbarui: {updated_count}. Total anime: {len(current_data)}")
+    print(f"Sync sukses! Baru: {new_count}, Diupdate: {updated_count}. Total Anime di DB: {len(current_data)}")
 
 if __name__ == "__main__":
-    limit = 5
-    if len(sys.argv) > 1:
-        try:
-            limit = int(sys.argv[1])
-        except:
-            pass
-    sync_data(limit=limit)
+    parser = argparse.ArgumentParser(description="Samehadaku Scraper & Syncer")
+    parser.add_argument("--all", action="store_true", help="Scrape seluruh halaman anime (57 halaman)")
+    parser.add_argument("--pages", type=int, default=1, help="Jumlah halaman anime untuk discrape")
+    parser.add_argument("--limit", type=int, default=None, help="Maksimal anime yang diproses")
+    parser.add_argument("--eps", type=int, default=12, help="Maksimal episode per anime")
+    parser.add_argument("--url", type=str, default=None, help="Scrape 1 anime spesifik dari URL")
+    parser.add_argument("--hourly", action="store_true", help="Mode cron per jam (20 update terbaru)")
+
+    args = parser.parse_args()
+
+    if args.hourly:
+        run_sync(pages=1, limit=20, max_eps=6)
+    elif args.all:
+        run_sync(fetch_all=True, max_eps=args.eps)
+    elif args.url:
+        run_sync(single_url=args.url, max_eps=args.eps)
+    else:
+        run_sync(pages=args.pages, limit=args.limit, max_eps=args.eps)
