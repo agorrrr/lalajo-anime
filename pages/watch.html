@@ -136,6 +136,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     </a>
   `).join('');
 
+  const isVip = typeof AdsManager !== 'undefined' && AdsManager.isAdFreeUser();
+  const vipBadgeHtml = isVip ? `<span style="background:rgba(234,179,8,0.18);color:#eab308;border:1px solid rgba(234,179,8,0.4);border-radius:14px;padding:3px 10px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;margin-left:8px;"><i class="fa fa-star"></i> Bebas Iklan (VIP/Admin)</span>` : '';
+
   content.innerHTML = `
     <nav style="font-size:13px;color:#9ca3af;margin-bottom:20px;">
       <a href="../" style="color:#3384d6;text-decoration:none;">Beranda</a> ›
@@ -150,8 +153,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       <!-- Player area -->
       <div>
-        <h1 style="font-size:18px;font-weight:800;margin-bottom:12px;">
-          ${anime.title} <span style="color:#9ca3af;font-weight:400;">— Episode ${ep.ep}: ${ep.title}</span>
+        <h1 style="font-size:18px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
+          <span>${anime.title} <span style="color:#9ca3af;font-weight:400;">— Episode ${ep.ep}: ${ep.title}</span></span>
+          ${vipBadgeHtml}
         </h1>
 
         <!-- Video player container -->

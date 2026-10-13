@@ -273,6 +273,35 @@ def get_user_activity(user_id):
     conn.close()
     return [dict(r) for r in rows]
 
+def get_all_users():
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('''
+    SELECT id, username, email, role, avatar, created_at
+    FROM users
+    ORDER BY id DESC
+    ''')
+    rows = c.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def update_user_role(user_id, role):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("UPDATE users SET role = ? WHERE id = ?", (role, int(user_id)))
+    conn.commit()
+    conn.close()
+    return True
+
+def delete_user(user_id):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("DELETE FROM users WHERE id = ?", (int(user_id),))
+    c.execute("DELETE FROM sessions WHERE user_id = ?", (int(user_id),))
+    conn.commit()
+    conn.close()
+    return True
+
 if __name__ == "__main__":
     init_db()
     print("Database SQLite terinisialisasi.")

@@ -423,7 +423,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
           data = {
             status: 'success',
             token: 'local_token_' + found.id,
-            user: { id: found.id, username: found.username, role: 'user', avatar: found.avatar }
+            user: { id: found.id, username: found.username, role: found.role || 'user', avatar: found.avatar }
           };
         } else {
           throw new Error((data && data.message) || 'Username atau password salah');

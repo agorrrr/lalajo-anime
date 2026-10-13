@@ -71,8 +71,22 @@ const AdsManager = {
     }
   },
 
+  isAdFreeUser() {
+    try {
+      if (sessionStorage.getItem('admin_logged_in') === 'true') return true;
+      const raw = localStorage.getItem('auth_user');
+      if (raw) {
+        const u = JSON.parse(raw);
+        if (u && (u.role === 'admin' || u.role === 'vip')) {
+          return true;
+        }
+      }
+    } catch (e) {}
+    return false;
+  },
+
   renderSlot(element, slotData) {
-    if (!element || !slotData || !slotData.enabled) {
+    if (this.isAdFreeUser() || !element || !slotData || !slotData.enabled) {
       if (element) element.style.display = 'none';
       return;
     }
@@ -98,7 +112,7 @@ const AdsManager = {
   },
 
   renderCenter(videoAreaEl, slotData) {
-    if (!videoAreaEl || !slotData || !slotData.enabled) return;
+    if (this.isAdFreeUser() || !videoAreaEl || !slotData || !slotData.enabled) return;
     if (document.getElementById('player-center-ad')) return;
 
     const overlay = document.createElement('div');
@@ -180,6 +194,15 @@ const AdsManager = {
   },
 
   async initSlots() {
+    if (this.isAdFreeUser()) {
+      // Hapus atau sembunyikan semua elemen iklan untuk VIP dan Admin
+      document.querySelectorAll('.ad-slot-top, .ad-slot-player-bottom, #floating-ad-bar, #player-center-ad').forEach(el => {
+        el.style.display = 'none';
+        if (el.parentNode && el.id === 'floating-ad-bar') el.remove();
+      });
+      return;
+    }
+
     const config = await this.load();
 
     // 1. Banner atas (top)
@@ -203,6 +226,7 @@ const AdsManager = {
   },
 
   renderFloating(slotData) {
+    if (this.isAdFreeUser() || !slotData || !slotData.enabled) return;
     if (document.getElementById('floating-ad-bar')) return;
     const bar = document.createElement('div');
     bar.id = 'floating-ad-bar';
@@ -257,6 +281,17 @@ const AdsManager = {
 
   setupVideoPopunder(videoAreaEl, playVideoCallback) {
     if (!videoAreaEl) return;
+
+    // VIP & Admin bebas popunder sepenuhnya: klik langsung play video
+    if (this.isAdFreeUser()) {
+      videoAreaEl.addEventListener('click', (e) => {
+        if (!videoAreaEl.classList.contains('playing')) {
+          playVideoCallback();
+        }
+      });
+      return;
+    }
+
     let clickCount = 0;
 
     videoAreaEl.addEventListener('click', async (e) => {

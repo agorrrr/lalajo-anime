@@ -218,9 +218,16 @@ function renderUser(u) {
     badge.className = 'role-badge role-admin';
     badge.innerHTML = '👑 Administrator';
     document.getElementById('btn-admin-panel').style.display = 'inline-flex';
+  } else if (u.role === 'vip') {
+    badge.className = 'role-badge role-vip';
+    badge.style.background = 'rgba(234, 179, 8, 0.2)';
+    badge.style.color = '#eab308';
+    badge.style.border = '1px solid rgba(234, 179, 8, 0.4)';
+    badge.innerHTML = '⭐ VIP Member (Bebas Semua Iklan)';
+    document.getElementById('btn-admin-panel').style.display = 'none';
   } else {
     badge.className = 'role-badge role-user';
-    badge.innerHTML = '⭐ Penonton Setia';
+    badge.innerHTML = '👤 Penonton Reguler';
     document.getElementById('btn-admin-panel').style.display = 'none';
   }
 }

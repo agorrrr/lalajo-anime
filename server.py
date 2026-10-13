@@ -232,6 +232,15 @@ class AppHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"status": "success", "activity": activity})
             return
 
+        # 1f2. List All Users for Admin (GET)
+        elif path == "/api/admin/users":
+            try:
+                users = database.get_all_users()
+                self.send_json({"status": "success", "users": users})
+            except Exception as e:
+                self.send_json({"status": "error", "message": str(e)}, status=500)
+            return
+
         # 1g. Universal Anime Scraper API (GET)
         elif path == "/api/scrape":
             params = urllib.parse.parse_qs(parsed.query)
@@ -728,6 +737,51 @@ class AppHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json({"status": "success"})
             except Exception as e:
                 self.send_json({"status": "error", "message": str(e)}, status=403)
+            return
+
+        # 11. Daftarkan Akun VIP Baru oleh Admin
+        elif path == "/api/admin/create-vip":
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length).decode("utf-8")
+            try:
+                data = json.loads(body)
+                username = data.get("username", "").strip()
+                email = data.get("email", "").strip() or None
+                password = data.get("password", "").strip()
+                if not username or not password:
+                    self.send_json({"status": "error", "message": "Username dan password wajib diisi"}, status=400)
+                    return
+                user = database.create_user(username, email, password, role="vip")
+                self.send_json({"status": "success", "user": user})
+            except Exception as e:
+                self.send_json({"status": "error", "message": str(e)}, status=400)
+            return
+
+        # 12. Ubah Role User (VIP / Reguler) oleh Admin
+        elif path == "/api/admin/update-role":
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length).decode("utf-8")
+            try:
+                data = json.loads(body)
+                user_id = data.get("user_id")
+                role = data.get("role", "user")
+                database.update_user_role(user_id, role)
+                self.send_json({"status": "success"})
+            except Exception as e:
+                self.send_json({"status": "error", "message": str(e)}, status=400)
+            return
+
+        # 13. Hapus User oleh Admin
+        elif path == "/api/admin/delete-user":
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length).decode("utf-8")
+            try:
+                data = json.loads(body)
+                user_id = data.get("user_id")
+                database.delete_user(user_id)
+                self.send_json({"status": "success"})
+            except Exception as e:
+                self.send_json({"status": "error", "message": str(e)}, status=400)
             return
 
         self.send_response(404)

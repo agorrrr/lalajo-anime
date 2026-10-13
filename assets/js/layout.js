@@ -63,6 +63,14 @@ function renderHeader() {
         <li><a href="${BASE}pages/admin.html"><span>👑 Panel Admin (${authUser.username})</span></a></li>
         <li><a href="${BASE}pages/user.html"><span>👤 Profil Akun</span></a></li>
       `;
+    } else if (authUser.role === 'vip') {
+      accountLink = `${BASE}pages/user.html`;
+      accountIcon = 'fa-star';
+      accountLabel = (authUser.username || 'VIP') + ' ⭐ VIP';
+      accountStyle = 'background:rgba(234,179,8,0.18);color:#eab308;border-radius:20px;padding:5px 12px;border:1px solid rgba(234,179,8,0.4);font-weight:700;';
+      mobileAccountHtml = `
+        <li><a href="${BASE}pages/user.html"><span>⭐ Profil VIP (${authUser.username})</span></a></li>
+      `;
     } else {
       accountLink = `${BASE}pages/user.html`;
       accountIcon = 'fa-user-circle';

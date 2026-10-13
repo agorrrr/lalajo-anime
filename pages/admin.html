@@ -144,7 +144,10 @@
         <span class="fa fa-bullhorn"></span> Banner & Iklan
       </button>
       <button class="admin-nav-btn" data-tab="tab-scraper">
-        <span class="fa fa-refresh"></span> Auto Scraper Samehadaku
+        <span class="fa fa-refresh"></span> Auto Scraper
+      </button>
+      <button class="admin-nav-btn" data-tab="tab-vip">
+        <span class="fa fa-star" style="color: #f59e0b;"></span> Kelola User & VIP (<span id="vip-count-badge">0</span>)
       </button>
     </nav>
 
@@ -675,6 +678,86 @@
       </div>
     </div>
 
+    <!-- TAB 7: KELOLA USER & VIP (BEBAS IKLAN) -->
+    <div id="tab-vip" class="tab-content" style="display: none;">
+      <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h3 style="font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+              <span class="fa fa-star" style="color: #f59e0b;"></span> Kelola Akun VIP (Bebas Iklan)
+            </h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+              Hanya Admin yang dapat mendaftarkan akun VIP. Akun VIP dan Admin 100% bebas dari semua jenis iklan (Banner, Popunder, Floating, Pop-up Player). Iklan hanya tayang untuk akun reguler atau penonton tanpa login.
+            </p>
+          </div>
+          <span class="badge" style="background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.35); font-size: 12px; padding: 6px 12px; border-radius: 20px;">
+            <i class="fa fa-shield"></i> Hak Akses Khusus Admin
+          </span>
+        </div>
+
+        <!-- Form Daftarkan VIP Baru -->
+        <div style="background: var(--bg-card2, rgba(128,128,128,0.04)); border: 1px solid var(--border-dark, #e5e7eb); border-radius: 10px; padding: 20px; margin-bottom: 24px;">
+          <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa fa-user-plus" style="color: #10b981;"></i> 1. Daftarkan Akun VIP Baru
+          </h4>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+            Buatkan username & password untuk member/donatur VIP. Akun langsung aktif dengan status bebas iklan.
+          </p>
+          <form id="form-add-vip" onsubmit="handleCreateVip(event)">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px;">
+              <div>
+                <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Username VIP:</label>
+                <input type="text" id="vip-reg-username" class="form-control" placeholder="Contoh: member_vip1" required>
+              </div>
+              <div>
+                <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Email / No HP (Opsional):</label>
+                <input type="text" id="vip-reg-email" class="form-control" placeholder="email@gmail.com / 0812...">
+              </div>
+              <div>
+                <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Password Akun:</label>
+                <input type="text" id="vip-reg-password" class="form-control" placeholder="Password akun VIP" required>
+              </div>
+            </div>
+            <button type="submit" id="btn-create-vip" class="btn btn-brand" style="background: #f59e0b; border-color: #f59e0b; color: #000; font-weight: 800;">
+              <span class="fa fa-star"></span> Daftarkan Sebagai Akun VIP
+            </button>
+          </form>
+        </div>
+
+        <!-- Tabel Daftar Semua User & VIP -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+            <h4 style="font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+              <i class="fa fa-users"></i> 2. Daftar Pengguna & Status VIP
+            </h4>
+            <input type="text" id="search-users-input" class="form-control" placeholder="Cari user..." style="max-width: 250px;" oninput="filterUsersTable()">
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="admin-table" style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">Avatar</th>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Tipe Role</th>
+                  <th>Status Iklan</th>
+                  <th>Tanggal</th>
+                  <th style="text-align: right;">Aksi Admin</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <tr>
+                  <td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">Memuat daftar user...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div> <!-- Tutup dashboard-section -->
 
   <!-- Modal Edit Anime Lengkap (Overlay Mandiri di Luar Tab) -->
@@ -918,6 +1001,7 @@ document.querySelectorAll('.admin-nav-btn').forEach(btn => {
     if (target) target.style.display = 'block';
     if (tabId === 'tab-upload') populateAnimeSelect();
     if (tabId === 'tab-scraper') updateScraperAnimeCount();
+    if (tabId === 'tab-vip') loadUsersTable();
   });
 });
 
@@ -999,6 +1083,240 @@ async function rollbackToManual() {
     alert('Berhasil! Data anime dikembalikan ke versi manual backup.');
   } catch (err) {
     alert('Gagal rollback: ' + err.message);
+  }
+}
+
+// ── VIP & User Management ──
+let allUsersList = [];
+
+async function loadUsersTable() {
+  const tbody = document.getElementById('users-table-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);"><span class="fa fa-spinner fa-spin"></span> Memuat daftar user...</td></tr>';
+
+  let users = [];
+  try {
+    const res = await fetch('/api/admin/users');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.status === 'success' && Array.isArray(data.users)) {
+        users = data.users;
+      }
+    }
+  } catch (e) {}
+
+  if (!users.length) {
+    users = JSON.parse(localStorage.getItem('local_users') || '[]');
+  }
+
+  // Akun bawaan admin ezakasep jika list kosong
+  if (!users.length) {
+    users = [
+      {
+        id: 1,
+        username: 'ezakasep',
+        email: 'admin@lalajo.anime',
+        role: 'admin',
+        avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=ezakasep',
+        created_at: '2026-10-12 10:00:00'
+      }
+    ];
+    localStorage.setItem('local_users', JSON.stringify(users));
+  }
+
+  allUsersList = users;
+  renderUsersTable(users);
+  updateVipBadgeCount();
+}
+
+function updateVipBadgeCount() {
+  const badge = document.getElementById('vip-count-badge');
+  if (!badge) return;
+  const vipCount = allUsersList.filter(u => u.role === 'vip').length;
+  badge.textContent = vipCount;
+}
+
+function renderUsersTable(list) {
+  const tbody = document.getElementById('users-table-body');
+  if (!tbody) return;
+
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted);">Tidak ada pengguna ditemukan.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(u => {
+    const isVip = u.role === 'vip';
+    const isAdmin = u.role === 'admin';
+    const avatar = u.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${u.username}`;
+
+    let roleBadge = '<span class="badge badge-secondary" style="font-size:12px;">👤 User Reguler</span>';
+    let adStatus = '<span style="color:#ef4444;font-size:12px;font-weight:600;"><i class="fa fa-bullhorn"></i> Ada Iklan</span>';
+
+    if (isAdmin) {
+      roleBadge = '<span class="badge badge-danger" style="background:#ef4444;color:#fff;font-size:12px;">👑 Admin</span>';
+      adStatus = '<span style="color:#10b981;font-size:12px;font-weight:700;"><i class="fa fa-check-circle"></i> Bebas Iklan</span>';
+    } else if (isVip) {
+      roleBadge = '<span class="badge" style="background:rgba(234,179,8,0.2);color:#eab308;border:1px solid rgba(234,179,8,0.4);font-weight:800;font-size:12px;">⭐ VIP Member</span>';
+      adStatus = '<span style="color:#10b981;font-size:12px;font-weight:700;"><i class="fa fa-check-circle"></i> Bebas Iklan</span>';
+    }
+
+    let actionBtns = '';
+    if (isAdmin) {
+      actionBtns = '<span style="font-size:12px;color:var(--text-muted);">Akun Utama</span>';
+    } else {
+      const toggleBtn = isVip
+        ? `<button type="button" onclick="changeUserRole(${u.id}, 'user')" class="btn btn-secondary" style="padding:4px 8px;font-size:12px;" title="Ubah ke user reguler (ada iklan)"><i class="fa fa-arrow-down"></i> Jadi User</button>`
+        : `<button type="button" onclick="changeUserRole(${u.id}, 'vip')" class="btn btn-brand" style="background:#f59e0b;border-color:#f59e0b;color:#000;padding:4px 8px;font-size:12px;font-weight:700;" title="Jadikan VIP (Bebas Iklan)"><i class="fa fa-star"></i> Jadikan VIP</button>`;
+
+      const deleteBtn = `<button type="button" onclick="deleteUserAccount(${u.id})" class="btn btn-danger" style="padding:4px 8px;font-size:12px;margin-left:4px;" title="Hapus User"><i class="fa fa-trash"></i></button>`;
+
+      actionBtns = `<div style="display:flex;justify-content:flex-end;gap:4px;">${toggleBtn}${deleteBtn}</div>`;
+    }
+
+    return `
+      <tr>
+        <td>
+          <img src="${avatar}" alt="${u.username}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid rgba(128,128,128,0.3);">
+        </td>
+        <td><strong>${u.username}</strong></td>
+        <td><span style="font-size:13px;color:var(--text-muted);">${u.email || '-'}</span></td>
+        <td>${roleBadge}</td>
+        <td>${adStatus}</td>
+        <td><span style="font-size:12px;color:var(--text-muted);">${u.created_at || 'Baru'}</span></td>
+        <td style="text-align:right;">${actionBtns}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterUsersTable() {
+  const query = (document.getElementById('search-users-input')?.value || '').toLowerCase();
+  if (!query) {
+    renderUsersTable(allUsersList);
+    return;
+  }
+  const filtered = allUsersList.filter(u =>
+    u.username.toLowerCase().includes(query) || (u.email && u.email.toLowerCase().includes(query)) || (u.role && u.role.toLowerCase().includes(query))
+  );
+  renderUsersTable(filtered);
+}
+
+async function handleCreateVip(e) {
+  e.preventDefault();
+  const username = document.getElementById('vip-reg-username').value.trim();
+  const email = document.getElementById('vip-reg-email').value.trim();
+  const password = document.getElementById('vip-reg-password').value.trim();
+  const btn = document.getElementById('btn-create-vip');
+
+  if (!username || !password) {
+    alert('Username dan Password wajib diisi!');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="fa fa-spinner fa-spin"></span> Mendaftarkan VIP...';
+
+  try {
+    let ok = false;
+    try {
+      const res = await fetch('/api/admin/create-vip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password, role: 'vip' })
+      });
+      if (res.ok) ok = true;
+    } catch (err) {}
+
+    // Simpan ke local_users
+    const users = JSON.parse(localStorage.getItem('local_users') || '[]');
+    const existing = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    if (existing) {
+      existing.role = 'vip';
+      existing.password = password;
+      if (email) existing.email = email;
+    } else {
+      users.push({
+        id: Date.now(),
+        username,
+        email: email || '',
+        password,
+        role: 'vip',
+        avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${username}`,
+        created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
+      });
+    }
+    localStorage.setItem('local_users', JSON.stringify(users));
+
+    alert(`🎉 Akun VIP "${username}" berhasil didaftarkan!\n\nUser VIP ini otomatis BEBAS DARI SEMUA IKLAN saat login dan menonton.`);
+    document.getElementById('form-add-vip').reset();
+    loadUsersTable();
+  } catch (err) {
+    alert('Gagal mendaftarkan VIP: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="fa fa-star"></span> Daftarkan Sebagai Akun VIP';
+  }
+}
+
+async function changeUserRole(id, newRole) {
+  const u = allUsersList.find(x => x.id === id);
+  const name = u ? u.username : 'user ini';
+  const label = newRole === 'vip' ? 'VIP (Bebas Iklan)' : 'User Reguler (Ada Iklan)';
+  if (!confirm(`Ubah status akun "${name}" menjadi ${label}?`)) return;
+
+  try {
+    try {
+      await fetch('/api/admin/update-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: id, role: newRole })
+      });
+    } catch (e) {}
+
+    const users = JSON.parse(localStorage.getItem('local_users') || '[]');
+    const target = users.find(x => x.id === id);
+    if (target) {
+      target.role = newRole;
+      localStorage.setItem('local_users', JSON.stringify(users));
+    }
+
+    const currentAuth = JSON.parse(localStorage.getItem('auth_user') || 'null');
+    if (currentAuth && currentAuth.id === id) {
+      currentAuth.role = newRole;
+      localStorage.setItem('auth_user', JSON.stringify(currentAuth));
+    }
+
+    alert(`Status akun "${name}" berhasil diubah menjadi ${label}!`);
+    loadUsersTable();
+  } catch (err) {
+    alert('Gagal mengubah role: ' + err.message);
+  }
+}
+
+async function deleteUserAccount(id) {
+  const u = allUsersList.find(x => x.id === id);
+  const name = u ? u.username : 'user ini';
+  if (!confirm(`Yakin ingin menghapus akun "${name}"?`)) return;
+
+  try {
+    try {
+      await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: id })
+      });
+    } catch (e) {}
+
+    let users = JSON.parse(localStorage.getItem('local_users') || '[]');
+    users = users.filter(x => x.id !== id);
+    localStorage.setItem('local_users', JSON.stringify(users));
+
+    alert(`Akun "${name}" berhasil dihapus.`);
+    loadUsersTable();
+  } catch (err) {
+    alert('Gagal menghapus akun: ' + err.message);
   }
 }
 
