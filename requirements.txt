@@ -1,0 +1,2 @@
+# Project menggunakan Python Standard Library (http.server, sqlite3, urllib, json)
+# Tidak memerlukan library pihak ketiga (Zero Dependency)

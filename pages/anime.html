@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Anime - Lalajo Anime</title>
+  <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<script src="../assets/js/layout.js"></script>
+<main id="content">
+  <div id="anime-content">
+    <div style="text-align:center;padding:80px;color:#9ca3af;">
+      <i class="fa fa-spinner fa-spin" style="font-size:32px;"></i>
+      <p style="margin-top:12px;">Memuat data anime...</p>
+    </div>
+  </div>
+</main>
+<script src="../assets/js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const params = new URLSearchParams(window.location.search);
+  const slug   = params.get('slug');
+  const data   = await DB.load();
+  const anime  = data.find(a => a.slug === slug);
+  const content = document.getElementById('anime-content');
+
+  if (!anime) {
+    content.innerHTML = `<div class="no-results">
+      <i class="fa fa-exclamation-circle" style="font-size:48px;color:#ef4444;"></i>
+      <p>Anime tidak ditemukan.</p>
+      <a href="anime-list.html" style="color:#3384d6;">← Kembali ke Daftar Anime</a>
+    </div>`;
+    return;
+  }
+
+  document.title = `${anime.title} - Lalajo Anime`;
+
+  const statusLabel = anime.status === 'Currently Airing'
+    ? '<span style="color:#22c55e;font-weight:700;">● Ongoing</span>'
+    : '<span style="color:#9ca3af;font-weight:700;">● Completed</span>';
+
+  const genreTags = anime.genres.map(g =>
+    `<a href="anime-list.html?genre=${encodeURIComponent(g)}" class="genre-tag">${g}</a>`
+  ).join('');
+
+  const episodeList = anime.episodes_list.length
+    ? anime.episodes_list.map(ep => `
+        <li class="episode-item">
+          <a href="watch?slug=${anime.slug}&ep=${ep.ep}">
+            <span class="ep-num">${ep.ep}</span>
+            ${ep.title}
+          </a>
+          <span class="ep-date">${ep.date}</span>
+        </li>
+      `).join('')
+    : '<li style="padding:16px;color:#9ca3af;font-size:14px;">Belum ada episode tersedia</li>';
+
+  // Related anime (same genre, exclude self)
+  const related = data.filter(a =>
+    a.slug !== slug && a.genres.some(g => anime.genres.includes(g))
+  ).slice(0, 5);
+
+  const relatedHTML = related.map(a => `
+    <a href="anime?slug=${a.slug}" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);text-decoration:none;color:inherit;">
+      <img src="${a.thumbnail}" alt="${a.title}" style="width:44px;height:62px;object-fit:cover;border-radius:4px;" onerror="this.src='https://placehold.co/44x62/333/fff?text=N%2FA'">
+      <div>
+        <div style="font-size:13px;font-weight:600;line-height:1.3;">${a.title}</div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:2px;">${a.type} · ⭐ ${a.score.toFixed(2)}</div>
+      </div>
+    </a>
+  `).join('');
+
+  content.innerHTML = `
+    <!-- Breadcrumb -->
+    <nav style="font-size:13px;color:#9ca3af;margin-bottom:20px;">
+      <a href="../" style="color:#3384d6;text-decoration:none;">Beranda</a> ›
+      <a href="anime-list" style="color:#3384d6;text-decoration:none;">Anime</a> ›
+      <span>${anime.title}</span>
+    </nav>
+
+    <div style="display:grid;grid-template-columns:1fr;gap:28px;">
+      <!-- Left: poster + info -->
+      <div style="display:grid;grid-template-columns:1fr;gap:24px;" class="detail-grid">
+
+        <!-- Poster + meta col -->
+        <div class="anime-poster">
+          <img src="${anime.thumbnail}" alt="${anime.title}"
+               style="width:100%;max-width:220px;border-radius:10px;"
+               onerror="this.src='https://placehold.co/212x300/333/fff?text=N%2FA'">
+          <div class="action-btns" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-width:220px;">
+            ${anime.episodes_list.length
+              ? `<a href="watch?slug=${anime.slug}&ep=1" class="btn-primary">
+                   <span class="fa fa-play"></span> Tonton Episode 1
+                 </a>`
+              : `<span class="btn-primary" style="opacity:0.5;cursor:not-allowed;">Belum Tersedia</span>`
+            }
+            <a href="anime-list" class="btn-secondary">
+              <span class="fa fa-list"></span> Daftar Anime
+            </a>
+          </div>
+        </div>
+
+        <!-- Info col -->
+        <div class="anime-info">
+          <h1>${anime.title}</h1>
+
+          <!-- Score bar -->
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;background:#f5c51822;border:1px solid #f5c51844;border-radius:8px;padding:8px 14px;">
+              <span style="font-size:20px;color:#f5c518;">★</span>
+              <div>
+                <div style="font-size:20px;font-weight:800;color:#f5c518;">${anime.score.toFixed(2)}</div>
+                <div style="font-size:11px;color:#9ca3af;">Score</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;background:#3384d622;border:1px solid #3384d644;border-radius:8px;padding:8px 14px;">
+              <span style="font-size:20px;">👁</span>
+              <div>
+                <div style="font-size:18px;font-weight:800;">${anime.views.toLocaleString()}</div>
+                <div style="font-size:11px;color:#9ca3af;">Views</div>
+              </div>
+            </div>
+          </div>
+
+          <ul class="anime-meta-list">
+            <li><strong>Judul:</strong> ${anime.title}</li>
+            <li><strong>Tipe:</strong> ${anime.type}</li>
+            <li><strong>Status:</strong> ${statusLabel}</li>
+            <li><strong>Episode:</strong> ${anime.episodes}</li>
+            <li><strong>Studio:</strong> ${anime.studio}</li>
+            <li><strong>Tahun:</strong> ${anime.year}</li>
+            <li><strong>Season:</strong> ${anime.season}</li>
+            ${anime.day ? `<li><strong>Jadwal Tayang:</strong> ${anime.day}, ${anime.time} WIB</li>` : ''}
+          </ul>
+
+          <div class="genre-tags">${genreTags}</div>
+
+          <div class="synopsis-box">
+            <h3>Sinopsis</h3>
+            <p>${anime.synopsis}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Episode list + sidebar -->
+      <div style="display:grid;grid-template-columns:1fr;gap:24px;" id="bottom-grid">
+
+        <!-- Episodes -->
+        <div class="episode-section">
+          <div class="section-title">Daftar Episode (${anime.episodes_list.length})</div>
+          <ul class="episode-list">${episodeList}</ul>
+        </div>
+
+        <!-- Related -->
+        ${related.length ? `
+        <div>
+          <div class="section-title">Anime Terkait</div>
+          <div>${relatedHTML}</div>
+        </div>` : ''}
+
+      </div>
+    </div>
+  `;
+
+  // Responsive: 2-col on wide screen
+  const style = document.createElement('style');
+  style.textContent = `
+    @media(min-width:768px) {
+      .detail-grid { grid-template-columns: 220px 1fr !important; }
+      #bottom-grid { grid-template-columns: 1fr 260px !important; }
+    }
+  `;
+  document.head.appendChild(style);
+});
+</script>
+</body>
+</html>

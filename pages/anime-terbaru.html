@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anime Terbaru - Lalajo Anime</title>
+  <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<script src="../assets/js/layout.js"></script>
+<main id="content">
+  <div class="page-title-bar">
+    <h1>Anime Terbaru</h1>
+    <p>Update terbaru anime sub Indonesia</p>
+  </div>
+
+  <!-- Episode update list style -->
+  <div id="latest-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+</main>
+<script src="../assets/js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const data = await DB.load();
+  const sorted = [...data].sort((a,b) => b.id - a.id);
+  const container = document.getElementById('latest-list');
+
+  container.innerHTML = sorted.map(a => {
+    const lastEp = a.episodes_list.length ? a.episodes_list[a.episodes_list.length-1] : null;
+    const statusLabel = a.status === 'Currently Airing' ? '<span style="color:#22c55e;font-weight:700;">● Ongoing</span>' : '<span style="color:#9ca3af;">Completed</span>';
+    return `<div class="batch-item">
+      <img src="${a.thumbnail}" alt="${a.title}" onerror="this.src='https://placehold.co/60x85/333/fff?text=N%2FA'">
+      <div class="info" style="flex-grow:1;">
+        <h3><a href="anime.html?slug=${a.slug}" style="text-decoration:none;color:inherit;">${a.title}</a></h3>
+        <div class="meta">${a.type} · ${a.studio} · ⭐ ${a.score.toFixed(2)}</div>
+        <div class="meta" style="margin-top:4px;">${statusLabel} · ${a.episodes} eps</div>
+        ${lastEp ? `<div class="meta" style="margin-top:4px;">Ep terbaru: <strong>Ep ${lastEp.ep} - ${lastEp.title}</strong> <span style="color:#9ca3af;">(${lastEp.date})</span></div>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+        <a href="anime.html?slug=${a.slug}" class="dl-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#3384d6;color:#fff;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;"><span class="fa fa-play"></span> Tonton</a>
+      </div>
+    </div>`;
+  }).join('');
+});
+</script>
+</body>
+</html>

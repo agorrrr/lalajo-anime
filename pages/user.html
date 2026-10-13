@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Saya - Lalajo Anime</title>
+  <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script>(function(){var m=localStorage.getItem('theme-mode')||'darkmode';if(m==='darkmode'||m==='dark')document.body&&document.body.classList.add('darkmode');})();</script>
+  <style>
+    .user-profile-container {
+      max-width: 860px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+    .profile-card {
+      background: var(--bg-card, #fff);
+      border: 1px solid var(--border-dark, #e5e7eb);
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .profile-avatar {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      border: 3px solid var(--brand, #3384d6);
+      object-fit: cover;
+      background: #1e1e2e;
+    }
+    .role-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .role-user {
+      background: rgba(51, 132, 214, 0.15);
+      color: #3384d6;
+      border: 1px solid rgba(51, 132, 214, 0.3);
+    }
+    .role-admin {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .activity-item {
+      padding: 14px 16px;
+      background: var(--bg-card2, #f9fafb);
+      border: 1px solid var(--border-dark, #e5e7eb);
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-logout {
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-admin {
+      background: #10b981;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+<script src="../assets/js/layout.js"></script>
+
+<main class="user-profile-container">
+
+  <!-- Profile Card -->
+  <div class="profile-card" id="profile-card">
+    <div style="text-align: center; padding: 40px; color: var(--text-muted);" id="loading-state">
+      <i class="fa fa-spinner fa-spin" style="font-size: 32px; margin-bottom: 12px;"></i>
+      <p>Memuat profil...</p>
+    </div>
+
+    <div id="profile-content" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+        <div class="profile-header">
+          <img id="u-avatar" class="profile-avatar" src="" alt="Avatar">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <h1 id="u-username" style="font-size: 22px; font-weight: 800; margin: 0;">Username</h1>
+              <span id="u-badge" class="role-badge role-user">⭐ Penonton</span>
+            </div>
+            <div id="u-email" style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">email@example.com</div>
+            <div id="u-joined" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Bergabung: -</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <a id="btn-admin-panel" href="admin.html" class="btn-admin" style="display: none;">
+            <i class="fa fa-dashboard"></i> Panel Admin
+          </a>
+          <button id="btn-logout" class="btn-logout" onclick="handleLogout()">
+            <i class="fa fa-sign-out"></i> Keluar
+          </button>
+        </div>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid var(--border-dark, #e5e7eb); margin: 24px 0;">
+
+      <!-- Quick Actions -->
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="anime-list.html" style="text-decoration: none; padding: 10px 18px; background: var(--brand, #3384d6); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+          <i class="fa fa-play-circle"></i> Jelajahi & Nonton Anime
+        </a>
+        <a href="jadwal-rilis.html" style="text-decoration: none; padding: 10px 18px; background: var(--bg-card2, #f9fafb); color: inherit; border: 1px solid var(--border-dark, #e5e7eb); border-radius: 8px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+          <i class="fa fa-calendar"></i> Cek Jadwal Rilis
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Komentar & Aktivitas Saya -->
+  <div class="profile-card">
+    <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+      <i class="fa fa-comments" style="color: var(--brand, #3384d6);"></i> Komentar & Diskusi Terakhir
+    </h2>
+    <div id="activity-container" class="activity-list">
+      <div style="text-align: center; padding: 20px; color: var(--text-muted);">Memuat riwayat komentar...</div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ponytail: simpan user state di localStorage, refresh saat load halaman
+let currentUser = null;
+
+async function loadProfile() {
+  const params = new URLSearchParams(window.location.search);
+  const tokenFromUrl = params.get('auth_token');
+  if (tokenFromUrl) {
+    localStorage.setItem('auth_token', tokenFromUrl);
+    history.replaceState(null, '', window.location.pathname);
+  }
+
+  const token = localStorage.getItem('auth_token');
+  if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/auth/me', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    if (!res.ok || data.status !== 'success' || !data.user) {
+      throw new Error('Sesi berakhir');
+    }
+
+    currentUser = data.user;
+    localStorage.setItem('auth_user', JSON.stringify(currentUser));
+    renderUser(currentUser);
+    loadActivity(token);
+  } catch (err) {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    window.location.href = 'login.html?error=session_expired';
+  }
+}
+
+function renderUser(u) {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('profile-content').style.display = 'block';
+
+  document.getElementById('u-avatar').src = u.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${u.username}`;
+  document.getElementById('u-username').textContent = u.username;
+  document.getElementById('u-email').textContent = u.email || 'Akun Lokal (Tanpa Email)';
+  document.getElementById('u-joined').textContent = 'Bergabung: ' + (u.created_at || 'Baru saja');
+
+  const badge = document.getElementById('u-badge');
+  if (u.role === 'admin') {
+    badge.className = 'role-badge role-admin';
+    badge.innerHTML = '👑 Administrator';
+    document.getElementById('btn-admin-panel').style.display = 'inline-flex';
+  } else {
+    badge.className = 'role-badge role-user';
+    badge.innerHTML = '⭐ Penonton Setia';
+    document.getElementById('btn-admin-panel').style.display = 'none';
+  }
+}
+
+async function loadActivity(token) {
+  const container = document.getElementById('activity-container');
+  try {
+    const res = await fetch('/api/user/activity', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    if (!res.ok || !data.activity || data.activity.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 14px;">
+          <i class="fa fa-comment-o" style="font-size: 28px; margin-bottom: 8px; opacity: 0.5;"></i>
+          <p>Belum ada komentar yang kamu tulis.</p>
+          <p style="font-size: 12px; margin-top: 4px;">Tonton anime dan tinggalkan pendapatmu di kolom komentar!</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = data.activity.map(item => `
+      <div class="activity-item">
+        <div style="flex-grow: 1;">
+          <div style="font-size: 13px; font-weight: 700;">
+            Komentar di <a href="watch.html?slug=${item.anime_slug}&ep=${item.ep}" style="color: var(--brand, #3384d6); text-decoration: none;">Episode ${item.ep}</a>
+            <span style="font-size: 11px; font-weight: 400; color: var(--text-muted); margin-left: 6px;">(${item.created_at})</span>
+          </div>
+          <div style="font-size: 13px; margin-top: 4px; color: inherit; opacity: 0.9;">"${escapeHtml(item.content)}"</div>
+        </div>
+        <a href="watch.html?slug=${item.anime_slug}&ep=${item.ep}" style="padding: 6px 12px; font-size: 12px; font-weight: 600; background: var(--brand, #3384d6); color: #fff; border-radius: 6px; text-decoration: none; flex-shrink: 0;">
+          Lihat <i class="fa fa-arrow-right"></i>
+        </a>
+      </div>
+    `).join('');
+  } catch (e) {
+    container.innerHTML = '<div style="color: #ef4444; font-size: 13px;">Gagal memuat aktivitas.</div>';
+  }
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+async function handleLogout() {
+  if (!confirm('Yakin ingin keluar?')) return;
+  const token = localStorage.getItem('auth_token');
+  try {
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+  } catch (e) {}
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('auth_user');
+  sessionStorage.removeItem('admin_logged_in');
+  window.location.href = '../';
+}
+
+document.addEventListener('DOMContentLoaded', loadProfile);
+</script>
+</body>
+</html>

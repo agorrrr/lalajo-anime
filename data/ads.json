@@ -1,0 +1,35 @@
+{
+  "popunder": {
+    "enabled": true,
+    "clicks": 3,
+    "url": "https://auctionr.org/4/08ce3909d178534b7aee7adf30cb2fa7"
+  },
+  "banner_top": {
+    "enabled": true,
+    "type": "image",
+    "image_url": "/assets/images/placeholder_banner.svg",
+    "link_url": "https://auctionr.org/4/08ce3909d178534b7aee7adf30cb2fa7",
+    "code": ""
+  },
+  "banner_player_bottom": {
+    "enabled": true,
+    "type": "image",
+    "image_url": "/assets/images/placeholder_banner.svg",
+    "link_url": "https://auctionr.org/4/08ce3909d178534b7aee7adf30cb2fa7",
+    "code": ""
+  },
+  "banner_floating": {
+    "enabled": true,
+    "type": "image",
+    "image_url": "/assets/images/placeholder_floating.svg",
+    "link_url": "https://auctionr.org/4/08ce3909d178534b7aee7adf30cb2fa7",
+    "code": ""
+  },
+  "banner_center": {
+    "enabled": true,
+    "type": "image",
+    "image_url": "/assets/images/placeholder_center.svg",
+    "link_url": "https://auctionr.org/4/08ce3909d178534b7aee7adf30cb2fa7",
+    "code": ""
+  }
+}

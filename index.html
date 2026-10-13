@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lalajo Anime - Nonton Streaming Anime Sub Indo</title>
+  <meta name="description" content="Nonton streaming anime subtitle Indonesia terlengkap">
+  <link rel="stylesheet" href="assets/css/font-awesome.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script>
+    (function(){
+      var m=localStorage.getItem('theme-mode')||'darkmode';
+      if(m==='darkmode'||m==='dark') document.documentElement.classList.add('dark');
+    })();
+  </script>
+  <style>
+    /* override dark class on html for body.darkmode pattern */
+    html.dark body { background: #111113; color: #e5e7eb; }
+  </style>
+</head>
+<body>
+<script src="assets/js/layout.js"></script>
+
+<main id="content" style="max-width:1170px;margin:0 auto;padding:24px 1rem;flex-grow:1;">
+
+  <!-- Hero Banner -->
+  <div class="hero-banner">
+    <h2>⚡ Selamat Datang di Lalajo Anime</h2>
+    <p>Nonton streaming dan download anime sub indo subtitle Indonesia terlengkap</p>
+    <a href="pages/anime-list.html" class="cta">
+      <span class="fa fa-film"></span> Lihat Semua Anime
+    </a>
+  </div>
+
+  <!-- Slot Iklan Banner Atas (728x90) -->
+  <div class="ad-slot-top" style="margin: 20px auto; text-align: center; max-width: 728px; min-height: 50px;"></div>
+
+  <!-- Anime Terbaru -->
+  <section class="latest-section">
+    <div class="section-header">
+      <h2>🆕 Anime Terbaru</h2>
+      <a href="pages/anime-terbaru.html" class="see-all">Lihat Semua →</a>
+    </div>
+    <div class="anime-grid" id="latest-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af;">Memuat...</div>
+    </div>
+  </section>
+
+  <!-- Ongoing Anime -->
+  <section class="latest-section">
+    <div class="section-header">
+      <h2>📺 Sedang Tayang</h2>
+      <a href="pages/anime-list.html?status=Currently+Airing" class="see-all">Lihat Semua →</a>
+    </div>
+    <div class="anime-grid" id="ongoing-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af;">Memuat...</div>
+    </div>
+  </section>
+
+  <!-- Top Rated -->
+  <section class="latest-section">
+    <div class="section-header">
+      <h2>⭐ Rating Tertinggi</h2>
+      <a href="pages/anime-list.html?order=rating" class="see-all">Lihat Semua →</a>
+    </div>
+    <div class="anime-grid" id="toprated-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af;">Memuat...</div>
+    </div>
+  </section>
+
+</main>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/ads.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const data = await DB.load();
+
+  // Latest (by id desc)
+  const latest = [...data].sort((a,b) => b.id - a.id).slice(0, 10);
+  document.getElementById('latest-grid').innerHTML = latest.map(animeCardHTML).join('');
+
+  // Ongoing
+  const ongoing = data.filter(a => a.status === 'Currently Airing').slice(0, 10);
+  document.getElementById('ongoing-grid').innerHTML = ongoing.map(animeCardHTML).join('');
+
+  // Top rated
+  const toprated = [...data].sort((a,b) => b.score - a.score).slice(0, 10);
+  document.getElementById('toprated-grid').innerHTML = toprated.map(animeCardHTML).join('');
+});
+</script>
+</body>
+</html>

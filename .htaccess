@@ -1,0 +1,29 @@
+# ============================================
+# Lalajo Anime - Apache / cPanel URL Rewrite
+# Sembunyikan ekstensi .html (Clean URLs)
+# ============================================
+
+RewriteEngine On
+
+# 1. Jangan ubah jika memang file atau folder fisik ada
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# 2. Redirect internal untuk path pages/ (misal: /pages/jadwal-rilis -> pages/jadwal-rilis.html)
+RewriteCond %{DOCUMENT_ROOT}/pages/$1.html -f
+RewriteRule ^pages/(.*)$ pages/$1.html [L,QSA]
+
+# 3. Redirect root URL clean (misal: /jadwal-rilis -> pages/jadwal-rilis.html)
+RewriteCond %{DOCUMENT_ROOT}/pages/$1.html -f
+RewriteRule ^(.*)$ pages/$1.html [L,QSA]
+
+# 4. Redirect root HTML umum (misal: /index -> index.html)
+RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+RewriteRule ^(.*)$ $1.html [L,QSA]
+
+# Proteksi file sensitif
+<FilesMatch "^(client_secret\.json|token\.json|server\.py)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Anime - Lalajo Anime</title>
+  <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script>(function(){var m=localStorage.getItem('theme-mode')||'darkmode';if(m==='darkmode'||m==='dark')document.body&&document.body.classList.add('darkmode');})();</script>
+</head>
+<body>
+<script src="../assets/js/layout.js"></script>
+<main id="content">
+
+  <div class="page-title-bar">
+    <h1>Daftar Anime Lengkap</h1>
+    <p>Nonton streaming dan download anime sub indo subtitle indonesia terlengkap</p>
+  </div>
+
+  <!-- Filter Box -->
+  <div class="filter-box">
+    <span class="filter-label">Urutkan Berdasarkan:</span>
+    <div class="sort-pills" id="sort-pills">
+      <button class="sort-pill active" data-order="update">Terbaru Diupdate</button>
+      <button class="sort-pill" data-order="latest">Baru Ditambahkan</button>
+      <button class="sort-pill" data-order="popular">Terpopuler</button>
+      <button class="sort-pill" data-order="rating">Rating Tertinggi</button>
+      <button class="sort-pill" data-order="title">A-Z</button>
+      <button class="sort-pill" data-order="titlereverse">Z-A</button>
+    </div>
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="filter-status">Status:</label>
+        <select id="filter-status">
+          <option value="">Semua Status</option>
+          <option value="Currently Airing">Ongoing</option>
+          <option value="Finished Airing">Completed</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-type">Tipe:</label>
+        <select id="filter-type">
+          <option value="">Semua Tipe</option>
+          <option value="TV">TV</option>
+          <option value="Movie">Movie</option>
+          <option value="OVA">OVA</option>
+          <option value="ONA">ONA</option>
+          <option value="Special">Special</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-genre">Genre:</label>
+        <select id="filter-genre">
+          <option value="">Semua Genre</option>
+          <option value="Action">Action</option>
+          <option value="Adventure">Adventure</option>
+          <option value="Comedy">Comedy</option>
+          <option value="Fantasy">Fantasy</option>
+          <option value="Horror">Horror</option>
+          <option value="Isekai">Isekai</option>
+          <option value="Military">Military</option>
+          <option value="Romance">Romance</option>
+          <option value="Shounen">Shounen</option>
+          <option value="Slice of Life">Slice of Life</option>
+          <option value="Survival">Survival</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search result info -->
+  <div id="search-info" style="display:none;margin-bottom:16px;font-size:14px;color:#9ca3af;"></div>
+
+  <!-- Grid -->
+  <div class="anime-grid" id="anime-grid">
+    <div style="grid-column:1/-1;text-align:center;padding:60px;color:#9ca3af;">Memuat...</div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" id="pagination"></div>
+
+</main>
+<script src="../assets/js/main.js"></script>
+<script>
+const PER_PAGE = 20;
+let allAnime = [];
+let filtered = [];
+let currentPage = 1;
+let currentOrder = 'update';
+
+function applyFilters() {
+  const status = document.getElementById('filter-status').value;
+  const type   = document.getElementById('filter-type').value;
+  const genre  = document.getElementById('filter-genre').value;
+  const params = new URLSearchParams(window.location.search);
+  const search = params.get('search') || '';
+
+  filtered = allAnime.filter(a => {
+    if (status && a.status !== status) return false;
+    if (type   && a.type !== type)     return false;
+    if (genre  && !a.genres.includes(genre)) return false;
+    if (search && !a.title.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  // Sort
+  switch(currentOrder) {
+    case 'popular':      filtered.sort((a,b) => b.views - a.views); break;
+    case 'rating':       filtered.sort((a,b) => b.score - a.score); break;
+    case 'title':        filtered.sort((a,b) => a.title.localeCompare(b.title)); break;
+    case 'titlereverse': filtered.sort((a,b) => b.title.localeCompare(a.title)); break;
+    case 'latest':       filtered.sort((a,b) => b.id - a.id); break;
+    default:             filtered.sort((a,b) => b.id - a.id); // update
+  }
+
+  if (search) {
+    const info = document.getElementById('search-info');
+    info.style.display = 'block';
+    info.textContent = `Menampilkan ${filtered.length} hasil untuk "${search}"`;
+  }
+
+  currentPage = 1;
+  renderPage();
+}
+
+function renderPage() {
+  const start = (currentPage - 1) * PER_PAGE;
+  const page  = filtered.slice(start, start + PER_PAGE);
+  const grid  = document.getElementById('anime-grid');
+
+  if (!page.length) {
+    grid.innerHTML = `<div class="no-results" style="grid-column:1/-1">
+      <i class="fa fa-search" style="font-size:48px;color:#9ca3af;"></i>
+      <p>Tidak ada anime ditemukan</p></div>`;
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  grid.innerHTML = page.map(animeCardHTML).join('');
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = Math.ceil(filtered.length / PER_PAGE);
+  const pag   = document.getElementById('pagination');
+  if (total <= 1) { pag.innerHTML = ''; return; }
+
+  let html = '';
+  if (currentPage > 1) html += `<a href="#" data-p="${currentPage-1}">&#8249;</a>`;
+  for (let i = 1; i <= total; i++) {
+    if (i === 1 || i === total || Math.abs(i - currentPage) <= 2) {
+      html += `<${i===currentPage?'span class="current"':'a href="#" data-p="'+i+'"'}>${i}${i===currentPage?'</span>':'</a>'}`;
+    } else if (Math.abs(i - currentPage) === 3) {
+      html += '<span>...</span>';
+    }
+  }
+  if (currentPage < total) html += `<a href="#" data-p="${currentPage+1}">&#8250;</a>`;
+  pag.innerHTML = html;
+
+  pag.querySelectorAll('a[data-p]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      currentPage = parseInt(a.dataset.p);
+      renderPage();
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  allAnime = await DB.load();
+
+  // URL params
+  const params = new URLSearchParams(window.location.search);
+  const orderParam  = params.get('order');
+  const statusParam = params.get('status');
+  const genreParam  = params.get('genre');
+
+  if (orderParam)  { currentOrder = orderParam; document.querySelector(`[data-order="${orderParam}"]`)?.classList.add('active'); document.querySelector('[data-order="update"]')?.classList.remove('active'); }
+  if (statusParam) document.getElementById('filter-status').value = statusParam;
+  if (genreParam)  document.getElementById('filter-genre').value  = genreParam;
+
+  // Sort pills
+  document.getElementById('sort-pills').addEventListener('click', e => {
+    const btn = e.target.closest('[data-order]');
+    if (!btn) return;
+    document.querySelectorAll('.sort-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    currentOrder = btn.dataset.order;
+    applyFilters();
+  });
+
+  document.getElementById('filter-status').addEventListener('change', applyFilters);
+  document.getElementById('filter-type').addEventListener('change', applyFilters);
+  document.getElementById('filter-genre').addEventListener('change', applyFilters);
+
+  applyFilters();
+});
+</script>
+</body>
+</html>

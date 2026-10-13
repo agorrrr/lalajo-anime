@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Lalajo Anime</title>
+  <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <!-- Google Identity Services for OAuth 2.0 Upload/Folder Write -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    .admin-container { max-width: 1100px; margin: 0 auto; padding: 24px 1rem; }
+    .admin-card {
+      background: var(--bg-card, #fff);
+      border: 1px solid var(--border-dark, #e5e7eb);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .admin-nav {
+      display: flex; gap: 8px; border-bottom: 1px solid var(--border-dark, #e5e7eb);
+      margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .admin-nav-btn {
+      padding: 10px 18px; border: none; background: none; font-size: 14px;
+      font-weight: 700; color: var(--text-muted, #6b7280); cursor: pointer;
+      border-bottom: 3px solid transparent; transition: all 0.2s;
+    }
+    .admin-nav-btn.active {
+      color: var(--brand, #3384d6);
+      border-bottom-color: var(--brand, #3384d6);
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .form-control {
+      width: 100%; padding: 10px 12px; border-radius: 8px;
+      border: 1px solid rgba(128,128,128,0.25);
+      background: var(--bg-card2, #f9fafb); color: inherit;
+      font-size: 14px; outline: none;
+    }
+    .form-control:focus { border-color: var(--brand, #3384d6); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 700;
+      cursor: pointer; border: none; text-decoration: none; transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn-brand { background: var(--brand, #3384d6); color: #fff; }
+    .btn-success { background: #10b981; color: #fff; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-secondary { background: #4b5563; color: #fff; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(128,128,128,0.15); }
+    th { font-weight: 700; color: var(--text-muted, #9ca3af); }
+    .progress-bar-bg {
+      width: 100%; height: 16px; background: rgba(128,128,128,0.2);
+      border-radius: 8px; overflow: hidden; margin-top: 10px; display: none;
+    }
+    .progress-bar-fill {
+      width: 0%; height: 100%; background: #10b981;
+      transition: width 0.2s;
+    }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 700;
+    }
+    .badge-success { background: rgba(16,185,129,0.15); color: #10b981; }
+    .badge-warning { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .badge-info { background: rgba(51,132,214,0.15); color: #3384d6; }
+    .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media(min-width: 640px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+<script src="../assets/js/layout.js"></script>
+
+<main class="admin-container">
+
+  <!-- Login Overlay jika belum login -->
+  <div id="login-section" class="admin-card" style="max-width: 440px; margin: 40px auto; text-align: center;">
+    <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 8px;">🔐 Login Administrator</h2>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+      Masuk dengan akun admin Lalajo Anime (Tersimpan aman di database SQLite)
+    </p>
+    <div id="admin-login-error" style="display:none;padding:10px;border-radius:6px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#ef4444;font-size:13px;margin-bottom:14px;"></div>
+    <form id="login-form">
+      <div class="form-group" style="text-align: left;">
+        <label>Username / Email:</label>
+        <input type="text" id="admin-username" class="form-control" value="ezakasep" placeholder="Default: ezakasep" required>
+      </div>
+      <div class="form-group" style="text-align: left;">
+        <label>Password Terenkripsi:</label>
+        <input type="password" id="admin-password" class="form-control" value="ezakasep" placeholder="Default: ezakasep" required>
+      </div>
+      <button type="submit" id="admin-login-submit" class="btn btn-brand" style="width: 100%; justify-content: center; margin-top: 8px;">
+        <span class="fa fa-lock"></span> Masuk ke Panel Admin
+      </button>
+    </form>
+    <div style="margin-top: 20px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border-dark, #e5e7eb); padding-top: 14px;">
+      Default Akun Admin: <code>ezakasep</code> / <code>ezakasep</code>
+    </div>
+  </div>
+
+  <!-- Dashboard Admin -->
+  <div id="dashboard-section" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <h1 style="font-size: 24px; font-weight: 800;">⚙️ Panel Admin Lalajo Anime</h1>
+        <p style="font-size: 13px; color: var(--text-muted);">
+          Kelola judul anime, sinkronisasi Google Drive, & upload file video
+        </p>
+      </div>
+      <button id="logout-btn" class="btn btn-secondary" style="padding: 6px 14px; font-size: 12px;">
+        <span class="fa fa-sign-out"></span> Logout
+      </button>
+    </div>
+
+    <!-- Banner Status Koneksi Google Drive -->
+    <div id="drive-connection-banner" style="margin-bottom: 20px; padding: 14px 18px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: gap; gap: 12px; background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3);">
+      <div>
+        <strong id="banner-title" style="color: #f59e0b; font-size: 14px;">⚠️ Google Drive Belum Terhubung</strong>
+        <p id="banner-desc" style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+          Klik tombol di samping untuk mengizinkan sinkronisasi dan pembuatan folder anime.
+        </p>
+      </div>
+      <button id="banner-login-btn" onclick="DriveService.login()" class="btn btn-success" style="padding: 8px 16px; font-size: 13px; flex-shrink: 0;">
+        <span class="fa fa-google"></span> Hubungkan Akun Google Sekarang
+      </button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="admin-nav">
+      <button class="admin-nav-btn active" data-tab="tab-list">
+        <span class="fa fa-list"></span> List Anime (<span id="anime-count">0</span>)
+      </button>
+      <button class="admin-nav-btn" data-tab="tab-add">
+        <span class="fa fa-plus-circle"></span> Tambah Anime Baru
+      </button>
+      <button class="admin-nav-btn" data-tab="tab-upload">
+        <span class="fa fa-cloud-upload"></span> Upload Video Episode
+      </button>
+      <button class="admin-nav-btn" data-tab="tab-drive">
+        <span class="fa fa-google"></span> Sinkronisasi Google Drive
+      </button>
+      <button class="admin-nav-btn" data-tab="tab-ads">
+        <span class="fa fa-bullhorn"></span> Banner & Iklan
+      </button>
+    </nav>
+
+    <!-- TAB 1: LIST ANIME -->
+    <div id="tab-list" class="tab-content">
+      <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+          <input type="text" id="search-anime-input" class="form-control" placeholder="Cari anime..." style="max-width: 280px;">
+          <div style="display: flex; gap: 8px;">
+            <button id="quick-sync-btn" class="btn btn-brand" style="font-size: 13px; padding: 8px 14px;">
+              <span class="fa fa-refresh"></span> Sync dari Google Drive
+            </button>
+            <button id="reset-db-btn" class="btn btn-secondary" style="font-size: 13px; padding: 8px 14px;">
+              <span class="fa fa-history"></span> Reset Default
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Poster</th>
+                <th>Judul</th>
+                <th>Tipe & Status</th>
+                <th>Episode</th>
+                <th>Drive Folder</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="anime-table-body">
+              <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Memuat...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: TAMBAH ANIME BARU -->
+    <div id="tab-add" class="tab-content" style="display: none;">
+      <div class="admin-card">
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">➕ Tambah Judul Anime Baru</h3>
+        <form id="add-anime-form">
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Judul Anime:</label>
+              <input type="text" id="add-title" class="form-control" placeholder="Contoh: Solo Leveling S2" required>
+            </div>
+            <div class="form-group">
+              <label>Tipe Anime:</label>
+              <select id="add-type" class="form-control">
+                <option value="TV">TV Series</option>
+                <option value="Movie">Movie</option>
+                <option value="OVA">OVA</option>
+                <option value="ONA">ONA</option>
+                <option value="Special">Special</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Status:</label>
+              <select id="add-status" class="form-control">
+                <option value="Currently Airing">Currently Airing (Ongoing)</option>
+                <option value="Finished Airing">Finished Airing (Completed)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Score (Rating):</label>
+              <input type="number" step="0.01" id="add-score" class="form-control" value="8.50">
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Studio:</label>
+              <input type="text" id="add-studio" class="form-control" placeholder="Contoh: A-1 Pictures" value="Studio">
+            </div>
+            <div class="form-group">
+              <label>Genre (pisahkan koma):</label>
+              <input type="text" id="add-genres" class="form-control" placeholder="Action, Fantasy, Adventure" value="Action, Fantasy">
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Jadwal Hari & Jam (WIB):</label>
+              <input type="text" id="add-schedule" class="form-control" placeholder="Contoh: Minggu 09:30" value="Minggu 19:00">
+            </div>
+            <div class="form-group">
+              <label>Gambar Thumbnail/Poster:</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="add-thumbnail" class="form-control" placeholder="URL Gambar atau klik Upload File">
+                <label class="btn btn-secondary" style="margin: 0; white-space: nowrap; cursor: pointer; font-size: 13px;">
+                  <span class="fa fa-upload"></span> Upload File
+                  <input type="file" id="add-thumb-file" accept="image/*" style="display: none;" onchange="handleThumbnailFileUpload(this, 'add')">
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Sinopsis:</label>
+            <textarea id="add-synopsis" class="form-control" rows="3" placeholder="Tuliskan sinopsis anime..."></textarea>
+          </div>
+
+          <div class="form-group" style="background: rgba(51,132,214,0.08); padding: 12px; border-radius: 8px;">
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="add-create-drive-folder" checked>
+              <span><strong>Otomatis buat subfolder di Google Drive</strong> sesuai judul anime ini</span>
+            </label>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px; margin-left: 24px;">
+              *Memerlukan login Google Drive OAuth di tab pengaturan.
+            </p>
+          </div>
+
+          <button type="submit" class="btn btn-brand">
+            <span class="fa fa-save"></span> Simpan Judul Anime
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 3: UPLOAD VIDEO EPISODE -->
+    <div id="tab-upload" class="tab-content" style="display: none;">
+      <div class="admin-card">
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">☁️ Upload Video Episode ke Google Drive</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+          File video akan diunggah langsung ke subfolder Google Drive anime yang dipilih.
+        </p>
+
+        <form id="upload-video-form">
+          <div class="form-group">
+            <label>Pilih Judul Anime:</label>
+            <select id="upload-anime-select" class="form-control" required>
+              <option value="">-- Pilih Anime --</option>
+            </select>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Nomor Episode:</label>
+              <input type="number" id="upload-ep-num" class="form-control" value="1" min="1" required>
+            </div>
+            <div class="form-group">
+              <label>Judul Episode (Opsional):</label>
+              <input type="text" id="upload-ep-title" class="form-control" placeholder="Contoh: Awal Perjalanan">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Pilih File Video (MP4 / MKV / WebM):</label>
+            <input type="file" id="upload-file-input" class="form-control" accept="video/*" required>
+          </div>
+
+          <div class="progress-bar-bg" id="upload-progress-container">
+            <div class="progress-bar-fill" id="upload-progress-fill"></div>
+          </div>
+          <p id="upload-status-text" style="font-size: 12px; color: var(--text-muted); margin-top: 6px; display: none;"></p>
+
+          <button type="submit" id="start-upload-btn" class="btn btn-brand" style="margin-top: 14px;">
+            <span class="fa fa-upload"></span> Mulai Upload ke Google Drive
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 4: SINKRONISASI GOOGLE DRIVE & PENGATURAN -->
+    <div id="tab-drive" class="tab-content" style="display: none;">
+      <div class="admin-card">
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">📁 Pengaturan & Koneksi Google Drive</h3>
+
+        <div style="background: rgba(51,132,214,0.08); border-left: 4px solid var(--brand, #3384d6); padding: 14px; border-radius: 6px; margin-bottom: 20px; font-size: 13px;">
+          <strong>💡 Cara Kerja Sinkronisasi:</strong><br>
+          1. Di dalam Google Drive Anda (Folder ID: <code id="disp-folder-id">1tSYO6d2s-Sr5Ne2Do1ZzqwOkdb_bbkYi</code>), setiap <strong>subfolder</strong> dianggap 1 judul anime.<br>
+          2. Setiap file <strong>video</strong> di dalam subfolder tersebut otomatis menjadi daftar episode-nya.<br>
+          3. Jika ada 10 folder anime di Google Drive, tombol sync akan membuat web menampilkan 10 anime persis sama!
+        </div>
+
+        <form id="drive-config-form">
+          <div class="form-group">
+            <label>Google Drive API Key:</label>
+            <input type="text" id="cfg-api-key" class="form-control" value="AIzaSyAPymJJWft8-tEgDQULUXelNxkr_GFPQ8Y" required>
+            <small style="color: var(--text-muted); font-size: 11px;">Digunakan untuk membaca data dan metadata Google Drive.</small>
+          </div>
+
+          <div class="form-group">
+            <label>Google Drive Root Folder ID:</label>
+            <input type="text" id="cfg-folder-id" class="form-control" value="1tSYO6d2s-Sr5Ne2Do1ZzqwOkdb_bbkYi" required>
+            <small style="color: var(--text-muted); font-size: 11px;">Folder utama tempat Anda menaruh folder-folder anime.</small>
+          </div>
+
+          <div class="form-group">
+            <label>OAuth 2.0 Client ID (Untuk Login Google di Web):</label>
+            <input type="text" id="cfg-client-id" class="form-control" placeholder="Contoh: 123456789-xxxxxx.apps.googleusercontent.com">
+            <small style="color: var(--text-muted); font-size: 11px;">
+              Dibuat di Google Cloud Console &gt; Credentials &gt; OAuth 2.0 Client ID (Web application).
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label>Atau Masukkan OAuth Access Token Langsung (ya29...):</label>
+            <input type="text" id="cfg-access-token" class="form-control" placeholder="ya29.a0AcM612...">
+            <small style="color: var(--text-muted); font-size: 11px;">
+              Token otorisasi langsung dari Google (misal dari Google OAuth Playground) untuk langsung konek tanpa Client ID.
+            </small>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap;">
+            <button type="submit" class="btn btn-brand">
+              <span class="fa fa-save"></span> Simpan Konfigurasi
+            </button>
+            <button type="button" id="google-login-btn" class="btn btn-success">
+              <span class="fa fa-google"></span> Hubungkan Akun Google (OAuth)
+            </button>
+            <button type="button" id="full-sync-btn" class="btn btn-brand">
+              <span class="fa fa-refresh"></span> Sinkronkan Seluruh Data dari Drive
+            </button>
+          </div>
+        </form>
+
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-dark, #e5e7eb);">
+          <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">Status Koneksi Saat Ini:</h4>
+          <p id="drive-auth-status" style="font-size: 13px;">Memeriksa status...</p>
+        </div>
+      </div>
+    </div> <!-- Tutup tab-drive -->
+
+    <!-- TAB 5: BANNER & IKLAN -->
+    <div id="tab-ads" class="tab-content" style="display: none;">
+      <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h3 style="font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+              <span class="fa fa-bullhorn"></span> Pengaturan Banner & Iklan
+            </h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+              Atur posisi banner otomatis, script iklan pihak ketiga, dan popunder video player.
+            </p>
+          </div>
+          <button type="button" onclick="saveAdsSettings()" class="btn btn-brand" style="padding: 10px 20px;">
+            <span class="fa fa-check"></span> Simpan Pengaturan Iklan
+          </button>
+        </div>
+
+        <form id="ads-management-form" onsubmit="event.preventDefault(); saveAdsSettings();">
+          
+          <!-- SEKSI 1: POPUNDER / KLIK VIDEO -->
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-dark, #e5e7eb); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <strong style="font-size: 15px; color: #38bdf8;">🎯 Iklan Popunder Player Video (Klik Tersembunyi)</strong>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px;">
+                <input type="checkbox" id="ad-pop-enabled" checked> Aktifkan Popunder
+              </label>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+              Saat pengunjung mengklik area player, klik ke-1 dan ke-2 akan membuka link iklan di tab baru, lalu klik ke-3 baru memutar video.
+            </p>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Jumlah Klik Iklan Sebelum Video Play:</label>
+                <input type="number" id="ad-pop-clicks" class="form-control" value="2" min="1" max="10">
+              </div>
+              <div class="form-group">
+                <label>URL Tujuan Iklan (Link Affiliate / Iklan Pop):</label>
+                <input type="url" id="ad-pop-url" class="form-control" placeholder="https://example.com/promo" value="https://otakudesu.cloud">
+              </div>
+            </div>
+          </div>
+
+          <!-- SEKSI 2: BANNER ATAS (HEADER / 728x90) -->
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-dark, #e5e7eb); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <strong style="font-size: 15px; color: #38bdf8;">📌 Banner Atas (Header / 728x90)</strong>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px;">
+                <input type="checkbox" id="ad-top-enabled" checked> Tampilkan Banner
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Tipe Iklan:</label>
+              <select id="ad-top-type" class="form-control" onchange="toggleAdType('top')">
+                <option value="image">Gambar Banner + Link Tujuan</option>
+                <option value="code">Kode Script / HTML Iklan (Adsterra / Adsense)</option>
+              </select>
+            </div>
+            <div id="ad-top-img-fields">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>URL Gambar Banner (728x90):</label>
+                  <input type="text" id="ad-top-img" class="form-control" placeholder="https://... / gambar banner">
+                </div>
+                <div class="form-group">
+                  <label>URL Link Tujuan:</label>
+                  <input type="url" id="ad-top-link" class="form-control" placeholder="https://...">
+                </div>
+              </div>
+            </div>
+            <div id="ad-top-code-fields" style="display: none;">
+              <div class="form-group">
+                <label>Script / Kode HTML Iklan:</label>
+                <textarea id="ad-top-code" class="form-control" rows="3" placeholder="<script>...</script>"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEKSI 3: BANNER BAWAH PLAYER (728x90) -->
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-dark, #e5e7eb); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <strong style="font-size: 15px; color: #38bdf8;">🎬 Banner Bawah Player Video (728x90)</strong>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px;">
+                <input type="checkbox" id="ad-player-enabled" checked> Tampilkan Banner
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Tipe Iklan:</label>
+              <select id="ad-player-type" class="form-control" onchange="toggleAdType('player')">
+                <option value="image">Gambar Banner + Link Tujuan</option>
+                <option value="code">Kode Script / HTML Iklan</option>
+              </select>
+            </div>
+            <div id="ad-player-img-fields">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>URL Gambar Banner (728x90):</label>
+                  <input type="text" id="ad-player-img" class="form-control" placeholder="https://... / gambar banner">
+                </div>
+                <div class="form-group">
+                  <label>URL Link Tujuan:</label>
+                  <input type="url" id="ad-player-link" class="form-control" placeholder="https://...">
+                </div>
+              </div>
+            </div>
+            <div id="ad-player-code-fields" style="display: none;">
+              <div class="form-group">
+                <label>Script / Kode HTML Iklan:</label>
+                <textarea id="ad-player-code" class="form-control" rows="3" placeholder="<script>...</script>"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEKSI 4: BANNER FLOATING (STICKY MELAYANG 468x60) -->
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-dark, #e5e7eb); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <strong style="font-size: 15px; color: #38bdf8;">📱 Banner Melayang Bawah / Sticky Footer (468x60)</strong>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px;">
+                <input type="checkbox" id="ad-float-enabled" checked> Tampilkan Banner Melayang
+              </label>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+              Banner berada di bagian bawah layar dengan tombol "X" agar pengunjung bisa menutupnya tanpa menutupi konten.
+            </p>
+            <div class="form-group">
+              <label>Tipe Iklan:</label>
+              <select id="ad-float-type" class="form-control" onchange="toggleAdType('float')">
+                <option value="image">Gambar Banner + Link Tujuan</option>
+                <option value="code">Kode Script / HTML Iklan</option>
+              </select>
+            </div>
+            <div id="ad-float-img-fields">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>URL Gambar Banner:</label>
+                  <input type="text" id="ad-float-img" class="form-control" placeholder="https://... / gambar banner">
+                </div>
+                <div class="form-group">
+                  <label>URL Link Tujuan:</label>
+                  <input type="url" id="ad-float-link" class="form-control" placeholder="https://...">
+                </div>
+              </div>
+            </div>
+            <div id="ad-float-code-fields" style="display: none;">
+              <div class="form-group">
+                <label>Script / Kode HTML Iklan:</label>
+                <textarea id="ad-float-code" class="form-control" rows="3" placeholder="<script>...</script>"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEKSI 5: BANNER TENGAH PLAYER (POP-UP TUTUP IKLAN) -->
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-dark, #e5e7eb); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <strong style="font-size: 15px; color: #f43f5e;">🛑 Banner Tengah Player Video (Popup "Tutup Iklan")</strong>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px;">
+                <input type="checkbox" id="ad-center-enabled" checked> Tampilkan Banner Tengah
+              </label>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+              Banner muncul tepat di tengah video player dengan tombol merah "Tutup Iklan". Pengunjung wajib menutup banner ini sebelum bisa memutar video.
+            </p>
+            <div class="form-group">
+              <label>Tipe Iklan:</label>
+              <select id="ad-center-type" class="form-control" onchange="toggleAdType('center')">
+                <option value="image">Gambar Banner + Link Tujuan (Ukuran ~300x250)</option>
+                <option value="code">Kode Script / HTML Iklan</option>
+              </select>
+            </div>
+            <div id="ad-center-img-fields">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>URL Gambar Banner:</label>
+                  <input type="text" id="ad-center-img" class="form-control" placeholder="https://... / gambar banner">
+                </div>
+                <div class="form-group">
+                  <label>URL Link Tujuan:</label>
+                  <input type="url" id="ad-center-link" class="form-control" placeholder="https://...">
+                </div>
+              </div>
+            </div>
+            <div id="ad-center-code-fields" style="display: none;">
+              <div class="form-group">
+                <label>Script / Kode HTML Iklan:</label>
+                <textarea id="ad-center-code" class="form-control" rows="3" placeholder="<script>...</script>"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div style="text-align: right;">
+            <button type="submit" class="btn btn-brand" style="padding: 12px 24px; font-size: 14px;">
+              <span class="fa fa-save"></span> Simpan Seluruh Pengaturan Iklan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div> <!-- Tutup tab-ads -->
+
+  </div> <!-- Tutup dashboard-section -->
+
+  <!-- Modal Edit Anime Lengkap (Overlay Mandiri di Luar Tab) -->
+  <div id="edit-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999999; align-items: center; justify-content: center; padding: 16px;">
+    <div class="admin-card" style="max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; margin: auto; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-dark, #e5e7eb); padding-bottom: 12px;">
+        <h3 style="font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+          <span class="fa fa-pencil"></span> Edit Data Anime
+        </h3>
+        <button type="button" onclick="closeEditModal()" class="btn btn-secondary" style="padding: 4px 10px; font-size: 13px;">
+          <span class="fa fa-times"></span>
+        </button>
+      </div>
+
+      <form id="edit-anime-form">
+        <input type="hidden" id="edit-id">
+
+        <div class="form-group">
+          <label>Judul Anime:</label>
+          <input type="text" id="edit-title" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label>Poster / Thumbnail Anime (URL atau Upload File):</label>
+          <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+            <input type="text" id="edit-thumbnail" class="form-control" placeholder="URL Poster atau path upload" oninput="updateEditThumbPreview()">
+            <label class="btn btn-secondary" style="margin: 0; white-space: nowrap; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+              <span class="fa fa-upload"></span> Upload File
+              <input type="file" id="edit-thumb-file" accept="image/*" style="display: none;" onchange="handleThumbnailFileUpload(this, 'edit')">
+            </label>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px; background: rgba(128,128,128,0.1); padding: 10px; border-radius: 8px;">
+            <img id="edit-thumb-preview" src="" style="width: 55px; height: 75px; object-fit: cover; border-radius: 6px; background: #222;" onerror="this.src='https://placehold.co/55x75/333/fff?text=No+Cover'">
+            <div>
+              <strong style="font-size: 12px; display: block;" id="edit-thumb-status">Live Preview Poster</strong>
+              <small style="color: var(--text-muted); font-size: 11px;">Bisa isi URL gambar atau klik tombol <strong>"Upload File"</strong> untuk memilih file gambar dari komputer.</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Keterangan / Sinopsis:</label>
+          <textarea id="edit-synopsis" class="form-control" rows="4" placeholder="Tuliskan keterangan/sinopsis anime..."></textarea>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Score / Rating:</label>
+            <input type="number" step="0.01" id="edit-score" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Status:</label>
+            <select id="edit-status" class="form-control">
+              <option value="Currently Airing">Currently Airing (Ongoing)</option>
+              <option value="Finished Airing">Finished Airing (Completed)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Studio:</label>
+            <input type="text" id="edit-studio" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Tipe Anime:</label>
+            <select id="edit-type" class="form-control">
+              <option value="TV">TV Series</option>
+              <option value="Movie">Movie</option>
+              <option value="OVA">OVA</option>
+              <option value="ONA">ONA</option>
+              <option value="Special">Special</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Genre (pisahkan koma):</label>
+            <input type="text" id="edit-genres" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Jadwal Hari & Jam (WIB):</label>
+            <input type="text" id="edit-schedule" class="form-control">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--border-dark, #e5e7eb);">
+          <button type="button" onclick="closeEditModal()" class="btn btn-secondary">Batal</button>
+          <button type="submit" class="btn btn-brand">
+            <span class="fa fa-save"></span> Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</main>
+
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/drive.js"></script>
+<script src="../assets/js/ads.js"></script>
+<script>
+// ==========================================
+// Admin Logic & Interaction
+// ==========================================
+
+async function checkAuth() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tokenFromUrl = urlParams.get('auth_token');
+  if (tokenFromUrl) {
+    localStorage.setItem('auth_token', tokenFromUrl);
+    history.replaceState(null, '', window.location.pathname);
+  }
+
+  const token = localStorage.getItem('auth_token');
+  let isAuth = false;
+
+  if (token) {
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success' && data.user) {
+        if (data.user.role === 'admin') {
+          isAuth = true;
+          sessionStorage.setItem('admin_logged_in', 'true');
+          localStorage.setItem('auth_user', JSON.stringify(data.user));
+        } else {
+          showAdminError(`Akun "${data.user.username}" adalah akun Penonton, bukan Administrator.`);
+        }
+      }
+    } catch (e) {}
+  } else if (sessionStorage.getItem('admin_logged_in') === 'true') {
+    isAuth = true;
+  }
+
+  document.getElementById('login-section').style.display = isAuth ? 'none' : 'block';
+  document.getElementById('dashboard-section').style.display = isAuth ? 'block' : 'none';
+  if (isAuth) {
+    loadAnimeTable();
+    updateDriveStatus();
+    populateAnimeSelect();
+    loadAdsForm();
+  }
+}
+
+function showAdminError(msg) {
+  const errEl = document.getElementById('admin-login-error');
+  if (errEl) {
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+  }
+}
+
+// ── Login / Logout ──
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('admin-username').value.trim();
+  const password = document.getElementById('admin-password').value;
+  const btn = document.getElementById('admin-login-submit');
+
+  btn.disabled = true;
+  btn.textContent = 'Memverifikasi...';
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok || data.status !== 'success') {
+      throw new Error(data.message || 'Login gagal');
+    }
+
+    if (data.user.role !== 'admin') {
+      throw new Error(`Akun "${data.user.username}" bukan akun Administrator!`);
+    }
+
+    localStorage.setItem('auth_token', data.token);
+    localStorage.setItem('auth_user', JSON.stringify(data.user));
+    sessionStorage.setItem('admin_logged_in', 'true');
+    checkAuth();
+  } catch (err) {
+    showAdminError(err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="fa fa-lock"></span> Masuk ke Panel Admin';
+  }
+});
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+    } catch(e) {}
+  }
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('auth_user');
+  sessionStorage.removeItem('admin_logged_in');
+  checkAuth();
+});
+
+// ── Tab Switching ──
+document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+    btn.classList.add('active');
+    const tabId = btn.dataset.tab;
+    const target = document.getElementById(tabId);
+    if (target) target.style.display = 'block';
+    if (tabId === 'tab-upload') populateAnimeSelect();
+  });
+});
+
+// ── Table Rendering & Management ──
+async function loadAnimeTable() {
+  const data = await DB.load();
+  document.getElementById('anime-count').textContent = data.length;
+  const tbody = document.getElementById('anime-table-body');
+
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Belum ada anime</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map((a, idx) => `
+    <tr>
+      <td>
+        <img src="${a.thumbnail}" style="width:40px;height:56px;object-fit:cover;border-radius:4px;"
+             onerror="this.src='https://placehold.co/40x56/333/fff?text=N/A'">
+      </td>
+      <td>
+        <strong>${a.title}</strong><br>
+        <span style="font-size:11px;color:var(--text-muted);">${a.studio || '-'} · ${a.year || '-'}</span>
+      </td>
+      <td>
+        <span class="badge ${a.status === 'Currently Airing' ? 'badge-success' : 'badge-warning'}">
+          ${a.status === 'Currently Airing' ? 'Ongoing' : 'Completed'}
+        </span>
+        <span class="badge badge-info">${a.type}</span>
+      </td>
+      <td>${a.episodes_list ? a.episodes_list.length : a.episodes || 0} Ep</td>
+      <td>
+        ${a.drive_folder_id ?
+          `<a href="https://drive.google.com/drive/folders/${a.drive_folder_id}" target="_blank" style="color:var(--brand);font-size:12px;">
+            <span class="fa fa-folder-open"></span> Buka Folder
+           </a>` :
+          `<span style="color:var(--text-muted);font-size:11px;">Belum tertaut</span>`
+        }
+      </td>
+      <td>
+        <button onclick="editAnime(${a.id})" class="btn btn-secondary" style="padding:4px 8px;font-size:11px;">
+          <span class="fa fa-pencil"></span>
+        </button>
+        <button onclick="deleteAnime(${a.id})" class="btn btn-danger" style="padding:4px 8px;font-size:11px;">
+          <span class="fa fa-trash"></span>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function populateAnimeSelect() {
+  const select = document.getElementById('upload-anime-select');
+  const data = DB.anime || [];
+  select.innerHTML = '<option value="">-- Pilih Anime --</option>' + data.map(a => `
+    <option value="${a.id}" data-folder="${a.drive_folder_id || ''}">${a.title} (${a.drive_folder_id ? 'Folder Drive Ada' : 'Tanpa Folder Drive'})</option>
+  `).join('');
+}
+
+// ── Search Anime Table ──
+document.getElementById('search-anime-input').addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll('#anime-table-body tr').forEach(tr => {
+    tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+
+// ── Tambah Anime Baru ──
+document.getElementById('add-anime-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const title = document.getElementById('add-title').value.trim();
+  const type = document.getElementById('add-type').value;
+  const status = document.getElementById('add-status').value;
+  const score = parseFloat(document.getElementById('add-score').value) || 8.0;
+  const studio = document.getElementById('add-studio').value.trim();
+  const genres = document.getElementById('add-genres').value.split(',').map(g => g.trim()).filter(Boolean);
+  const schedule = document.getElementById('add-schedule').value.trim();
+  const thumbnail = document.getElementById('add-thumbnail').value.trim() || `https://placehold.co/212x300/1e1e2e/cba6f7?text=${encodeURIComponent(title)}`;
+  const synopsis = document.getElementById('add-synopsis').value.trim();
+  const createFolder = document.getElementById('add-create-drive-folder').checked;
+
+  let driveFolderId = null;
+
+  // Jika diminta membuat folder di Google Drive
+  if (createFolder) {
+    try {
+      const folder = await DriveService.createAnimeFolder(title);
+      driveFolderId = folder.id;
+      alert(`Folder Google Drive "${title}" berhasil dibuat! ID: ${driveFolderId}`);
+    } catch (err) {
+      console.warn('Gagal membuat folder di Drive:', err);
+      alert('Catatan: Gagal membuat folder di Google Drive (' + err.message + '). Silakan hubungkan akun Google di tab "Sinkronisasi Google Drive".');
+    }
+  }
+
+  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const [day, time] = schedule.split(' ');
+
+  const newAnime = {
+    id: Date.now(),
+    slug,
+    title,
+    type,
+    status,
+    score,
+    views: 0,
+    episodes: 0,
+    year: new Date().getFullYear(),
+    season: "Fall",
+    studio,
+    synopsis: synopsis || `Sinopsis untuk ${title}.`,
+    genres,
+    thumbnail,
+    day: day || "Senin",
+    time: time || "19:00",
+    drive_folder_id: driveFolderId,
+    episodes_list: []
+  };
+
+  const current = await DB.load();
+  current.unshift(newAnime);
+  await DriveService.saveAnimeData(current);
+
+  alert(`Anime "${title}" berhasil ditambahkan!`);
+  document.getElementById('add-anime-form').reset();
+  loadAnimeTable();
+  populateAnimeSelect();
+  document.querySelector('[data-tab="tab-list"]').click();
+});
+
+// ── Edit & Delete Anime ──
+window.deleteAnime = async (id) => {
+  const data = await DB.load();
+  const item = data.find(a => a.id === id);
+  if (!item) return;
+
+  if (confirm(`Yakin ingin menghapus anime "${item.title}"?`)) {
+    if (item.drive_folder_id) {
+      if (confirm(`Hapus juga folder "${item.title}" di Google Drive?`)) {
+        try {
+          await DriveService.deleteItem(item.drive_folder_id);
+          alert('Folder di Google Drive berhasil dihapus.');
+        } catch (err) {
+          alert('Gagal menghapus di Drive: ' + err.message);
+        }
+      }
+    }
+
+    const updated = data.filter(a => a.id !== id);
+    await DriveService.saveAnimeData(updated);
+    loadAnimeTable();
+    populateAnimeSelect();
+  }
+};
+
+// ── Upload File Gambar Poster / Thumbnail ──
+async function handleThumbnailFileUpload(inputEl, mode) {
+  const file = inputEl.files[0];
+  if (!file) return;
+
+  const targetInput = mode === 'edit' ? document.getElementById('edit-thumbnail') : document.getElementById('add-thumbnail');
+  const previewImg = mode === 'edit' ? document.getElementById('edit-thumb-preview') : null;
+  const statusEl = document.getElementById('edit-thumb-status');
+
+  if (statusEl) statusEl.textContent = 'Mengunggah file poster...';
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const dataUrl = e.target.result;
+    if (previewImg) previewImg.src = dataUrl;
+
+    try {
+      const res = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, data: dataUrl })
+      });
+      const result = await res.json();
+      if (result.status === 'success') {
+        targetInput.value = result.url;
+        if (statusEl) statusEl.textContent = '✅ File gambar tersimpan ke server!';
+      } else {
+        targetInput.value = dataUrl;
+        if (statusEl) statusEl.textContent = '✅ Gambar terpilih (Data URL)';
+      }
+    } catch (err) {
+      targetInput.value = dataUrl;
+      if (statusEl) statusEl.textContent = '✅ Gambar terpilih';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Modal Edit Data Anime (Judul, Poster, Sinopsis, dll) ──
+function openEditModal(anime) {
+  document.getElementById('edit-id').value = anime.id;
+  document.getElementById('edit-title').value = anime.title || '';
+  document.getElementById('edit-thumbnail').value = anime.thumbnail || '';
+  document.getElementById('edit-synopsis').value = anime.synopsis || '';
+  document.getElementById('edit-score').value = anime.score || 8.0;
+  document.getElementById('edit-status').value = anime.status || 'Currently Airing';
+  document.getElementById('edit-studio').value = anime.studio || '';
+  document.getElementById('edit-type').value = anime.type || 'TV';
+  document.getElementById('edit-genres').value = (anime.genres || []).join(', ');
+  document.getElementById('edit-schedule').value = `${anime.day || ''} ${anime.time || ''}`.trim();
+
+  updateEditThumbPreview();
+  const modal = document.getElementById('edit-modal');
+  modal.style.display = 'flex';
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+
+function updateEditThumbPreview() {
+  const url = document.getElementById('edit-thumbnail').value.trim();
+  document.getElementById('edit-thumb-preview').src = url || 'https://placehold.co/55x75/333/fff?text=No+Cover';
+}
+
+window.editAnime = async (id) => {
+  const data = await DB.load();
+  const item = data.find(a => a.id === id);
+  if (!item) return;
+  openEditModal(item);
+};
+
+document.getElementById('edit-anime-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = parseInt(document.getElementById('edit-id').value);
+  const data = await DB.load();
+  const item = data.find(a => a.id === id);
+  if (!item) return;
+
+  item.title = document.getElementById('edit-title').value.trim();
+  item.thumbnail = document.getElementById('edit-thumbnail').value.trim() || item.thumbnail;
+  item.synopsis = document.getElementById('edit-synopsis').value.trim();
+  item.score = parseFloat(document.getElementById('edit-score').value) || item.score;
+  item.status = document.getElementById('edit-status').value;
+  item.studio = document.getElementById('edit-studio').value.trim();
+  item.type = document.getElementById('edit-type').value;
+  item.genres = document.getElementById('edit-genres').value.split(',').map(g => g.trim()).filter(Boolean);
+
+  const sched = document.getElementById('edit-schedule').value.trim().split(' ');
+  if (sched[0]) item.day = sched[0];
+  if (sched[1]) item.time = sched[1];
+
+  await DriveService.saveAnimeData(data);
+  closeEditModal();
+  loadAnimeTable();
+  populateAnimeSelect();
+  alert(`Data anime "${item.title}" berhasil diperbarui!`);
+});
+
+// ── Reset Database ──
+document.getElementById('reset-db-btn').addEventListener('click', async () => {
+  if (confirm('Reset database ke data bawaan anime.json?')) {
+    localStorage.removeItem('anime_db');
+    DB.anime = null;
+    await DB.load();
+    loadAnimeTable();
+    populateAnimeSelect();
+    alert('Database di-reset ke default.');
+  }
+});
+
+// ── Upload Video Episode ──
+document.getElementById('upload-video-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const animeId = parseInt(document.getElementById('upload-anime-select').value);
+  const epNum = parseInt(document.getElementById('upload-ep-num').value);
+  const epTitle = document.getElementById('upload-ep-title').value.trim() || `Episode ${epNum}`;
+  const fileInput = document.getElementById('upload-file-input');
+  const file = fileInput.files[0];
+
+  if (!animeId || !file) {
+    alert('Pilih anime dan file video terlebih dahulu');
+    return;
+  }
+
+  const data = await DB.load();
+  const anime = data.find(a => a.id === animeId);
+  if (!anime) return;
+
+  // Jika anime belum punya folder di Drive, buatkan dulu
+  let folderId = anime.drive_folder_id;
+  if (!folderId) {
+    try {
+      const f = await DriveService.createAnimeFolder(anime.title);
+      folderId = f.id;
+      anime.drive_folder_id = folderId;
+      await DriveService.saveAnimeData(data);
+    } catch (err) {
+      alert('Gagal membuat folder di Google Drive: ' + err.message + '\nSilakan hubungkan akun Google Drive terlebih dahulu.');
+      return;
+    }
+  }
+
+  // Mulai upload
+  const progressBg = document.getElementById('upload-progress-container');
+  const progressFill = document.getElementById('upload-progress-fill');
+  const statusText = document.getElementById('upload-status-text');
+  const submitBtn = document.getElementById('start-upload-btn');
+
+  progressBg.style.display = 'block';
+  statusText.style.display = 'block';
+  submitBtn.disabled = true;
+  statusText.textContent = `Mempersiapkan upload ${file.name}...`;
+
+  try {
+    alert('Fitur upload file langsung terhubung ke Google Drive folder ID: ' + folderId + '\nUntuk upload file besar, Anda juga bisa taruh file langsung ke Google Drive di folder anime tersebut, lalu klik tombol "Sync dari Google Drive" di dashboard!');
+  } catch (err) {
+    console.error(err);
+    alert('Gagal upload: ' + err.message);
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+// ── Google Drive Config & Status ──
+async function updateDriveStatus() {
+  const statusEl = document.getElementById('drive-auth-status');
+  const banner = document.getElementById('drive-connection-banner');
+  const bannerTitle = document.getElementById('banner-title');
+  const bannerDesc = document.getElementById('banner-desc');
+  const bannerBtn = document.getElementById('banner-login-btn');
+
+  const status = await DriveService.getStatus();
+  const isConn = status.connected;
+
+  if (isConn) {
+    banner.style.background = 'rgba(16,185,129,0.12)';
+    banner.style.borderColor = 'rgba(16,185,129,0.3)';
+    bannerTitle.style.color = '#10b981';
+    bannerTitle.textContent = '✅ Google Drive Terhubung & Siap Sinkron';
+    bannerDesc.textContent = `Folder Root: ${DRIVE_CONFIG.ROOT_FOLDER_ID} · Izin buat folder & sinkronisasi otomatis aktif.`;
+    bannerBtn.style.display = 'none';
+  } else {
+    banner.style.background = 'rgba(245,158,11,0.12)';
+    banner.style.borderColor = 'rgba(245,158,11,0.3)';
+    bannerTitle.style.color = '#f59e0b';
+    bannerTitle.textContent = '⚠️ Google Drive Belum Terhubung';
+    bannerDesc.textContent = 'Klik tombol di samping untuk login Google dan mengizinkan sinkronisasi.';
+    bannerBtn.style.display = 'inline-flex';
+  }
+
+  statusEl.innerHTML = `
+    Folder Root ID: <code>${DRIVE_CONFIG.ROOT_FOLDER_ID}</code><br>
+    OAuth Client ID: <code>${DRIVE_CONFIG.CLIENT_ID}</code><br>
+    Status Google Drive: <span class="badge ${isConn ? 'badge-success' : 'badge-warning'}">
+      ${isConn ? '✅ Terhubung (Izin Buat Folder & Sync Otomatis Aktif)' : '⚠️ Belum Terhubung (Klik tombol hijau di bawah)'}
+    </span>
+  `;
+}
+
+// Login Google OAuth
+document.getElementById('google-login-btn').addEventListener('click', () => {
+  DriveService.login();
+});
+
+// Trigger Sync
+async function performSync() {
+  const btn1 = document.getElementById('quick-sync-btn');
+  const btn2 = document.getElementById('full-sync-btn');
+  btn1.disabled = true;
+  if (btn2) btn2.disabled = true;
+  btn1.innerHTML = '<span class="fa fa-spinner fa-spin"></span> Menyinkronkan...';
+
+  try {
+    const list = await DriveService.syncFromDrive();
+    alert(`Sinkronisasi berhasil! Ditemukan ${list.length} judul anime dari Google Drive.`);
+    loadAnimeTable();
+    populateAnimeSelect();
+  } catch (err) {
+    console.error(err);
+    if (confirm('Google Drive belum terhubung (login diperlukan)!\n\nIngin menghubungkan akun Google sekarang?')) {
+      DriveService.login();
+    }
+  } finally {
+    btn1.disabled = false;
+    if (btn2) btn2.disabled = false;
+    btn1.innerHTML = '<span class="fa fa-refresh"></span> Sync dari Google Drive';
+  }
+}
+
+document.getElementById('quick-sync-btn').addEventListener('click', performSync);
+document.getElementById('full-sync-btn').addEventListener('click', performSync);
+
+// ── Ads Configuration Management ──
+function toggleAdType(slot) {
+  const type = document.getElementById(`ad-${slot}-type`).value;
+  const imgFields = document.getElementById(`ad-${slot}-img-fields`);
+  const codeFields = document.getElementById(`ad-${slot}-code-fields`);
+  if (type === 'code') {
+    imgFields.style.display = 'none';
+    codeFields.style.display = 'block';
+  } else {
+    imgFields.style.display = 'block';
+    codeFields.style.display = 'none';
+  }
+}
+
+async function loadAdsForm() {
+  const ads = await AdsManager.load();
+  if (!ads) return;
+
+  // Popunder
+  if (ads.popunder) {
+    document.getElementById('ad-pop-enabled').checked = ads.popunder.enabled !== false;
+    document.getElementById('ad-pop-clicks').value = ads.popunder.clicks || 2;
+    document.getElementById('ad-pop-url').value = ads.popunder.url || '';
+  }
+
+  // Top banner
+  if (ads.banner_top) {
+    document.getElementById('ad-top-enabled').checked = ads.banner_top.enabled !== false;
+    document.getElementById('ad-top-type').value = ads.banner_top.type || 'image';
+    document.getElementById('ad-top-img').value = ads.banner_top.image_url || '';
+    document.getElementById('ad-top-link').value = ads.banner_top.link_url || '';
+    document.getElementById('ad-top-code').value = ads.banner_top.code || '';
+    toggleAdType('top');
+  }
+
+  // Player bottom banner
+  if (ads.banner_player_bottom) {
+    document.getElementById('ad-player-enabled').checked = ads.banner_player_bottom.enabled !== false;
+    document.getElementById('ad-player-type').value = ads.banner_player_bottom.type || 'image';
+    document.getElementById('ad-player-img').value = ads.banner_player_bottom.image_url || '';
+    document.getElementById('ad-player-link').value = ads.banner_player_bottom.link_url || '';
+    document.getElementById('ad-player-code').value = ads.banner_player_bottom.code || '';
+    toggleAdType('player');
+  }
+
+  // Floating banner
+  if (ads.banner_floating) {
+    document.getElementById('ad-float-enabled').checked = ads.banner_floating.enabled !== false;
+    document.getElementById('ad-float-type').value = ads.banner_floating.type || 'image';
+    document.getElementById('ad-float-img').value = ads.banner_floating.image_url || '';
+    document.getElementById('ad-float-link').value = ads.banner_floating.link_url || '';
+    document.getElementById('ad-float-code').value = ads.banner_floating.code || '';
+    toggleAdType('float');
+  }
+
+  // Center player banner (Pop-up Tutup Iklan)
+  if (ads.banner_center) {
+    document.getElementById('ad-center-enabled').checked = ads.banner_center.enabled !== false;
+    document.getElementById('ad-center-type').value = ads.banner_center.type || 'image';
+    document.getElementById('ad-center-img').value = ads.banner_center.image_url || '';
+    document.getElementById('ad-center-link').value = ads.banner_center.link_url || '';
+    document.getElementById('ad-center-code').value = ads.banner_center.code || '';
+    toggleAdType('center');
+  }
+}
+
+async function saveAdsSettings() {
+  const payload = {
+    popunder: {
+      enabled: document.getElementById('ad-pop-enabled').checked,
+      clicks: parseInt(document.getElementById('ad-pop-clicks').value) || 2,
+      url: document.getElementById('ad-pop-url').value.trim()
+    },
+    banner_top: {
+      enabled: document.getElementById('ad-top-enabled').checked,
+      type: document.getElementById('ad-top-type').value,
+      image_url: document.getElementById('ad-top-img').value.trim(),
+      link_url: document.getElementById('ad-top-link').value.trim(),
+      code: document.getElementById('ad-top-code').value.trim()
+    },
+    banner_player_bottom: {
+      enabled: document.getElementById('ad-player-enabled').checked,
+      type: document.getElementById('ad-player-type').value,
+      image_url: document.getElementById('ad-player-img').value.trim(),
+      link_url: document.getElementById('ad-player-link').value.trim(),
+      code: document.getElementById('ad-player-code').value.trim()
+    },
+    banner_floating: {
+      enabled: document.getElementById('ad-float-enabled').checked,
+      type: document.getElementById('ad-float-type').value,
+      image_url: document.getElementById('ad-float-img').value.trim(),
+      link_url: document.getElementById('ad-float-link').value.trim(),
+      code: document.getElementById('ad-float-code').value.trim()
+    },
+    banner_center: {
+      enabled: document.getElementById('ad-center-enabled').checked,
+      type: document.getElementById('ad-center-type').value,
+      image_url: document.getElementById('ad-center-img').value.trim(),
+      link_url: document.getElementById('ad-center-link').value.trim(),
+      code: document.getElementById('ad-center-code').value.trim()
+    }
+  };
+
+  try {
+    const res = await AdsManager.save(payload);
+    alert('✅ Seluruh pengaturan banner & iklan berhasil disimpan!');
+  } catch (err) {
+    alert('Gagal menyimpan iklan: ' + err.message);
+  }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('oauth') === 'success') {
+    sessionStorage.setItem('admin_logged_in', 'true');
+    alert('🎉 Akun Google Drive Berhasil Terhubung! Sekarang Anda bisa membuat folder anime dan melakukan sinkronisasi otomatis.');
+    history.replaceState(null, '', window.location.pathname);
+  }
+  checkAuth();
+});
+</script>
+</body>
+</html>

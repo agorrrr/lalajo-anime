@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="250" viewBox="0 0 300 250">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e1b4b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="300" height="250" fill="url(#grad)" rx="6"/>
+  <rect x="3" y="3" width="294" height="244" fill="none" stroke="#e11d48" stroke-width="2" stroke-dasharray="6,6" rx="6"/>
+  <circle cx="150" cy="80" r="32" fill="#e11d48" fill-opacity="0.2"/>
+  <text x="150" y="88" font-family="sans-serif" font-size="28" fill="#f43f5e" text-anchor="middle">🎯</text>
+  <text x="150" y="145" font-family="sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">IKLAN TENGAH PLAYER</text>
+  <text x="150" y="172" font-family="sans-serif" font-size="13" fill="#cbd5e1" text-anchor="middle">Ukuran 300x250 (Medium Box)</text>
+  <rect x="50" y="195" width="200" height="32" rx="6" fill="#e11d48"/>
+  <text x="150" y="216" font-family="sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">KLIK DISINI UNTUK PROMO</text>
+</svg>

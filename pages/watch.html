@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tonton Anime - Lalajo Anime</title>
+  <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    .video-area {
+      background:#111; border-radius:10px; overflow:hidden;
+      aspect-ratio:16/9; display:flex; align-items:center; justify-content:center;
+      position:relative; margin-bottom:16px;
+      background-size:cover; background-position:center; background-repeat:no-repeat;
+      cursor:pointer;
+    }
+    .video-area.playing {
+      cursor:default;
+      background-image:none !important;
+    }
+    .video-area::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%);
+      z-index:1;
+      pointer-events:none;
+    }
+    .video-area.playing::before {
+      display:none !important;
+    }
+    .video-area iframe, .video-area video {
+      position:relative; z-index:10; width:100%; height:100%; border:none;
+    }
+    .video-area:fullscreen, .video-area:-webkit-full-screen {
+      width:100vw !important; height:100vh !important; max-width:100vw !important;
+      border-radius:0 !important; aspect-ratio:auto !important; background:#000 !important;
+    }
+    .video-area:fullscreen video, .video-area:-webkit-full-screen video,
+    .video-area:fullscreen iframe, .video-area:-webkit-full-screen iframe {
+      width:100vw !important; height:100vh !important;
+    }
+    .video-placeholder {
+      position:relative; z-index:2;
+      text-align:center; color:#fff; padding:20px;
+    }
+    .video-placeholder .play-big {
+      font-size:72px; color:rgba(255,255,255,0.9); margin-bottom:12px; display:inline-block;
+      cursor:pointer; transition:transform 0.2s, color 0.2s;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+    }
+    .video-placeholder .play-big:hover { transform:scale(1.1); color:#3384d6; }
+    .server-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .server-tab {
+      padding:7px 16px; border-radius:6px; border:1px solid #e5e7eb;
+      background:#f9fafb; color:#374151; font-size:13px; font-weight:600;
+      cursor:pointer; transition:all 0.15s;
+    }
+    body.darkmode .server-tab { background:#222327; color:#d1d5db; border-color:rgba(255,255,255,0.1); }
+    .server-tab.active, .server-tab:hover { background:#3384d6; color:#fff; border-color:#3384d6; }
+    .ep-nav { display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+    .ep-nav a {
+      padding:8px 16px; border-radius:8px; background:#3384d6; color:#fff;
+      text-decoration:none; font-size:13px; font-weight:700; transition:background 0.15s;
+    }
+    .ep-nav a:hover { background:#2563ab; }
+    .ep-nav a.disabled { background:#9ca3af; pointer-events:none; }
+    .ep-nav .ep-label { font-size:16px; font-weight:800; }
+  </style>
+</head>
+<body>
+<script src="../assets/js/layout.js"></script>
+<main id="content">
+  <div id="watch-content">
+    <div style="text-align:center;padding:80px;color:#9ca3af;">
+      <i class="fa fa-spinner fa-spin" style="font-size:32px;"></i>
+      <p style="margin-top:12px;">Memuat...</p>
+    </div>
+  </div>
+</main>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/ads.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const params  = new URLSearchParams(window.location.search);
+  const slug    = params.get('slug');
+  const epNum   = parseInt(params.get('ep')) || 1;
+  const data    = await DB.load();
+  const anime   = data.find(a => a.slug === slug);
+  const content = document.getElementById('watch-content');
+
+  if (!anime) {
+    content.innerHTML = `<div class="no-results"><i class="fa fa-exclamation-circle" style="font-size:48px;color:#ef4444;"></i><p>Anime tidak ditemukan</p><a href="anime-list.html" style="color:#3384d6;">← Daftar Anime</a></div>`;
+    return;
+  }
+
+  const ep = anime.episodes_list.find(e => e.ep === epNum) || anime.episodes_list[0];
+  if (!ep) {
+    content.innerHTML = `<div class="no-results"><p>Episode tidak tersedia.</p><a href="anime.html?slug=${slug}" style="color:#3384d6;">← Kembali ke detail</a></div>`;
+    return;
+  }
+
+  document.title = `${anime.title} - Ep ${ep.ep} - Lalajo Anime`;
+
+  const prevEp = anime.episodes_list.find(e => e.ep === epNum - 1);
+  const nextEp = anime.episodes_list.find(e => e.ep === epNum + 1);
+
+  // Related episodes
+  const epListHTML = anime.episodes_list.map(e => `
+    <a href="watch?slug=${slug}&ep=${e.ep}"
+       style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:6px;
+              text-decoration:none;color:inherit;transition:background 0.15s;
+              ${e.ep === epNum ? 'background:#3384d622;border:1px solid #3384d644;' : 'border:1px solid transparent;'}">
+      <span class="ep-num" style="width:28px;height:28px;border-radius:6px;background:${e.ep===epNum?'#3384d6':'#374151'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">${e.ep}</span>
+      <div>
+        <div style="font-size:13px;font-weight:600;">Episode ${e.ep}</div>
+        <div style="font-size:11px;color:#9ca3af;">${e.date}</div>
+      </div>
+    </a>
+  `).join('');
+
+  content.innerHTML = `
+    <nav style="font-size:13px;color:#9ca3af;margin-bottom:20px;">
+      <a href="../" style="color:#3384d6;text-decoration:none;">Beranda</a> ›
+      <a href="anime?slug=${slug}" style="color:#3384d6;text-decoration:none;">${anime.title}</a> ›
+      Episode ${ep.ep}
+    </nav>
+
+    <!-- Slot Iklan Banner Atas (728x90) -->
+    <div class="ad-slot-top" style="margin: 0 auto 20px; text-align: center; max-width: 728px; min-height: 50px;"></div>
+
+    <div style="display:grid;grid-template-columns:1fr;gap:24px;" id="watch-grid">
+
+      <!-- Player area -->
+      <div>
+        <h1 style="font-size:18px;font-weight:800;margin-bottom:12px;">
+          ${anime.title} <span style="color:#9ca3af;font-weight:400;">— Episode ${ep.ep}: ${ep.title}</span>
+        </h1>
+
+        <!-- Video player container -->
+        <div class="video-area">
+          <div class="video-placeholder">
+            <span class="play-big fa fa-play-circle" id="play-btn"></span>
+            <div style="font-size:16px;font-weight:700;margin-bottom:6px;">${anime.title}</div>
+            <div style="font-size:13px;opacity:0.8;">Episode ${ep.ep}: ${ep.title}</div>
+            <div style="margin-top:12px;font-size:13px;opacity:0.9;">
+              <span class="fa fa-play"></span> Putar Video
+            </div>
+          </div>
+        </div>
+
+        <!-- Server tabs & Tombol Fullscreen -->
+        <div class="server-tabs" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+          <button class="server-tab active" data-server="html5"><i class="fa fa-play-circle"></i> Server 1 (HTML5 Fullscreen)</button>
+          <button class="server-tab" data-server="embed"><i class="fa fa-cloud"></i> Server 2 (Embed)</button>
+          <button class="server-tab" id="btn-fullscreen" style="margin-left:auto;background:#10b981;color:#fff;border-color:#10b981;font-weight:700;">
+            <i class="fa fa-arrows-alt"></i> ⛶ Layar Penuh
+          </button>
+        </div>
+
+        <!-- Slot Iklan Banner Bawah Player (728x90) -->
+        <div class="ad-slot-player-bottom" style="margin: 16px auto; text-align: center; max-width: 728px; min-height: 50px;"></div>
+
+        <!-- Episode navigation -->
+        <div class="ep-nav">
+          ${prevEp
+            ? `<a href="watch?slug=${slug}&ep=${prevEp.ep}">&#8592; Episode ${prevEp.ep}</a>`
+            : `<a class="disabled">&#8592; Ep Sebelumnya</a>`}
+          <span class="ep-label">Episode ${ep.ep} / ${anime.episodes}</span>
+          ${nextEp
+            ? `<a href="watch?slug=${slug}&ep=${nextEp.ep}">Episode ${nextEp.ep} &#8594;</a>`
+            : `<a class="disabled">Ep Berikutnya &#8594;</a>`}
+        </div>
+
+        <!-- Anime info quick -->
+        <div style="display:flex;gap:12px;align-items:center;padding:12px;background:var(--bg-card,#f9fafb);border-radius:8px;border:1px solid rgba(0,0,0,0.06);">
+          <img src="${anime.thumbnail}" alt="${anime.title}" style="width:50px;height:70px;object-fit:cover;border-radius:6px;" onerror="this.src='https://placehold.co/50x70/333/fff?text=N%2FA'">
+          <div>
+            <div style="font-weight:700;font-size:14px;">${anime.title}</div>
+            <div style="font-size:12px;color:#9ca3af;margin-top:2px;">${anime.type} · ⭐ ${anime.score.toFixed(2)} · ${anime.studio}</div>
+            <a href="anime?slug=${slug}" style="font-size:12px;color:#3384d6;text-decoration:none;margin-top:4px;display:inline-block;">Lihat Detail →</a>
+          </div>
+        </div>
+
+        <!-- Kolom Komentar Penonton -->
+        <div class="comments-section" style="margin-top:20px;background:var(--bg-card,#fff);border:1px solid var(--border-dark,#e5e7eb);border-radius:10px;padding:20px;">
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+            <i class="fa fa-comments" style="color:#3384d6;"></i> Diskusi Episode Ini (<span id="comment-count">0</span>)
+          </h3>
+
+          <div id="comment-input-area"></div>
+
+          <div id="comments-list" style="margin-top:20px;display:flex;flex-direction:column;gap:14px;">
+            <div style="text-align:center;color:#9ca3af;font-size:13px;padding:16px;">Memuat komentar...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Episode list sidebar -->
+      <div>
+        <div class="section-title">Daftar Episode</div>
+        <div style="display:flex;flex-direction:column;gap:4px;max-height:500px;overflow-y:auto;">
+          ${epListHTML || '<p style="color:#9ca3af;font-size:14px;">Belum ada episode</p>'}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 2-col on desktop
+  const s = document.createElement('style');
+  s.textContent = `@media(min-width:900px){#watch-grid{grid-template-columns:1fr 280px !important;}}`;
+  document.head.appendChild(s);
+
+  // server tab click
+  document.querySelectorAll('.server-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.server-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // Capture frame acak dari potongan video
+  const sampleVideoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+
+  function captureRandomVideoFrame(videoSrc) {
+    const vid = document.createElement('video');
+    vid.crossOrigin = 'anonymous';
+    vid.preload = 'auto';
+    vid.muted = true;
+    vid.src = videoSrc;
+
+    vid.addEventListener('loadedmetadata', () => {
+      const duration = vid.duration || 60;
+      const randSec = (Math.random() * 0.8 + 0.05) * duration;
+      vid.currentTime = randSec;
+    });
+
+    vid.addEventListener('seeked', () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = vid.videoWidth || 640;
+        canvas.height = vid.videoHeight || 360;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+        const vArea = document.querySelector('.video-area');
+        if (vArea) {
+          vArea.style.backgroundImage = `url("${dataUrl}")`;
+        }
+      } catch (err) {
+        console.warn('Canvas frame capture:', err);
+      }
+    });
+  }
+
+  // Set thumbnail cuplikan video awal
+  if (ep.drive_file_id) {
+    const driveThumb = `https://drive.google.com/thumbnail?id=${ep.drive_file_id}&sz=w1280`;
+    const vArea = document.querySelector('.video-area');
+    if (vArea) {
+      vArea.style.backgroundImage = `url("${driveThumb}")`;
+    }
+  } else {
+    captureRandomVideoFrame(sampleVideoUrl);
+  }
+
+  let activeServer = 'html5';
+
+  // play btn click - load video player (HTML5 native dengan Fullscreen / Drive embed fallback)
+  function loadVideo() {
+    const vArea = document.querySelector('.video-area');
+    if (!vArea) return;
+    const centerAd = document.getElementById('player-center-ad');
+    if (centerAd) centerAd.remove();
+    vArea.classList.add('playing');
+
+    if (activeServer === 'html5') {
+      const videoSrc = ep.drive_file_id
+        ? `/api/video/stream?id=${ep.drive_file_id}`
+        : sampleVideoUrl;
+      vArea.innerHTML = `
+        <video controls autoplay playsinline style="width:100%;height:100%;object-fit:contain;background:#000;position:relative;z-index:10;">
+          <source src="${videoSrc}" type="video/mp4">
+          Browser tidak mendukung pemutaran video.
+        </video>
+      `;
+    } else {
+      if (ep.drive_file_id) {
+        vArea.innerHTML = `
+          <iframe src="https://drive.google.com/file/d/${ep.drive_file_id}/preview"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"
+                  style="width:100%;height:100%;border:none;background:#000;position:relative;z-index:10;"></iframe>
+        `;
+      } else {
+        vArea.innerHTML = `
+          <video controls autoplay playsinline style="width:100%;height:100%;object-fit:contain;background:#000;position:relative;z-index:10;">
+            <source src="${sampleVideoUrl}" type="video/mp4">
+            Browser tidak mendukung pemutaran video.
+          </video>
+        `;
+      }
+    }
+  }
+
+  // Switch server
+  document.querySelectorAll('.server-tab[data-server]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.server-tab[data-server]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeServer = btn.dataset.server;
+      const vArea = document.querySelector('.video-area');
+      if (vArea && vArea.classList.contains('playing')) {
+        loadVideo();
+      }
+    });
+  });
+
+  // Tombol Layar Penuh (Fullscreen API Universal)
+  document.getElementById('btn-fullscreen')?.addEventListener('click', () => {
+    const vArea = document.querySelector('.video-area');
+    if (!vArea) return;
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      if (vArea.requestFullscreen) {
+        vArea.requestFullscreen();
+      } else if (vArea.webkitRequestFullscreen) {
+        vArea.webkitRequestFullscreen();
+      } else if (vArea.msRequestFullscreen) {
+        vArea.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    }
+  });
+
+  // Pasang fitur popunder (klik 1 dan 2 buka tab iklan, klik 3 play video)
+  AdsManager.setupVideoPopunder(document.querySelector('.video-area'), loadVideo);
+  AdsManager.initSlots();
+
+  // ── Fitur Komentar Episode ──
+  let authUser = null;
+  const authToken = localStorage.getItem('auth_token');
+  try {
+    const raw = localStorage.getItem('auth_user');
+    if (raw) authUser = JSON.parse(raw);
+  } catch(e) {}
+
+  function renderCommentInput() {
+    const area = document.getElementById('comment-input-area');
+    if (!area) return;
+
+    if (authToken && authUser) {
+      area.innerHTML = `
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <img src="${authUser.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + authUser.username}"
+               alt="${authUser.username}"
+               style="width:40px;height:40px;border-radius:50%;border:2px solid #3384d6;object-fit:cover;flex-shrink:0;">
+          <div style="flex-grow:1;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:6px;">
+              ${authUser.username}
+              <span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;margin-left:4px;background:${authUser.role==='admin'?'#ef444422':'#3384d622'};color:${authUser.role==='admin'?'#ef4444':'#3384d6'};">
+                ${authUser.role === 'admin' ? '👑 Admin' : '⭐ Penonton'}
+              </span>
+            </div>
+            <textarea id="comment-textarea"
+                      placeholder="Tulis pendapat atau komentar kamu tentang episode ini..."
+                      rows="3"
+                      style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:8px;border:1px solid rgba(128,128,128,0.25);background:var(--bg-card2,#f9fafb);color:inherit;font-size:13px;outline:none;resize:vertical;"></textarea>
+            <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+              <button id="btn-submit-comment"
+                      style="background:#3384d6;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;">
+                <i class="fa fa-paper-plane"></i> Kirim Komentar
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('btn-submit-comment')?.addEventListener('click', postComment);
+    } else {
+      area.innerHTML = `
+        <div style="background:var(--bg-card2,#f9fafb);border:1px dashed var(--border-dark,#e5e7eb);border-radius:8px;padding:16px;text-align:center;">
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">
+            <i class="fa fa-lock"></i> Masuk atau daftar untuk ikut berdiskusi di kolom komentar.
+          </p>
+          <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+            <a href="login.html" style="background:#3384d6;color:#fff;text-decoration:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;">
+              <i class="fa fa-sign-in"></i> Masuk Akun
+            </a>
+            <a href="login.html?tab=register" style="background:none;border:1px solid #3384d6;color:#3384d6;text-decoration:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;">
+              <i class="fa fa-user-plus"></i> Daftar Penonton
+            </a>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  async function loadComments() {
+    const listEl = document.getElementById('comments-list');
+    const countEl = document.getElementById('comment-count');
+    if (!listEl) return;
+
+    try {
+      const res = await fetch(`/api/comments?slug=${encodeURIComponent(slug)}&ep=${epNum}`);
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') throw new Error('Gagal memuat');
+
+      const comments = data.comments || [];
+      if (countEl) countEl.textContent = comments.length;
+
+      if (!comments.length) {
+        listEl.innerHTML = `
+          <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">
+            <i class="fa fa-comment-o" style="font-size:24px;margin-bottom:6px;opacity:0.5;"></i>
+            <p>Belum ada komentar untuk episode ini. Jadilah yang pertama berkomentar!</p>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = comments.map(c => {
+        const canDelete = authUser && (authUser.role === 'admin' || authUser.id === c.user_id);
+        const roleLabel = c.user_role === 'admin'
+          ? '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,0.15);color:#ef4444;font-weight:700;">👑 Admin</span>'
+          : '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(51,132,214,0.15);color:#3384d6;font-weight:600;">⭐ Penonton</span>';
+
+        return `
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:8px;background:var(--bg-card2,#f9fafb);border:1px solid rgba(128,128,128,0.1);">
+            <img src="${c.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + c.username}"
+                 alt="${c.username}"
+                 style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+            <div style="flex-grow:1;">
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <strong style="font-size:13px;">${escapeHtml(c.username)}</strong>
+                  ${roleLabel}
+                  <span style="font-size:11px;color:var(--text-muted);">${c.created_at}</span>
+                </div>
+                ${canDelete ? `
+                  <button onclick="deleteCommentItem(${c.id})"
+                          title="Hapus Komentar"
+                          style="background:none;border:none;color:#ef4444;font-size:11px;cursor:pointer;opacity:0.8;">
+                    <i class="fa fa-trash"></i> Hapus
+                  </button>
+                ` : ''}
+              </div>
+              <div style="font-size:13px;margin-top:6px;line-height:1.5;white-space:pre-wrap;color:inherit;">${escapeHtml(c.content)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch(err) {
+      listEl.innerHTML = '<div style="color:#ef4444;font-size:13px;text-align:center;">Gagal mengambil komentar.</div>';
+    }
+  }
+
+  async function postComment() {
+    const textarea = document.getElementById('comment-textarea');
+    const btn = document.getElementById('btn-submit-comment');
+    if (!textarea || !btn) return;
+
+    const content = textarea.value.trim();
+    if (!content) {
+      alert('Isi komentar tidak boleh kosong');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Mengirim...';
+
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: JSON.stringify({ slug, ep: epNum, content })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') throw new Error(data.message || 'Gagal mengirim komentar');
+
+      textarea.value = '';
+      loadComments();
+    } catch(err) {
+      alert('Gagal: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa fa-paper-plane"></i> Kirim Komentar';
+    }
+  }
+
+  window.deleteCommentItem = async function(cid) {
+    if (!confirm('Hapus komentar ini?')) return;
+    try {
+      const res = await fetch('/api/comments/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: JSON.stringify({ id: cid })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') throw new Error(data.message || 'Gagal menghapus');
+      loadComments();
+    } catch(err) {
+      alert('Gagal: ' + err.message);
+    }
+  };
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  renderCommentInput();
+  loadComments();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Batch - Lalajo Anime</title>
+  <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<script src="../assets/js/layout.js"></script>
+<main id="content">
+  <div class="page-title-bar">
+    <h1>📦 Daftar Batch</h1>
+    <p>Download batch anime lengkap subtitle Indonesia</p>
+  </div>
+
+  <!-- Search batch -->
+  <div style="margin-bottom:20px;">
+    <input type="text" id="batch-search" placeholder="Cari anime batch..." autocomplete="off"
+      style="width:100%;max-width:400px;padding:10px 16px;border-radius:8px;border:1px solid #e5e7eb;
+             font-size:14px;outline:none;background:var(--bg-card,#fff);color:inherit;">
+  </div>
+
+  <div class="batch-list" id="batch-list">
+    <div style="text-align:center;padding:60px;color:#9ca3af;">Memuat...</div>
+  </div>
+</main>
+<script src="../assets/js/main.js"></script>
+<script>
+let allBatch = [];
+
+function renderBatch(list) {
+  const container = document.getElementById('batch-list');
+  if (!list.length) {
+    container.innerHTML = '<div class="no-results"><i class="fa fa-search"></i><p>Tidak ada hasil</p></div>';
+    return;
+  }
+  container.innerHTML = list.map(a => `
+    <div class="batch-item">
+      <img src="${a.thumbnail}" alt="${a.title}" onerror="this.src='https://placehold.co/60x85/333/fff?text=N%2FA'">
+      <div class="info" style="flex-grow:1;">
+        <h3><a href="anime.html?slug=${a.slug}" style="text-decoration:none;color:inherit;">${a.title}</a></h3>
+        <div class="meta">${a.type} · ${a.studio} · ${a.year}</div>
+        <div class="meta" style="margin-top:4px;">
+          ⭐ ${a.score.toFixed(2)} · ${a.episodes} Episode
+          · <span style="color:${a.status==='Finished Airing'?'#22c55e':'#f59e0b'};">
+            ${a.status === 'Finished Airing' ? 'Completed' : 'Ongoing'}
+          </span>
+        </div>
+        <div class="meta" style="margin-top:4px;">Genre: ${a.genres.join(', ')}</div>
+      </div>
+      <div style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+        <a href="anime.html?slug=${a.slug}" class="dl-btn"
+           style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;
+                  background:#3384d6;color:#fff;border-radius:6px;text-decoration:none;
+                  font-size:13px;font-weight:600;">
+          <span class="fa fa-download"></span> Download
+        </a>
+        <a href="anime.html?slug=${a.slug}"
+           style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;
+                  background:transparent;color:#3384d6;border-radius:6px;text-decoration:none;
+                  font-size:13px;font-weight:600;border:1px solid #3384d6;">
+          <span class="fa fa-info-circle"></span> Detail
+        </a>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  allBatch = await DB.load();
+  // Show completed + ongoing with many eps
+  const batchList = allBatch.filter(a => a.status === 'Finished Airing' || a.episodes > 20)
+    .sort((a,b) => a.title.localeCompare(b.title));
+  allBatch = batchList;
+  renderBatch(allBatch);
+
+  document.getElementById('batch-search').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase().trim();
+    renderBatch(q ? allBatch.filter(a => a.title.toLowerCase().includes(q)) : allBatch);
+  });
+});
+</script>
+</body>
+</html>
