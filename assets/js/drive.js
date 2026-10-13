@@ -3,9 +3,9 @@
 // ============================================
 
 const DRIVE_CONFIG = {
-  API_KEY: 'AIzaSyAPymJJWft8-tEgDQULUXelNxkr_GFPQ8Y',
-  CLIENT_ID: '1041776387984-52q2mbi5eqmn9vh61tt9nhl6omkalmao.apps.googleusercontent.com',
-  ROOT_FOLDER_ID: '1tSYO6d2s-Sr5Ne2Do1ZzqwOkdb_bbkYi'
+  API_KEY: localStorage.getItem('drive_api_key') || 'AIzaSyAPymJJWft8-tEgDQULUXelNxkr_GFPQ8Y',
+  CLIENT_ID: localStorage.getItem('drive_client_id') || '1041776387984-52q2mbi5eqmn9vh61tt9nhl6omkalmao.apps.googleusercontent.com',
+  ROOT_FOLDER_ID: localStorage.getItem('drive_folder_id') || '1tSYO6d2s-Sr5Ne2Do1ZzqwOkdb_bbkYi'
 };
 
 const DriveService = {
@@ -20,6 +20,14 @@ const DriveService = {
 
   // 1. Arahkan ke endpoint login Google OAuth
   login() {
+    window.location.href = '/auth/login';
+  },
+
+  // 1b. Putuskan koneksi Google Drive
+  async disconnect() {
+    try {
+      await fetch('/api/drive/disconnect', { method: 'POST' });
+    } catch (e) {}
     window.location.href = '/auth/login';
   },
 

@@ -33,7 +33,7 @@ _load_env_file()
 CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 REDIRECT_URI = f"http://localhost:{PORT}/oauth2callback"
-ROOT_FOLDER_ID = "1tSYO6d2s-Sr5Ne2Do1ZzqwOkdb_bbkYi"
+ROOT_FOLDER_ID = os.environ.get("GOOGLE_DRIVE_FOLDER_ID", "1tSYO6d2s-Sr5Ne2Do1ZzqwOkdb_bbkYi")
 TOKEN_FILE = os.path.join(DIRECTORY, "token.json")
 ANIME_JSON_FILE = os.path.join(DIRECTORY, "data", "anime.json")
 ADS_JSON_FILE = os.path.join(DIRECTORY, "data", "ads.json")
@@ -159,12 +159,27 @@ class AppHandler(http.server.SimpleHTTPRequestHandler):
                     "redirect_uri": REDIRECT_URI,
                     "scope": scope,
                     "access_type": "offline",
-                    "prompt": "consent"
+                    "prompt": "select_account consent"
                 })
             )
             self.send_response(302)
             self.send_header("Location", auth_url)
             self.end_headers()
+            return
+
+        # 1-disconnect. Logout / Disconnect Google Drive
+        elif path == "/auth/logout-drive" or path == "/api/drive/disconnect":
+            if os.path.exists(TOKEN_FILE):
+                try:
+                    os.remove(TOKEN_FILE)
+                except Exception:
+                    pass
+            if path == "/api/drive/disconnect":
+                self.send_json({"status": "success", "message": "Google Drive berhasil diputuskan"})
+            else:
+                self.send_response(302)
+                self.send_header("Location", "/pages/admin.html?drive=disconnected")
+                self.end_headers()
             return
 
         # 1b. OAuth Login URL (Google User / Penonton)

@@ -361,6 +361,9 @@
             <button type="button" id="google-login-btn" class="btn btn-success">
               <span class="fa fa-google"></span> Hubungkan Akun Google (OAuth)
             </button>
+            <button type="button" id="google-disconnect-btn" class="btn btn-danger" onclick="disconnectGoogleDrive()">
+              <span class="fa fa-unlink"></span> Putuskan / Ganti Akun Google
+            </button>
             <button type="button" id="full-sync-btn" class="btn btn-brand">
               <span class="fa fa-refresh"></span> Sinkronkan Seluruh Data dari Drive
             </button>
@@ -1350,6 +1353,16 @@ async function updateDriveStatus() {
       ${isConn ? '✅ Terhubung (Izin Buat Folder & Sync Otomatis Aktif)' : '⚠️ Belum Terhubung (Klik tombol hijau di bawah)'}
     </span>
   `;
+
+  if (document.getElementById('cfg-folder-id')) {
+    document.getElementById('cfg-folder-id').value = DRIVE_CONFIG.ROOT_FOLDER_ID;
+  }
+  if (document.getElementById('disp-folder-id')) {
+    document.getElementById('disp-folder-id').textContent = DRIVE_CONFIG.ROOT_FOLDER_ID;
+  }
+  if (document.getElementById('cfg-api-key')) {
+    document.getElementById('cfg-api-key').value = DRIVE_CONFIG.API_KEY;
+  }
 }
 
 // Login Google OAuth
@@ -1384,6 +1397,38 @@ async function performSync() {
 
 document.getElementById('quick-sync-btn').addEventListener('click', performSync);
 document.getElementById('full-sync-btn').addEventListener('click', performSync);
+
+// Putuskan & Ganti Akun Google Drive
+async function disconnectGoogleDrive() {
+  if (!confirm('Putuskan akun Google Drive saat ini dan hubungkan akun Google baru?')) return;
+  try {
+    await fetch('/api/drive/disconnect', { method: 'POST' });
+  } catch (e) {}
+  alert('Akun Google Drive berhasil diputuskan. Silakan pilih akun Google yang benar pada halaman otorisasi berikutnya.');
+  DriveService.login();
+}
+
+// Simpan Konfigurasi Drive Form
+document.getElementById('drive-config-form')?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const apiKey = document.getElementById('cfg-api-key').value.trim();
+  const folderId = document.getElementById('cfg-folder-id').value.trim();
+  const clientId = document.getElementById('cfg-client-id').value.trim();
+  if (apiKey) {
+    DRIVE_CONFIG.API_KEY = apiKey;
+    localStorage.setItem('drive_api_key', apiKey);
+  }
+  if (folderId) {
+    DRIVE_CONFIG.ROOT_FOLDER_ID = folderId;
+    localStorage.setItem('drive_folder_id', folderId);
+  }
+  if (clientId) {
+    DRIVE_CONFIG.CLIENT_ID = clientId;
+    localStorage.setItem('drive_client_id', clientId);
+  }
+  alert('Konfigurasi Google Drive berhasil disimpan!');
+  updateDriveStatus();
+});
 
 // ── Ads Configuration Management ──
 function toggleAdType(slot) {
