@@ -3,6 +3,17 @@
 // Dipanggil dari setiap halaman
 // ============================================
 
+(function syncTheme() {
+  var m = localStorage.getItem('theme-mode') || 'darkmode';
+  if (m === 'darkmode' || m === 'dark') {
+    document.documentElement.classList.add('darkmode');
+    if (document.body) document.body.classList.add('darkmode');
+  } else {
+    document.documentElement.classList.remove('darkmode');
+    if (document.body) document.body.classList.remove('darkmode');
+  }
+})();
+
 const BASE = (function() {
   // hitung relative path ke root
   const depth = window.location.pathname.split('/').filter(Boolean).length;

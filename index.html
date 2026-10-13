@@ -9,14 +9,12 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <script>
     (function(){
-      var m=localStorage.getItem('theme-mode')||'darkmode';
-      if(m==='darkmode'||m==='dark') document.documentElement.classList.add('dark');
+      var m = localStorage.getItem('theme-mode') || 'darkmode';
+      if (m === 'darkmode' || m === 'dark') {
+        document.documentElement.classList.add('darkmode');
+      }
     })();
   </script>
-  <style>
-    /* override dark class on html for body.darkmode pattern */
-    html.dark body { background: #111113; color: #e5e7eb; }
-  </style>
 </head>
 <body>
 <script src="assets/js/layout.js"></script>

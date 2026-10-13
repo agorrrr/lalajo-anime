@@ -31,18 +31,24 @@ const DB = {
 // ── Dark mode ──
 function initTheme() {
   const saved = localStorage.getItem('theme-mode') || 'darkmode';
-  if (saved === 'darkmode' || saved === 'dark') {
+  const isDark = (saved === 'darkmode' || saved === 'dark');
+  if (isDark) {
+    document.documentElement.classList.add('darkmode');
     document.body.classList.add('darkmode');
+  } else {
+    document.documentElement.classList.remove('darkmode');
+    document.body.classList.remove('darkmode');
   }
   const cb = document.getElementById('theme-toggle-checkbox');
-  if (cb) cb.checked = document.body.classList.contains('darkmode');
+  if (cb) cb.checked = isDark;
 }
 
 function toggleTheme() {
-  const dark = document.body.classList.toggle('darkmode');
-  localStorage.setItem('theme-mode', dark ? 'darkmode' : 'lightmode');
+  const isDark = document.body.classList.toggle('darkmode');
+  document.documentElement.classList.toggle('darkmode', isDark);
+  localStorage.setItem('theme-mode', isDark ? 'darkmode' : 'lightmode');
   const cb = document.getElementById('theme-toggle-checkbox');
-  if (cb) cb.checked = dark;
+  if (cb) cb.checked = isDark;
 }
 
 // ── Mobile menu ──
