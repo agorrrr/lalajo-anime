@@ -1,6 +1,8 @@
 {
   "cleanUrls": false,
   "rewrites": [
+    { "source": "/api/auth/:path*", "destination": "/api/auth.js" },
+    { "source": "/api/admin/:path*", "destination": "/api/auth.js" },
     { "source": "/pages/:path*", "destination": "/pages/:path*.html" },
     { "source": "/auth/login", "destination": "/pages/admin.html" },
     { "source": "/auth/google/login", "destination": "/pages/login.html" },

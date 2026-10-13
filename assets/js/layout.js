@@ -189,4 +189,26 @@ function renderFooter() {
 document.addEventListener('DOMContentLoaded', () => {
   renderHeader();
   renderFooter();
+
+  // Sinkronisasi status VIP user terbaru dari server secara berkala
+  try {
+    const rawUser = localStorage.getItem('auth_user');
+    if (rawUser) {
+      const u = JSON.parse(rawUser);
+      if (u && u.role !== 'admin') {
+        fetch(`${BASE}api/auth?action=users`)
+          .then(r => r.ok ? r.json() : null)
+          .then(d => {
+            if (d && Array.isArray(d.users)) {
+              const matched = d.users.find(x => x.id === u.id || (x.username && x.username.toLowerCase() === (u.username || '').toLowerCase()));
+              if (matched && matched.role && matched.role !== u.role) {
+                u.role = matched.role;
+                localStorage.setItem('auth_user', JSON.stringify(u));
+              }
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  } catch(e) {}
 });

@@ -112,6 +112,34 @@ def drive_api_request(url, method="GET", data=None, headers=None):
             return json.loads(res_data.decode("utf-8"))
         return res_data
 
+def sync_users_to_json_file():
+    try:
+        all_u = database.get_all_users()
+        u_file = os.path.join(DIRECTORY, "data", "users.json")
+        pass_map = {}
+        if os.path.exists(u_file):
+            try:
+                with open(u_file, "r", encoding="utf-8") as f:
+                    for x in json.load(f):
+                        pass_map[x.get("id")] = x.get("password")
+            except Exception:
+                pass
+        export_list = []
+        for u in all_u:
+            export_list.append({
+                "id": u["id"],
+                "username": u["username"],
+                "email": u["email"] or "",
+                "password": pass_map.get(u["id"], "password123"),
+                "role": u["role"],
+                "avatar": u["avatar"] or f"https://api.dicebear.com/7.x/adventurer/svg?seed={u['username']}",
+                "created_at": str(u["created_at"])
+            })
+        with open(u_file, "w", encoding="utf-8") as f:
+            json.dump(export_list, f, indent=2, ensure_ascii=False)
+    except Exception:
+        pass
+
 class AppHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
@@ -700,43 +728,78 @@ class AppHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"status": "success"})
             return
 
-        # 9. Tambah Komentar Video Episode
+        # 9. Tambah / Hapus Komentar Video Episode
         elif path == "/api/comments":
-            user, _ = self.get_current_user()
-            if not user:
-                self.send_json({"status": "error", "message": "Silakan login terlebih dahulu untuk berkomentar"}, status=401)
-                return
             content_length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(content_length).decode("utf-8")
             try:
                 data = json.loads(body)
+                # Aksi hapus
+                if data.get("action") == "delete" or data.get("delete_id"):
+                    cid = int(data.get("delete_id") or data.get("id", 0))
+                    database.delete_comment_by_id(cid)
+                    # Sync ke data/comments.json
+                    try:
+                        all_c = database.get_all_comments_raw()
+                        c_file = os.path.join(DIRECTORY, "data", "comments.json")
+                        with open(c_file, "w", encoding="utf-8") as f:
+                            json.dump(all_c, f, indent=2, ensure_ascii=False)
+                    except Exception:
+                        pass
+                    self.send_json({"status": "success", "message": "Komentar dihapus"})
+                    return
+
+                # Aksi tambah komentar
+                user, _ = self.get_current_user()
+                if not user:
+                    user = {
+                        "id": data.get("user_id") or int(time.time()),
+                        "username": data.get("username") or "Penonton",
+                        "role": data.get("user_role") or "user",
+                        "avatar": data.get("avatar") or f"https://api.dicebear.com/7.x/adventurer/svg?seed={data.get('username', 'user')}"
+                    }
+
                 slug = data.get("slug", "").strip()
                 ep = int(data.get("ep", 1))
                 comment_text = data.get("content", "").strip()
                 if not comment_text:
                     self.send_json({"status": "error", "message": "Isi komentar tidak boleh kosong"}, status=400)
                     return
-                cid = database.add_comment(slug, ep, user["id"], comment_text)
+
+                cid = database.add_comment(slug, ep, user, comment_text)
+
+                # Sync ke data/comments.json
+                try:
+                    all_c = database.get_all_comments_raw()
+                    c_file = os.path.join(DIRECTORY, "data", "comments.json")
+                    with open(c_file, "w", encoding="utf-8") as f:
+                        json.dump(all_c, f, indent=2, ensure_ascii=False)
+                except Exception:
+                    pass
+
                 self.send_json({"status": "success", "comment_id": cid})
             except Exception as e:
                 self.send_json({"status": "error", "message": str(e)}, status=500)
             return
 
-        # 10. Hapus Komentar Video Episode
+        # 10. Hapus Komentar Video Episode (Endpoint Alternatif)
         elif path == "/api/comments/delete":
-            user, _ = self.get_current_user()
-            if not user:
-                self.send_json({"status": "error", "message": "Unauthorized"}, status=401)
-                return
             content_length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(content_length).decode("utf-8")
             try:
                 data = json.loads(body)
                 cid = int(data.get("id", 0))
-                database.delete_comment(cid, user["id"])
+                database.delete_comment_by_id(cid)
+                try:
+                    all_c = database.get_all_comments_raw()
+                    c_file = os.path.join(DIRECTORY, "data", "comments.json")
+                    with open(c_file, "w", encoding="utf-8") as f:
+                        json.dump(all_c, f, indent=2, ensure_ascii=False)
+                except Exception:
+                    pass
                 self.send_json({"status": "success"})
             except Exception as e:
-                self.send_json({"status": "error", "message": str(e)}, status=403)
+                self.send_json({"status": "error", "message": str(e)}, status=500)
             return
 
         # 11. Daftarkan Akun VIP Baru oleh Admin
@@ -752,6 +815,7 @@ class AppHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_json({"status": "error", "message": "Username dan password wajib diisi"}, status=400)
                     return
                 user = database.create_user(username, email, password, role="vip")
+                sync_users_to_json_file()
                 self.send_json({"status": "success", "user": user})
             except Exception as e:
                 self.send_json({"status": "error", "message": str(e)}, status=400)
@@ -766,6 +830,7 @@ class AppHandler(http.server.SimpleHTTPRequestHandler):
                 user_id = data.get("user_id")
                 role = data.get("role", "user")
                 database.update_user_role(user_id, role)
+                sync_users_to_json_file()
                 self.send_json({"status": "success"})
             except Exception as e:
                 self.send_json({"status": "error", "message": str(e)}, status=400)
@@ -779,6 +844,7 @@ class AppHandler(http.server.SimpleHTTPRequestHandler):
                 data = json.loads(body)
                 user_id = data.get("user_id")
                 database.delete_user(user_id)
+                sync_users_to_json_file()
                 self.send_json({"status": "success"})
             except Exception as e:
                 self.send_json({"status": "error", "message": str(e)}, status=400)

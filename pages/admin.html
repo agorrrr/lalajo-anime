@@ -1106,6 +1106,18 @@ async function loadUsersTable() {
     }
   } catch (e) {}
 
+  if (users.length) {
+    localStorage.setItem('local_users', JSON.stringify(users));
+  } else {
+    try {
+      const fRes = await fetch('../data/users.json?t=' + Date.now());
+      if (fRes.ok) {
+        users = await fRes.json();
+        if (users.length) localStorage.setItem('local_users', JSON.stringify(users));
+      }
+    } catch(e) {}
+  }
+
   if (!users.length) {
     users = JSON.parse(localStorage.getItem('local_users') || '[]');
   }

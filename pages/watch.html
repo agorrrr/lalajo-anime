@@ -416,6 +416,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!area) return;
 
     if (authToken && authUser) {
+      let userBadge = '<span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;margin-left:4px;background:#3384d622;color:#3384d6;">👤 Penonton</span>';
+      if (authUser.role === 'admin') userBadge = '<span style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px;background:#ef444422;color:#ef4444;">👑 Admin</span>';
+      else if (authUser.role === 'vip') userBadge = '<span style="font-size:11px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:4px;background:rgba(234,179,8,0.2);color:#eab308;">⭐ VIP</span>';
+
       area.innerHTML = `
         <div style="display:flex;gap:12px;align-items:flex-start;">
           <img src="${authUser.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + authUser.username}"
@@ -424,9 +428,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div style="flex-grow:1;">
             <div style="font-size:13px;font-weight:700;margin-bottom:6px;">
               ${authUser.username}
-              <span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;margin-left:4px;background:${authUser.role==='admin'?'#ef444422':'#3384d622'};color:${authUser.role==='admin'?'#ef4444':'#3384d6'};">
-                ${authUser.role === 'admin' ? '👑 Admin' : '⭐ Penonton'}
-              </span>
+              ${userBadge}
             </div>
             <textarea id="comment-textarea"
                       placeholder="Tulis pendapat atau komentar kamu tentang episode ini..."
@@ -476,8 +478,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } catch (e) {}
 
+    // Fallback static data/comments.json jika API serverless cold
     if (!comments.length) {
-      comments = JSON.parse(localStorage.getItem(`comments_${slug}_${epNum}`) || '[]');
+      try {
+        const fallbackRes = await fetch('../data/comments.json?t=' + Date.now());
+        if (fallbackRes.ok) {
+          const allComments = await fallbackRes.json();
+          comments = allComments.filter(c => c.anime_slug === slug && String(c.ep) === String(epNum));
+        }
+      } catch (e) {}
+    }
+
+    // Merge dengan komentar local yang baru dikirim jika ada
+    const localPending = JSON.parse(localStorage.getItem(`comments_${slug}_${epNum}`) || '[]');
+    if (localPending.length) {
+      const existingIds = new Set(comments.map(c => c.id));
+      const newItems = localPending.filter(c => !existingIds.has(c.id));
+      comments = [...newItems, ...comments];
     }
 
     if (countEl) countEl.textContent = comments.length;
@@ -494,9 +511,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     listEl.innerHTML = comments.map(c => {
       const canDelete = authUser && (authUser.role === 'admin' || authUser.id === c.user_id);
-      const roleLabel = c.user_role === 'admin'
-        ? '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,0.15);color:#ef4444;font-weight:700;">👑 Admin</span>'
-        : '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(51,132,214,0.15);color:#3384d6;font-weight:600;">⭐ Penonton</span>';
+      let roleLabel = '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(51,132,214,0.15);color:#3384d6;font-weight:600;">👤 Penonton</span>';
+      if (c.user_role === 'admin') {
+        roleLabel = '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,0.15);color:#ef4444;font-weight:700;">👑 Admin</span>';
+      } else if (c.user_role === 'vip') {
+        roleLabel = '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(234,179,8,0.2);color:#eab308;font-weight:800;">⭐ VIP</span>';
+      }
 
       return `
         <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:8px;background:var(--bg-card2,#f9fafb);border:1px solid rgba(128,128,128,0.1);">
@@ -539,32 +559,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.disabled = true;
     btn.textContent = 'Mengirim...';
 
+    const payload = {
+      slug,
+      ep: epNum,
+      content,
+      user_id: (authUser && authUser.id) || Date.now(),
+      username: (authUser && authUser.username) || 'Penonton',
+      user_role: (authUser && authUser.role) || 'user',
+      avatar: (authUser && authUser.avatar) || ''
+    };
+
     let posted = false;
     try {
       const res = await fetch('/api/comments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + authToken
+          'Authorization': 'Bearer ' + (authToken || '')
         },
-        body: JSON.stringify({ slug, ep: epNum, content })
+        body: JSON.stringify(payload)
       });
-      if (res.ok) posted = true;
+      if (res.ok) {
+        const d = await res.json();
+        if (d && d.status === 'success') posted = true;
+      }
     } catch(err) {}
 
     if (!posted) {
+      // Simpan di local storage hanya jika server offline/gagal
       const key = `comments_${slug}_${epNum}`;
       const list = JSON.parse(localStorage.getItem(key) || '[]');
       list.unshift({
         id: Date.now(),
         anime_slug: slug,
         ep: epNum,
-        user_id: (authUser && authUser.id) || Date.now(),
-        username: (authUser && authUser.username) || 'Penonton',
-        user_role: (authUser && authUser.role) || 'user',
-        avatar: (authUser && authUser.avatar) || '',
+        user_id: payload.user_id,
+        username: payload.username,
+        user_role: payload.user_role,
+        avatar: payload.avatar,
         content: content,
-        created_at: new Date().toLocaleDateString('id-ID')
+        created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
       });
       localStorage.setItem(key, JSON.stringify(list));
     }
@@ -578,13 +612,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.deleteCommentItem = async function(cid) {
     if (!confirm('Hapus komentar ini?')) return;
     try {
-      await fetch('/api/comments/delete', {
+      await fetch('/api/comments', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + authToken
-        },
-        body: JSON.stringify({ id: cid })
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (authToken || '') },
+        body: JSON.stringify({ action: 'delete', id: cid })
       });
     } catch(e) {}
 
@@ -592,6 +623,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let list = JSON.parse(localStorage.getItem(key) || '[]');
     list = list.filter(c => c.id !== cid);
     localStorage.setItem(key, JSON.stringify(list));
+
     loadComments();
   };
 

@@ -392,7 +392,7 @@ async function checkExistingSession() {
 document.getElementById('form-login').addEventListener('submit', async (e) => {
   e.preventDefault();
   const username = document.getElementById('login-username').value.trim();
-  const password = document.getElementById('login-password').value;
+  const password = document.getElementById('login-password').value.trim();
   const btn = document.getElementById('btn-submit-login');
 
   btn.disabled = true;
@@ -406,27 +406,44 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
-      if (res.ok) data = await res.json();
+      if (res.ok) {
+        data = await res.json();
+      } else {
+        const errData = await res.json().catch(() => null);
+        if (errData && errData.message) var serverErrMsg = errData.message;
+      }
     } catch (e) {}
 
     if (!data || data.status !== 'success') {
-      if (username === 'ezakasep' && password === 'ezakasep') {
+      if (username.toLowerCase() === 'ezakasep' && password === 'ezakasep') {
         data = {
           status: 'success',
           token: 'local_admin_token',
           user: { id: 1, username: 'ezakasep', role: 'admin', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=ezakasep' }
         };
       } else {
-        const users = JSON.parse(localStorage.getItem('local_users') || '[]');
-        const found = users.find(u => (u.username.toLowerCase() === username.toLowerCase() || (u.email && u.email.toLowerCase() === username.toLowerCase())) && u.password === password);
+        let users = JSON.parse(localStorage.getItem('local_users') || '[]');
+        if (!users.length) {
+          try {
+            const fRes = await fetch('../data/users.json?t=' + Date.now());
+            if (fRes.ok) users = await fRes.json();
+          } catch(e) {}
+        }
+        const found = users.find(u => {
+          const uMatch = (u.username || '').toLowerCase() === username.toLowerCase();
+          const eMatch = u.email && (u.email || '').toLowerCase() === username.toLowerCase();
+          const pMatch = String(u.password || '').trim() === password;
+          return (uMatch || eMatch) && pMatch;
+        });
+
         if (found) {
           data = {
             status: 'success',
             token: 'local_token_' + found.id,
-            user: { id: found.id, username: found.username, role: found.role || 'user', avatar: found.avatar }
+            user: { id: found.id, username: found.username, role: found.role || 'user', avatar: found.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${found.username}` }
           };
         } else {
-          throw new Error((data && data.message) || 'Username atau password salah');
+          throw new Error(serverErrMsg || (data && data.message) || 'Username atau password salah');
         }
       }
     }

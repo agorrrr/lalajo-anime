@@ -1,0 +1,35 @@
+[
+  {
+    "id": 3,
+    "anime_slug": "sousou-no-frieren",
+    "ep": 28,
+    "user_id": 3,
+    "username": "Bocil",
+    "user_role": "user",
+    "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=Bocil",
+    "content": "mantaap",
+    "created_at": "2026-10-12 13:45:34"
+  },
+  {
+    "id": 2,
+    "anime_slug": "naruto",
+    "ep": 1,
+    "user_id": 1,
+    "username": "ezakasep",
+    "user_role": "admin",
+    "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=ezakasep",
+    "content": "Komentar resmi dari Admin: Selamat menonton!",
+    "created_at": "2026-10-12 13:41:10"
+  },
+  {
+    "id": 1,
+    "anime_slug": "naruto",
+    "ep": 1,
+    "user_id": 2,
+    "username": "penonton1",
+    "user_role": "user",
+    "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=penonton1",
+    "content": "Keren banget animenya! Bikin nostalgia.",
+    "created_at": "2026-10-12 13:37:58"
+  }
+]

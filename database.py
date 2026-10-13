@@ -119,19 +119,22 @@ def create_user(username, email, password, role="user", avatar=None, google_id=N
         raise Exception(f"Gagal mendaftar: {e}")
 
 def authenticate_user(username_or_email, password):
+    username_or_email = (username_or_email or "").strip()
+    password = (password or "").strip()
     conn = get_connection()
     c = conn.cursor()
     c.execute('''
-    SELECT * FROM users WHERE username = ? OR email = ?
+    SELECT * FROM users WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)
     ''', (username_or_email, username_or_email))
     user = c.fetchone()
     conn.close()
 
     if not user:
         return None
-    if not user["password_hash"] or not user["salt"]:
-        return None
-    if verify_password(password, user["password_hash"], user["salt"]):
+    if user["password_hash"] and user["salt"]:
+        if verify_password(password, user["password_hash"], user["salt"]):
+            return dict(user)
+    elif user["password_hash"] and user["password_hash"] == password:
         return dict(user)
     return None
 
@@ -208,17 +211,25 @@ def delete_session(token):
     conn.close()
 
 # ── Komentar ──
-def add_comment(anime_slug, ep, user_id, content):
-    user = get_user_by_id(user_id)
-    if not user:
-        raise Exception("User tidak ditemukan")
+def add_comment(anime_slug, ep, user, content):
+    if isinstance(user, int):
+        u = get_user_by_id(user)
+        if u:
+            user = u
+        else:
+            user = {"id": user, "username": "Penonton", "role": "user", "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=user"}
     
+    uid = user.get("id") or int(time.time())
+    uname = user.get("username") or "Penonton"
+    urole = user.get("role") or user.get("user_role") or "user"
+    uavatar = user.get("avatar") or f"https://api.dicebear.com/7.x/adventurer/svg?seed={uname}"
+
     conn = get_connection()
     c = conn.cursor()
     c.execute('''
     INSERT INTO comments (anime_slug, ep, user_id, username, user_role, avatar, content)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (anime_slug, int(ep), user["id"], user["username"], user["role"], user["avatar"], content))
+    ''', (anime_slug, int(ep), uid, uname, urole, uavatar, content))
     conn.commit()
     comment_id = c.lastrowid
     conn.close()
@@ -236,6 +247,26 @@ def get_comments(anime_slug, ep):
     rows = c.fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+def get_all_comments_raw():
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('''
+    SELECT id, anime_slug, ep, user_id, username, user_role, avatar, content, created_at
+    FROM comments
+    ORDER BY id DESC
+    ''')
+    rows = c.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def delete_comment_by_id(comment_id):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("DELETE FROM comments WHERE id = ?", (int(comment_id),))
+    conn.commit()
+    conn.close()
+    return True
 
 def delete_comment(comment_id, user_id):
     user = get_user_by_id(user_id)

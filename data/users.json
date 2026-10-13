@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "username": "ezakasep",
+    "email": "admin@lalajo.anime",
+    "password": "ezakasep",
+    "role": "admin",
+    "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=ezakasep",
+    "created_at": "2026-10-12 10:00:00"
+  },
+  {
+    "id": 2,
+    "username": "penonton1",
+    "email": "p1@mail.com",
+    "password": "penonton1",
+    "role": "user",
+    "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=penonton1",
+    "created_at": "2026-10-12 11:00:00"
+  },
+  {
+    "id": 3,
+    "username": "Bocil",
+    "email": "bocil@gmail.com",
+    "password": "bocil",
+    "role": "user",
+    "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=Bocil",
+    "created_at": "2026-10-12 13:45:34"
+  },
+  {
+    "id": 1791893072216,
+    "username": "testvip",
+    "email": "vip@mail.com",
+    "password": "vippassword",
+    "role": "vip",
+    "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=testvip",
+    "created_at": "2026-10-13 12:04:32"
+  },
+  {
+    "id": 4,
+    "username": "opsesbbri",
+    "email": "opsbriesb@gmail.com",
+    "password": "password123",
+    "role": "user",
+    "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=opsesbbri",
+    "created_at": "2026-10-12 14:00:00"
+  }
+]
