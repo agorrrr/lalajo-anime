@@ -708,6 +708,10 @@ class DualStackServer(http.server.ThreadingHTTPServer):
         self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
         super().server_bind()
 
+handler = AppHandler
+app = AppHandler
+application = AppHandler
+
 if __name__ == "__main__":
     print(f"Lalajo Anime Server berjalan di http://localhost:{PORT}")
     try:

@@ -4,7 +4,17 @@ import hashlib
 import secrets
 import time
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "lalajo.db")
+if os.environ.get("VERCEL"):
+    DB_PATH = "/tmp/lalajo.db"
+    orig = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "lalajo.db")
+    if not os.path.exists(DB_PATH) and os.path.exists(orig):
+        import shutil
+        try:
+            shutil.copy2(orig, DB_PATH)
+        except Exception:
+            pass
+else:
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "lalajo.db")
 
 def get_connection():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)

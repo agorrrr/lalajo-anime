@@ -8,3 +8,5 @@ token.json
 lalajo-anime.zip
 .env
 *.db
+
+.vercel

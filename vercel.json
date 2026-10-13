@@ -1,6 +1,4 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
     { "source": "/jadwal-rilis", "destination": "/pages/jadwal-rilis.html" },
     { "source": "/anime-list", "destination": "/pages/anime-list.html" },
@@ -10,7 +8,6 @@
     { "source": "/watch", "destination": "/pages/watch.html" },
     { "source": "/admin", "destination": "/pages/admin.html" },
     { "source": "/login", "destination": "/pages/login.html" },
-    { "source": "/user", "destination": "/pages/user.html" },
-    { "source": "/pages/:path*", "destination": "/pages/:path*.html" }
+    { "source": "/user", "destination": "/pages/user.html" }
   ]
 }
