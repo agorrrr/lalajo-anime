@@ -2,6 +2,7 @@
   "cleanUrls": false,
   "rewrites": [
     { "source": "/pages/:path*", "destination": "/pages/:path*.html" },
+    { "source": "/auth/login", "destination": "/pages/admin.html" },
     { "source": "/auth/google/login", "destination": "/pages/login.html" },
     { "source": "/jadwal-rilis", "destination": "/pages/jadwal-rilis.html" },
     { "source": "/anime-list", "destination": "/pages/anime-list.html" },

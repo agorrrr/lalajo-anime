@@ -775,7 +775,7 @@
 </main>
 
 <script src="../assets/js/main.js?v=2"></script>
-<script src="../assets/js/drive.js"></script>
+<script src="../assets/js/drive.js?v=2"></script>
 <script src="../assets/js/ads.js"></script>
 <script>
 // ==========================================
@@ -1401,11 +1401,7 @@ document.getElementById('full-sync-btn').addEventListener('click', performSync);
 // Putuskan & Ganti Akun Google Drive
 async function disconnectGoogleDrive() {
   if (!confirm('Putuskan akun Google Drive saat ini dan hubungkan akun Google baru?')) return;
-  try {
-    await fetch('/api/drive/disconnect', { method: 'POST' });
-  } catch (e) {}
-  alert('Akun Google Drive berhasil diputuskan. Silakan pilih akun Google yang benar pada halaman otorisasi berikutnya.');
-  DriveService.login();
+  await DriveService.disconnect();
 }
 
 // Simpan Konfigurasi Drive Form
