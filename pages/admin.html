@@ -1363,6 +1363,9 @@ async function updateDriveStatus() {
   if (document.getElementById('cfg-api-key')) {
     document.getElementById('cfg-api-key').value = DRIVE_CONFIG.API_KEY;
   }
+  if (document.getElementById('cfg-client-id')) {
+    document.getElementById('cfg-client-id').value = DRIVE_CONFIG.CLIENT_ID;
+  }
 }
 
 // Login Google OAuth
@@ -1421,6 +1424,10 @@ document.getElementById('drive-config-form')?.addEventListener('submit', (e) => 
   if (clientId) {
     DRIVE_CONFIG.CLIENT_ID = clientId;
     localStorage.setItem('drive_client_id', clientId);
+  }
+  const accessToken = document.getElementById('cfg-access-token')?.value.trim();
+  if (accessToken) {
+    localStorage.setItem('drive_token', accessToken);
   }
   alert('Konfigurasi Google Drive berhasil disimpan!');
   updateDriveStatus();
