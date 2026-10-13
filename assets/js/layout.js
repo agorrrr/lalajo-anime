@@ -26,13 +26,13 @@ const BASE = (function() {
 
 function getNavLinks(currentPage) {
   const links = [
-    { href: 'anime-terbaru', label: 'Anime Terbaru' },
-    { href: 'anime-list',   label: 'Daftar Anime'  },
-    { href: 'batch',        label: 'Batch'         },
-    { href: 'jadwal-rilis', label: 'Jadwal Rilis'  },
+    { href: 'anime-terbaru.html', label: 'Anime Terbaru' },
+    { href: 'anime-list.html',   label: 'Daftar Anime'  },
+    { href: 'batch.html',        label: 'Batch'         },
+    { href: 'jadwal-rilis.html', label: 'Jadwal Rilis'  },
   ];
   return links.map(l => {
-    const active = window.location.pathname.includes(l.href) ? 'current-menu-item' : '';
+    const active = window.location.pathname.includes(l.href.replace('.html', '')) ? 'current-menu-item' : '';
     return `<li class="menu-item ${active}"><a href="${BASE}pages/${l.href}"><span>${l.label}</span></a></li>`;
   }).join('');
 }
@@ -87,11 +87,11 @@ function renderHeader() {
   <div style="flex-grow:1;overflow-y:auto;">
     <nav class="mobile-nav-links">
       <ul id="mobile-menu-items" class="mobile-menu">
-        <li><a href="${BASE}"><span>🏠 Beranda</span></a></li>
-        <li><a href="${BASE}pages/anime-terbaru"><span>🆕 Anime Terbaru</span></a></li>
-        <li><a href="${BASE}pages/anime-list"><span>📋 Daftar Anime</span></a></li>
-        <li><a href="${BASE}pages/batch"><span>📦 Batch</span></a></li>
-        <li><a href="${BASE}pages/jadwal-rilis"><span>📅 Jadwal Rilis</span></a></li>
+        <li><a href="${BASE}index.html"><span>🏠 Beranda</span></a></li>
+        <li><a href="${BASE}pages/anime-terbaru.html"><span>🆕 Anime Terbaru</span></a></li>
+        <li><a href="${BASE}pages/anime-list.html"><span>📋 Daftar Anime</span></a></li>
+        <li><a href="${BASE}pages/batch.html"><span>📦 Batch</span></a></li>
+        <li><a href="${BASE}pages/jadwal-rilis.html"><span>📅 Jadwal Rilis</span></a></li>
         ${mobileAccountHtml}
       </ul>
     </nav>

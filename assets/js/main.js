@@ -126,20 +126,22 @@ function initLiveSearch() {
     input.closest('form')?.addEventListener('submit', e => {
       e.preventDefault();
       const q = input.value.trim();
-      if (q) window.location.href = `anime-list?search=${encodeURIComponent(q)}`;
+      const inPages = window.location.pathname.split('/').some(p => p === 'pages');
+      if (q) window.location.href = `${inPages ? 'anime-list.html' : 'pages/anime-list.html'}?search=${encodeURIComponent(q)}`;
     });
   });
 }
 
 // ── Anime card HTML ──
 function animeCardHTML(a) {
+  const inPages = window.location.pathname.split('/').some(p => p === 'pages');
   const statusLabel = a.status === 'Currently Airing' ? 'Ongoing' : 'Completed';
   const genres = a.genres.slice(0, 4).map(g =>
-    `<a href="anime-list?genre=${encodeURIComponent(g)}">${g}</a>`).join('');
+    `<a href="${inPages ? 'anime-list.html' : 'pages/anime-list.html'}?genre=${encodeURIComponent(g)}">${g}</a>`).join('');
   return `
     <article class="animepost">
       <div class="animposx">
-        <a href="anime?slug=${a.slug}" title="${a.title}">
+        <a href="${inPages ? 'anime.html' : 'pages/anime.html'}?slug=${a.slug}" title="${a.title}">
           <div class="content-thumb">
             <div class="ply"><i class="fa fa-play"></i></div>
             <img src="${a.thumbnail}" class="anmsa" alt="${a.title}" loading="lazy"
