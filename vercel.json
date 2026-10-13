@@ -8,6 +8,8 @@
     { "source": "/watch", "destination": "/pages/watch.html" },
     { "source": "/admin", "destination": "/pages/admin.html" },
     { "source": "/login", "destination": "/pages/login.html" },
-    { "source": "/user", "destination": "/pages/user.html" }
+    { "source": "/user", "destination": "/pages/user.html" },
+    { "source": "/auth/google/login", "destination": "/pages/login.html" },
+    { "source": "/:page.html", "destination": "/pages/:page.html" }
   ]
 }

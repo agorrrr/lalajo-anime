@@ -170,29 +170,38 @@ async function loadProfile() {
   }
 
   const token = localStorage.getItem('auth_token');
-  if (!token) {
-    window.location.href = 'login.html';
+  let user = null;
+  const rawUser = localStorage.getItem('auth_user');
+  if (rawUser) {
+    try { user = JSON.parse(rawUser); } catch(e) {}
+  }
+
+  if (token) {
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.status === 'success' && data.user) {
+          user = data.user;
+          localStorage.setItem('auth_user', JSON.stringify(user));
+        }
+      }
+    } catch (e) {}
+  }
+
+  if (!user) {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    const loginTarget = window.location.pathname.includes('/pages/') ? 'login.html' : '/login';
+    window.location.href = loginTarget;
     return;
   }
 
-  try {
-    const res = await fetch('/api/auth/me', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const data = await res.json();
-    if (!res.ok || data.status !== 'success' || !data.user) {
-      throw new Error('Sesi berakhir');
-    }
-
-    currentUser = data.user;
-    localStorage.setItem('auth_user', JSON.stringify(currentUser));
-    renderUser(currentUser);
-    loadActivity(token);
-  } catch (err) {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
-    window.location.href = 'login.html?error=session_expired';
-  }
+  currentUser = user;
+  renderUser(currentUser);
+  loadActivity(token);
 }
 
 function renderUser(u) {
@@ -218,39 +227,58 @@ function renderUser(u) {
 
 async function loadActivity(token) {
   const container = document.getElementById('activity-container');
+  let activities = [];
   try {
     const res = await fetch('/api/user/activity', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
-    const data = await res.json();
-    if (!res.ok || !data.activity || data.activity.length === 0) {
-      container.innerHTML = `
-        <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 14px;">
-          <i class="fa fa-comment-o" style="font-size: 28px; margin-bottom: 8px; opacity: 0.5;"></i>
-          <p>Belum ada komentar yang kamu tulis.</p>
-          <p style="font-size: 12px; margin-top: 4px;">Tonton anime dan tinggalkan pendapatmu di kolom komentar!</p>
-        </div>
-      `;
-      return;
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.activity) activities = data.activity;
     }
+  } catch (e) {}
 
-    container.innerHTML = data.activity.map(item => `
-      <div class="activity-item">
-        <div style="flex-grow: 1;">
-          <div style="font-size: 13px; font-weight: 700;">
-            Komentar di <a href="watch.html?slug=${item.anime_slug}&ep=${item.ep}" style="color: var(--brand, #3384d6); text-decoration: none;">Episode ${item.ep}</a>
-            <span style="font-size: 11px; font-weight: 400; color: var(--text-muted); margin-left: 6px;">(${item.created_at})</span>
-          </div>
-          <div style="font-size: 13px; margin-top: 4px; color: inherit; opacity: 0.9;">"${escapeHtml(item.content)}"</div>
-        </div>
-        <a href="watch.html?slug=${item.anime_slug}&ep=${item.ep}" style="padding: 6px 12px; font-size: 12px; font-weight: 600; background: var(--brand, #3384d6); color: #fff; border-radius: 6px; text-decoration: none; flex-shrink: 0;">
-          Lihat <i class="fa fa-arrow-right"></i>
-        </a>
-      </div>
-    `).join('');
-  } catch (e) {
-    container.innerHTML = '<div style="color: #ef4444; font-size: 13px;">Gagal memuat aktivitas.</div>';
+  if (!activities.length) {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('comments_')) {
+          const list = JSON.parse(localStorage.getItem(key) || '[]');
+          list.forEach(c => {
+            if (currentUser && (c.user_id === currentUser.id || c.username === currentUser.username)) {
+              activities.push(c);
+            }
+          });
+        }
+      }
+    } catch(e) {}
   }
+
+  if (!activities.length) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 14px;">
+        <i class="fa fa-comment-o" style="font-size: 28px; margin-bottom: 8px; opacity: 0.5;"></i>
+        <p>Belum ada komentar yang kamu tulis.</p>
+        <p style="font-size: 12px; margin-top: 4px;">Tonton anime dan tinggalkan pendapatmu di kolom komentar!</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = activities.map(item => `
+    <div class="activity-item">
+      <div style="flex-grow: 1;">
+        <div style="font-size: 13px; font-weight: 700;">
+          Komentar di <a href="watch.html?slug=${item.anime_slug}&ep=${item.ep}" style="color: var(--brand, #3384d6); text-decoration: none;">Episode ${item.ep}</a>
+          <span style="font-size: 11px; font-weight: 400; color: var(--text-muted); margin-left: 6px;">(${item.created_at})</span>
+        </div>
+        <div style="font-size: 13px; margin-top: 4px; color: inherit; opacity: 0.9;">"${escapeHtml(item.content)}"</div>
+      </div>
+      <a href="watch.html?slug=${item.anime_slug}&ep=${item.ep}" style="padding: 6px 12px; font-size: 12px; font-weight: 600; background: var(--brand, #3384d6); color: #fff; border-radius: 6px; text-decoration: none; flex-shrink: 0;">
+        Lihat <i class="fa fa-arrow-right"></i>
+      </a>
+    </div>
+  `).join('');
 }
 
 function escapeHtml(str) {
