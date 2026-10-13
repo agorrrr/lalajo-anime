@@ -619,8 +619,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rootComments = comments.filter(c => !c.parent_id);
     const replyMap = {};
     comments.filter(c => c.parent_id).forEach(r => {
-      if (!replyMap[r.parent_id]) replyMap[r.parent_id] = [];
-      replyMap[r.parent_id].push(r);
+      const pid = String(r.parent_id);
+      if (!replyMap[pid]) replyMap[pid] = [];
+      replyMap[pid].push(r);
     });
 
     listEl.innerHTML = rootComments.map(c => {
@@ -632,7 +633,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         roleLabel = '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(234,179,8,0.2);color:#eab308;font-weight:800;">⭐ VIP</span>';
       }
 
-      const childReplies = replyMap[c.id] || [];
+      const childReplies = replyMap[String(c.id)] || [];
 
       const repliesHtml = childReplies.map(r => {
         const canDeleteReply = authUser && (authUser.role === 'admin' || authUser.id === r.user_id);
@@ -750,8 +751,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).join('');
   }
 
-  async function postComment(parentId = null) {
-    const isReply = parentId !== null;
+  window.postComment = async function(parentId = null) {
+    const isReply = parentId !== null && parentId !== undefined && parentId !== '' && parentId !== 'null';
     const textareaId = isReply ? `reply-textarea-${parentId}` : 'comment-textarea';
     const textarea = document.getElementById(textareaId);
     const btn = isReply ? document.getElementById(`btn-submit-reply-${parentId}`) : document.getElementById('btn-submit-comment');
@@ -778,7 +779,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       slug,
       ep: epNum,
       content,
-      parent_id: parentId ? parseInt(parentId) : null,
+      parent_id: isReply ? parseInt(parentId) : null,
       user_id: (authUser && authUser.id) || Date.now(),
       username: (authUser && authUser.username) || customName || 'Penonton',
       user_role: (authUser && authUser.role) || 'user',
@@ -814,7 +815,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         user_role: payload.user_role,
         avatar: payload.avatar,
         content: content,
-        parent_id: parentId,
+        parent_id: isReply ? parseInt(parentId) : null,
         created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
       });
       localStorage.setItem(key, JSON.stringify(list));
@@ -836,7 +837,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (modal) modal.style.display = 'none';
 
     loadComments();
-  }
+  };
+  const postComment = window.postComment;
 
   window.deleteCommentItem = async function(cid) {
     if (!confirm('Hapus komentar ini? Semua balasan di dalamnya juga akan terhapus.')) return;
