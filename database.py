@@ -62,9 +62,15 @@ def init_db():
         user_role TEXT DEFAULT 'user',
         avatar TEXT,
         content TEXT NOT NULL,
+        parent_id INTEGER DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ''')
+
+    try:
+        c.execute("ALTER TABLE comments ADD COLUMN parent_id INTEGER DEFAULT NULL")
+    except Exception:
+        pass
 
     # Table sessions
     c.execute('''
@@ -211,7 +217,7 @@ def delete_session(token):
     conn.close()
 
 # ── Komentar ──
-def add_comment(anime_slug, ep, user, content):
+def add_comment(anime_slug, ep, user, content, parent_id=None):
     if isinstance(user, int):
         u = get_user_by_id(user)
         if u:
@@ -223,13 +229,14 @@ def add_comment(anime_slug, ep, user, content):
     uname = user.get("username") or "Penonton"
     urole = user.get("role") or user.get("user_role") or "user"
     uavatar = user.get("avatar") or f"https://api.dicebear.com/7.x/adventurer/svg?seed={uname}"
+    pid = int(parent_id) if parent_id else None
 
     conn = get_connection()
     c = conn.cursor()
     c.execute('''
-    INSERT INTO comments (anime_slug, ep, user_id, username, user_role, avatar, content)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (anime_slug, int(ep), uid, uname, urole, uavatar, content))
+    INSERT INTO comments (anime_slug, ep, user_id, username, user_role, avatar, content, parent_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (anime_slug, int(ep), uid, uname, urole, uavatar, content, pid))
     conn.commit()
     comment_id = c.lastrowid
     conn.close()
@@ -239,10 +246,10 @@ def get_comments(anime_slug, ep):
     conn = get_connection()
     c = conn.cursor()
     c.execute('''
-    SELECT id, anime_slug, ep, user_id, username, user_role, avatar, content, created_at
+    SELECT id, anime_slug, ep, user_id, username, user_role, avatar, content, parent_id, created_at
     FROM comments
     WHERE anime_slug = ? AND ep = ?
-    ORDER BY id DESC
+    ORDER BY id ASC
     ''', (anime_slug, int(ep)))
     rows = c.fetchall()
     conn.close()
@@ -252,7 +259,7 @@ def get_all_comments_raw():
     conn = get_connection()
     c = conn.cursor()
     c.execute('''
-    SELECT id, anime_slug, ep, user_id, username, user_role, avatar, content, created_at
+    SELECT id, anime_slug, ep, user_id, username, user_role, avatar, content, parent_id, created_at
     FROM comments
     ORDER BY id DESC
     ''')
@@ -263,7 +270,7 @@ def get_all_comments_raw():
 def delete_comment_by_id(comment_id):
     conn = get_connection()
     c = conn.cursor()
-    c.execute("DELETE FROM comments WHERE id = ?", (int(comment_id),))
+    c.execute("DELETE FROM comments WHERE id = ? OR parent_id = ?", (int(comment_id), int(comment_id)))
     conn.commit()
     conn.close()
     return True

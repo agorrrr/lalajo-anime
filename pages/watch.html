@@ -403,13 +403,84 @@ document.addEventListener('DOMContentLoaded', async () => {
   AdsManager.setupVideoPopunder(document.querySelector('.video-area'), loadVideo);
   AdsManager.initSlots();
 
-  // ── Fitur Komentar Episode ──
+  // ── Fitur Komentar Episode & Emoji Picker ──
   let authUser = null;
   const authToken = localStorage.getItem('auth_token');
   try {
     const raw = localStorage.getItem('auth_user');
     if (raw) authUser = JSON.parse(raw);
   } catch(e) {}
+
+  const EMOJI_PACK = {
+    '🔥 Populer': ['🔥', '😂', '😍', '👍', '😭', '👏', '🎉', '🍿', '💯', '⭐', '⚡', '✨'],
+    '😃 Ekspresi': ['😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '😉', '😊', '🥰', '😍', '🤩', '😘', '😋', '😛', '😜', '🤪', '😎', '🤓', '🧐', '🤔', '🤐', '🤨', '😐', '😏', '😒', '🙄', '😬', '😔', '😴', '😷', '🥵', '🥶', '🤯', '🥳', '🥺', '😢', '😭', '😱', '😡', '🤬', '😈', '💀'],
+    '👍 Reaksi': ['👍', '👎', '👊', '✊', '🤛', '🤜', '👏', '🙌', '👐', '🤝', '🙏', '✍️', '💪', '👈', '👉', '👆', '👇', '✌️', '🤞', '🖖', '🤘', '🤙', '👌'],
+    '❤️ Hati': ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💯', '✨', '🌟', '⭐', '💥', '💢', '💤'],
+    '🎌 Anime': ['🍿', '🍙', '🍜', '🍣', '🍱', '🎮', '🎯', '🏆', '👑', '🎬', '🗡️', '🛡️', '🪄', '🎭', '🎌', '🇯🇵', '🐱', '🦊', '🐉', '🦄']
+  };
+
+  window.insertEmoji = function(targetId, emoji) {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    const start = el.selectionStart || el.value.length;
+    const end = el.selectionEnd || el.value.length;
+    el.value = el.value.substring(0, start) + emoji + el.value.substring(end);
+    el.focus();
+    el.selectionStart = el.selectionEnd = start + emoji.length;
+  };
+
+  window.toggleEmojiModal = function(targetTextareaId) {
+    let modal = document.getElementById('emoji-picker-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'emoji-picker-modal';
+      modal.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:99999;width:320px;max-width:90vw;background:var(--bg-card,#fff);border:1px solid var(--border-dark,#e5e7eb);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.2);padding:14px;display:none;';
+      document.body.appendChild(modal);
+    }
+
+    if (modal.dataset.target === targetTextareaId && modal.style.display === 'block') {
+      modal.style.display = 'none';
+      return;
+    }
+
+    modal.dataset.target = targetTextareaId;
+    let categoriesHtml = Object.keys(EMOJI_PACK).map((cat, idx) => `
+      <button type="button" class="emoji-tab-btn ${idx===0?'active':''}" data-cat="${cat}" style="padding:4px 8px;font-size:11px;font-weight:700;border:none;background:${idx===0?'#3384d6':'rgba(128,128,128,0.1)'};color:${idx===0?'#fff':'inherit'};border-radius:6px;cursor:pointer;">
+        ${cat}
+      </button>
+    `).join('');
+
+    modal.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <strong style="font-size:13px;display:flex;align-items:center;gap:6px;">😀 Pilih Emoji</strong>
+        <button type="button" onclick="document.getElementById('emoji-picker-modal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:16px;cursor:pointer;">&times;</button>
+      </div>
+      <div style="display:flex;gap:4px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;" id="emoji-cat-tabs">
+        ${categoriesHtml}
+      </div>
+      <div id="emoji-grid-area" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-height:180px;overflow-y:auto;padding:4px;">
+        ${EMOJI_PACK['🔥 Populer'].map(em => `<button type="button" onclick="insertEmoji('${targetTextareaId}', '${em}')" style="background:none;border:none;font-size:20px;padding:4px;cursor:pointer;border-radius:4px;transition:background 0.15s;" onmouseover="this.style.background='rgba(51,132,214,0.15)'" onmouseout="this.style.background='none'">${em}</button>`).join('')}
+      </div>
+    `;
+
+    modal.querySelectorAll('.emoji-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        modal.querySelectorAll('.emoji-tab-btn').forEach(b => {
+          b.style.background = 'rgba(128,128,128,0.1)';
+          b.style.color = 'inherit';
+        });
+        btn.style.background = '#3384d6';
+        btn.style.color = '#fff';
+        const cat = btn.dataset.cat;
+        const grid = document.getElementById('emoji-grid-area');
+        grid.innerHTML = EMOJI_PACK[cat].map(em => `
+          <button type="button" onclick="insertEmoji('${targetTextareaId}', '${em}')" style="background:none;border:none;font-size:20px;padding:4px;cursor:pointer;border-radius:4px;transition:background 0.15s;" onmouseover="this.style.background='rgba(51,132,214,0.15)'" onmouseout="this.style.background='none'">${em}</button>
+        `).join('');
+      });
+    });
+
+    modal.style.display = 'block';
+  };
 
   function renderCommentInput() {
     const area = document.getElementById('comment-input-area');
@@ -419,6 +490,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       let userBadge = '<span style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;margin-left:4px;background:#3384d622;color:#3384d6;">👤 Penonton</span>';
       if (authUser.role === 'admin') userBadge = '<span style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px;background:#ef444422;color:#ef4444;">👑 Admin</span>';
       else if (authUser.role === 'vip') userBadge = '<span style="font-size:11px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:4px;background:rgba(234,179,8,0.2);color:#eab308;">⭐ VIP</span>';
+
+      const quickEmojis = ['👍', '❤️', '🔥', '😂', '😭', '👏', '🎉', '🍿', '💯', '⭐'];
 
       area.innerHTML = `
         <div style="display:flex;gap:12px;align-items:flex-start;">
@@ -434,9 +507,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                       placeholder="Tulis pendapat atau komentar kamu tentang episode ini..."
                       rows="3"
                       style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:8px;border:1px solid rgba(128,128,128,0.25);background:var(--bg-card2,#f9fafb);color:inherit;font-size:13px;outline:none;resize:vertical;"></textarea>
-            <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+            
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:8px;">
+              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                ${quickEmojis.map(em => `<button type="button" onclick="insertEmoji('comment-textarea', '${em}')" title="Kirim ${em}" style="background:none;border:none;font-size:16px;cursor:pointer;padding:3px 5px;border-radius:4px;transition:transform 0.1s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">${em}</button>`).join('')}
+                <button type="button" onclick="toggleEmojiModal('comment-textarea')" style="background:rgba(128,128,128,0.12);border:none;font-size:12px;font-weight:700;cursor:pointer;padding:4px 8px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;color:inherit;margin-left:4px;">
+                  😀 Emoji
+                </button>
+              </div>
               <button id="btn-submit-comment"
-                      style="background:#3384d6;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;">
+                      style="background:#3384d6;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
                 <i class="fa fa-paper-plane"></i> Kirim Komentar
               </button>
             </div>
@@ -444,7 +524,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       `;
 
-      document.getElementById('btn-submit-comment')?.addEventListener('click', postComment);
+      document.getElementById('btn-submit-comment')?.addEventListener('click', () => postComment(null));
     } else {
       area.innerHTML = `
         <div style="background:var(--bg-card2,#f9fafb);border:1px dashed var(--border-dark,#e5e7eb);border-radius:8px;padding:16px;text-align:center;">
@@ -463,6 +543,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
     }
   }
+
+  window.toggleReplyBox = function(cid, targetUsername) {
+    if (!authToken || !authUser) {
+      alert('Silakan masuk atau daftar terlebih dahulu untuk membalas komentar');
+      window.location.href = 'login.html';
+      return;
+    }
+    const box = document.getElementById(`reply-box-${cid}`);
+    if (!box) return;
+    if (box.style.display === 'none' || !box.style.display) {
+      box.style.display = 'block';
+      const ta = document.getElementById(`reply-textarea-${cid}`);
+      if (ta) {
+        if (!ta.value && targetUsername) ta.value = `@${targetUsername} `;
+        ta.focus();
+      }
+    } else {
+      box.style.display = 'none';
+    }
+  };
 
   async function loadComments() {
     const listEl = document.getElementById('comments-list');
@@ -509,7 +609,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    listEl.innerHTML = comments.map(c => {
+    // Pisahkan komentar utama (root) dan balasan (replies)
+    const rootComments = comments.filter(c => !c.parent_id);
+    const replyMap = {};
+    comments.filter(c => c.parent_id).forEach(r => {
+      if (!replyMap[r.parent_id]) replyMap[r.parent_id] = [];
+      replyMap[r.parent_id].push(r);
+    });
+
+    listEl.innerHTML = rootComments.map(c => {
       const canDelete = authUser && (authUser.role === 'admin' || authUser.id === c.user_id);
       let roleLabel = '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(51,132,214,0.15);color:#3384d6;font-weight:600;">👤 Penonton</span>';
       if (c.user_role === 'admin') {
@@ -518,51 +626,134 @@ document.addEventListener('DOMContentLoaded', async () => {
         roleLabel = '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(234,179,8,0.2);color:#eab308;font-weight:800;">⭐ VIP</span>';
       }
 
-      return `
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:8px;background:var(--bg-card2,#f9fafb);border:1px solid rgba(128,128,128,0.1);">
-          <img src="${c.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + c.username}"
-               alt="${c.username}"
-               style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">
-          <div style="flex-grow:1;">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-              <div style="display:flex;align-items:center;gap:6px;">
-                <strong style="font-size:13px;">${escapeHtml(c.username)}</strong>
-                ${roleLabel}
-                <span style="font-size:11px;color:var(--text-muted);">${c.created_at}</span>
+      const childReplies = replyMap[c.id] || [];
+
+      const repliesHtml = childReplies.map(r => {
+        const canDeleteReply = authUser && (authUser.role === 'admin' || authUser.id === r.user_id);
+        let rRoleLabel = '<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(51,132,214,0.15);color:#3384d6;font-weight:600;">👤 Penonton</span>';
+        if (r.user_role === 'admin') rRoleLabel = '<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(239,68,68,0.15);color:#ef4444;font-weight:700;">👑 Admin</span>';
+        else if (r.user_role === 'vip') rRoleLabel = '<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(234,179,8,0.2);color:#eab308;font-weight:800;">⭐ VIP</span>';
+
+        return `
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:6px;background:rgba(128,128,128,0.05);border:1px solid rgba(128,128,128,0.08);">
+            <img src="${r.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + r.username}"
+                 alt="${r.username}"
+                 style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+            <div style="flex-grow:1;">
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <strong style="font-size:12px;">${escapeHtml(r.username)}</strong>
+                  ${rRoleLabel}
+                  <span style="font-size:10px;color:var(--text-muted);">${r.created_at}</span>
+                </div>
+                ${canDeleteReply ? `
+                  <button onclick="deleteCommentItem(${r.id})" title="Hapus Balasan" style="background:none;border:none;color:#ef4444;font-size:11px;cursor:pointer;opacity:0.8;">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                ` : ''}
               </div>
-              ${canDelete ? `
-                <button onclick="deleteCommentItem(${c.id})"
-                        title="Hapus Komentar"
-                        style="background:none;border:none;color:#ef4444;font-size:11px;cursor:pointer;opacity:0.8;">
-                  <i class="fa fa-trash"></i> Hapus
-                </button>
-              ` : ''}
+              <div style="font-size:12px;margin-top:4px;line-height:1.5;white-space:pre-wrap;color:inherit;">${escapeHtml(r.content)}</div>
             </div>
-            <div style="font-size:13px;margin-top:6px;line-height:1.5;white-space:pre-wrap;color:inherit;">${escapeHtml(c.content)}</div>
           </div>
+        `;
+      }).join('');
+
+      return `
+        <div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:8px;background:var(--bg-card2,#f9fafb);border:1px solid rgba(128,128,128,0.1);">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <img src="${c.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=' + c.username}"
+                 alt="${c.username}"
+                 style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+            <div style="flex-grow:1;">
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <strong style="font-size:13px;">${escapeHtml(c.username)}</strong>
+                  ${roleLabel}
+                  <span style="font-size:11px;color:var(--text-muted);">${c.created_at}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <button onclick="toggleReplyBox(${c.id}, '${escapeHtml(c.username)}')"
+                          title="Balas komentar ini"
+                          style="background:none;border:none;color:#3384d6;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                    <i class="fa fa-reply"></i> Balas
+                  </button>
+                  ${canDelete ? `
+                    <button onclick="deleteCommentItem(${c.id})"
+                            title="Hapus Komentar"
+                            style="background:none;border:none;color:#ef4444;font-size:11px;cursor:pointer;opacity:0.8;">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+              <div style="font-size:13px;margin-top:6px;line-height:1.5;white-space:pre-wrap;color:inherit;">${escapeHtml(c.content)}</div>
+            </div>
+          </div>
+
+          <!-- Form Balas Komentar (Inline Drawer) -->
+          <div id="reply-box-${c.id}" style="display:none;margin-left:48px;padding:10px 12px;border-radius:8px;background:rgba(51,132,214,0.06);border:1px solid rgba(51,132,214,0.2);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;color:#3384d6;font-weight:700;">
+              <span><i class="fa fa-reply"></i> Membalas @${escapeHtml(c.username)}</span>
+              <button type="button" onclick="toggleReplyBox(${c.id})" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;">Batal</button>
+            </div>
+            <textarea id="reply-textarea-${c.id}"
+                      rows="2"
+                      placeholder="Tulis balasan kamu..."
+                      style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:6px;border:1px solid rgba(128,128,128,0.2);background:var(--bg-card,#fff);color:inherit;font-size:12px;outline:none;resize:vertical;"></textarea>
+            
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;flex-wrap:wrap;gap:6px;">
+              <div style="display:flex;align-items:center;gap:3px;flex-wrap:wrap;">
+                ${['👍', '❤️', '🔥', '😂', '😭', '👏'].map(em => `<button type="button" onclick="insertEmoji('reply-textarea-${c.id}', '${em}')" style="background:none;border:none;font-size:14px;cursor:pointer;padding:2px 4px;">${em}</button>`).join('')}
+                <button type="button" onclick="toggleEmojiModal('reply-textarea-${c.id}')" style="background:rgba(128,128,128,0.12);border:none;font-size:11px;font-weight:700;cursor:pointer;padding:2px 6px;border-radius:4px;color:inherit;">
+                  😀
+                </button>
+              </div>
+              <button onclick="postComment(${c.id})"
+                      id="btn-submit-reply-${c.id}"
+                      style="background:#3384d6;color:#fff;border:none;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">
+                <i class="fa fa-paper-plane"></i> Kirim Balasan
+              </button>
+            </div>
+          </div>
+
+          <!-- Daftar Balasan (Nested) -->
+          ${childReplies.length ? `
+            <div style="margin-left:48px;border-left:2px solid rgba(51,132,214,0.3);padding-left:12px;display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:2px;">
+                💬 ${childReplies.length} Balasan
+              </div>
+              ${repliesHtml}
+            </div>
+          ` : ''}
+
         </div>
       `;
     }).join('');
   }
 
-  async function postComment() {
-    const textarea = document.getElementById('comment-textarea');
-    const btn = document.getElementById('btn-submit-comment');
-    if (!textarea || !btn) return;
+  async function postComment(parentId = null) {
+    const isReply = parentId !== null;
+    const textareaId = isReply ? `reply-textarea-${parentId}` : 'comment-textarea';
+    const textarea = document.getElementById(textareaId);
+    const btn = isReply ? document.getElementById(`btn-submit-reply-${parentId}`) : document.getElementById('btn-submit-comment');
+    if (!textarea) return;
 
     const content = textarea.value.trim();
     if (!content) {
-      alert('Isi komentar tidak boleh kosong');
+      alert(isReply ? 'Isi balasan tidak boleh kosong' : 'Isi komentar tidak boleh kosong');
       return;
     }
 
-    btn.disabled = true;
-    btn.textContent = 'Mengirim...';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Mengirim...';
+    }
 
     const payload = {
       slug,
       ep: epNum,
       content,
+      parent_id: parentId,
       user_id: (authUser && authUser.id) || Date.now(),
       username: (authUser && authUser.username) || 'Penonton',
       user_role: (authUser && authUser.role) || 'user',
@@ -589,7 +780,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Simpan di local storage hanya jika server offline/gagal
       const key = `comments_${slug}_${epNum}`;
       const list = JSON.parse(localStorage.getItem(key) || '[]');
-      list.unshift({
+      list.push({
         id: Date.now(),
         anime_slug: slug,
         ep: epNum,
@@ -598,19 +789,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         user_role: payload.user_role,
         avatar: payload.avatar,
         content: content,
+        parent_id: parentId,
         created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
       });
       localStorage.setItem(key, JSON.stringify(list));
     }
 
     textarea.value = '';
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fa fa-paper-plane"></i> Kirim Komentar';
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = isReply ? '<i class="fa fa-paper-plane"></i> Kirim Balasan' : '<i class="fa fa-paper-plane"></i> Kirim Komentar';
+    }
+
+    if (isReply) {
+      const replyBox = document.getElementById(`reply-box-${parentId}`);
+      if (replyBox) replyBox.style.display = 'none';
+    }
+
+    // Tutup emoji modal jika terbuka
+    const modal = document.getElementById('emoji-picker-modal');
+    if (modal) modal.style.display = 'none';
+
     loadComments();
   }
 
   window.deleteCommentItem = async function(cid) {
-    if (!confirm('Hapus komentar ini?')) return;
+    if (!confirm('Hapus komentar ini? Semua balasan di dalamnya juga akan terhapus.')) return;
     try {
       await fetch('/api/comments', {
         method: 'POST',
@@ -621,7 +825,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const key = `comments_${slug}_${epNum}`;
     let list = JSON.parse(localStorage.getItem(key) || '[]');
-    list = list.filter(c => c.id !== cid);
+    list = list.filter(c => c.id !== cid && c.parent_id !== cid);
     localStorage.setItem(key, JSON.stringify(list));
 
     loadComments();

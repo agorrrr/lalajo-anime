@@ -766,7 +766,8 @@ class AppHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_json({"status": "error", "message": "Isi komentar tidak boleh kosong"}, status=400)
                     return
 
-                cid = database.add_comment(slug, ep, user, comment_text)
+                parent_id = data.get("parent_id")
+                cid = database.add_comment(slug, ep, user, comment_text, parent_id=parent_id)
 
                 # Sync ke data/comments.json
                 try:

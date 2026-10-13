@@ -63,13 +63,13 @@ export default async function handler(req, res) {
     if (body.action === 'delete' || body.delete_id) {
       const targetId = parseInt(body.delete_id || body.id);
       let all = getComments();
-      all = all.filter(c => c.id !== targetId);
+      all = all.filter(c => c.id !== targetId && c.parent_id !== targetId);
       saveComments(all);
       return res.status(200).json({ status: 'success', message: 'Komentar berhasil dihapus' });
     }
 
     // Aksi tambah komentar
-    const { slug, ep, content, user_id, username, user_role, avatar } = body;
+    const { slug, ep, content, user_id, username, user_role, avatar, parent_id } = body;
     if (!content || !content.trim()) {
       return res.status(400).json({ status: 'error', message: 'Isi komentar tidak boleh kosong' });
     }
@@ -84,10 +84,11 @@ export default async function handler(req, res) {
       user_role: user_role || 'user',
       avatar: avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${username || 'user'}`,
       content: content.trim(),
+      parent_id: parent_id ? parseInt(parent_id) : null,
       created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
     };
 
-    all.unshift(newComment);
+    all.push(newComment);
     saveComments(all);
 
     return res.status(200).json({ status: 'success', comment: newComment });
