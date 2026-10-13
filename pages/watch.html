@@ -103,6 +103,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   const prevEp = anime.episodes_list.find(e => e.ep === epNum - 1);
   const nextEp = anime.episodes_list.find(e => e.ep === epNum + 1);
 
+  // Stream servers
+  const streamServers = (ep.servers && ep.servers.length > 0)
+    ? ep.servers
+    : (ep.stream_url ? [ep.stream_url] : []);
+
+  let serverTabsHTML = '';
+  if (streamServers.length > 0) {
+    serverTabsHTML = streamServers.slice(0, 4).map((s, idx) => `
+      <button class="server-tab ${idx===0?'active':''}" data-server-idx="${idx}">
+        <i class="fa fa-play-circle"></i> Server ${idx + 1}
+      </button>
+    `).join('');
+  } else {
+    serverTabsHTML = `
+      <button class="server-tab active" data-server="html5"><i class="fa fa-play-circle"></i> Server 1 (HTML5 Fullscreen)</button>
+      <button class="server-tab" data-server="embed"><i class="fa fa-cloud"></i> Server 2 (Embed)</button>
+    `;
+  }
+
   // Related episodes
   const epListHTML = anime.episodes_list.map(e => `
     <a href="watch?slug=${slug}&ep=${e.ep}"
@@ -149,8 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         <!-- Server tabs & Tombol Fullscreen -->
         <div class="server-tabs" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-          <button class="server-tab active" data-server="html5"><i class="fa fa-play-circle"></i> Server 1 (HTML5 Fullscreen)</button>
-          <button class="server-tab" data-server="embed"><i class="fa fa-cloud"></i> Server 2 (Embed)</button>
+          ${serverTabsHTML}
           <button class="server-tab" id="btn-fullscreen" style="margin-left:auto;background:#10b981;color:#fff;border-color:#10b981;font-weight:700;">
             <i class="fa fa-arrows-alt"></i> ⛶ Layar Penuh
           </button>
@@ -259,19 +277,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (vArea) {
       vArea.style.backgroundImage = `url("${driveThumb}")`;
     }
+  } else if (anime.thumbnail) {
+    const vArea = document.querySelector('.video-area');
+    if (vArea) {
+      vArea.style.backgroundImage = `url("${anime.thumbnail}")`;
+    }
   } else {
     captureRandomVideoFrame(sampleVideoUrl);
   }
 
   let activeServer = 'html5';
+  let activeServerIdx = 0;
 
-  // play btn click - load video player (HTML5 native dengan Fullscreen / Drive embed fallback)
+  // play btn click - load video player (HTML5 native dengan Fullscreen / Drive embed fallback / Scraped stream)
   function loadVideo() {
     const vArea = document.querySelector('.video-area');
     if (!vArea) return;
     const centerAd = document.getElementById('player-center-ad');
     if (centerAd) centerAd.remove();
     vArea.classList.add('playing');
+
+    if (streamServers.length > 0) {
+      const currentStream = streamServers[activeServerIdx] || streamServers[0];
+      if (currentStream.endsWith('.mp4')) {
+        vArea.innerHTML = `
+          <video controls autoplay playsinline style="width:100%;height:100%;object-fit:contain;background:#000;position:relative;z-index:10;">
+            <source src="${currentStream}" type="video/mp4">
+            Browser tidak mendukung pemutaran video.
+          </video>
+        `;
+      } else {
+        vArea.innerHTML = `
+          <iframe src="${currentStream}"
+                  allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+                  allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"
+                  style="width:100%;height:100%;border:none;background:#000;position:relative;z-index:10;"></iframe>
+        `;
+      }
+      return;
+    }
 
     if (activeServer === 'html5') {
       const videoSrc = ep.drive_file_id
@@ -306,6 +350,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Switch server
+  document.querySelectorAll('.server-tab[data-server-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.server-tab[data-server-idx]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeServerIdx = parseInt(btn.dataset.serverIdx) || 0;
+      const vArea = document.querySelector('.video-area');
+      if (vArea && vArea.classList.contains('playing')) {
+        loadVideo();
+      }
+    });
+  });
+
   document.querySelectorAll('.server-tab[data-server]').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.server-tab[data-server]').forEach(b => b.classList.remove('active'));

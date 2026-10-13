@@ -1,0 +1,29 @@
+name: Sync Anime dari Samehadaku
+
+on:
+  schedule:
+    # Jalan tiap 6 jam otomatis
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Bisa di-klik tombol 'Run workflow' manual di GitHub
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Jalankan Scraper
+        run: python scripts/scrape_samehadaku.py 15
+
+      - name: Commit & Push jika ada update
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add data/anime.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-sync anime data dari Samehadaku [skip ci]" && git push)
