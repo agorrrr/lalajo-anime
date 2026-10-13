@@ -790,24 +790,35 @@ async function checkAuth() {
   const token = localStorage.getItem('auth_token');
   let isAuth = false;
 
-  if (token) {
+  let localUser = null;
+  try {
+    const raw = localStorage.getItem('auth_user');
+    if (raw) localUser = JSON.parse(raw);
+  } catch (e) {}
+
+  // 1. Cek sesi lokal (ezakasep atau admin role di localStorage/sessionStorage)
+  if (token === 'local_admin_token' || (localUser && localUser.role === 'admin') || sessionStorage.getItem('admin_logged_in') === 'true') {
+    isAuth = true;
+    sessionStorage.setItem('admin_logged_in', 'true');
+  } else if (token) {
+    // 2. Token server eksternal jika ada
     try {
       const res = await fetch('/api/auth/me', {
         headers: { 'Authorization': 'Bearer ' + token }
       });
-      const data = await res.json();
-      if (res.ok && data.status === 'success' && data.user) {
-        if (data.user.role === 'admin') {
-          isAuth = true;
-          sessionStorage.setItem('admin_logged_in', 'true');
-          localStorage.setItem('auth_user', JSON.stringify(data.user));
-        } else {
-          showAdminError(`Akun "${data.user.username}" adalah akun Penonton, bukan Administrator.`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.status === 'success' && data.user) {
+          if (data.user.role === 'admin') {
+            isAuth = true;
+            sessionStorage.setItem('admin_logged_in', 'true');
+            localStorage.setItem('auth_user', JSON.stringify(data.user));
+          } else {
+            showAdminError(`Akun "${data.user.username}" adalah akun Penonton, bukan Administrator.`);
+          }
         }
       }
     } catch (e) {}
-  } else if (sessionStorage.getItem('admin_logged_in') === 'true') {
-    isAuth = true;
   }
 
   document.getElementById('login-section').style.display = isAuth ? 'none' : 'block';
@@ -840,25 +851,25 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 
   try {
     let data = null;
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      if (res.ok) data = await res.json();
-    } catch (e) {}
+    if (username === 'ezakasep' && password === 'ezakasep') {
+      data = {
+        status: 'success',
+        token: 'local_admin_token',
+        user: { id: 1, username: 'ezakasep', role: 'admin', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=ezakasep' }
+      };
+    } else {
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        if (res.ok) data = await res.json();
+      } catch (e) {}
+    }
 
     if (!data || data.status !== 'success') {
-      if (username === 'ezakasep' && password === 'ezakasep') {
-        data = {
-          status: 'success',
-          token: 'local_admin_token',
-          user: { id: 1, username: 'ezakasep', role: 'admin', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=ezakasep' }
-        };
-      } else {
-        throw new Error((data && data.message) || 'Username atau password admin salah');
-      }
+      throw new Error((data && data.message) || 'Username atau password admin salah');
     }
 
     if (data.user.role !== 'admin') {
