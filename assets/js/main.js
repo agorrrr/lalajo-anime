@@ -5,6 +5,19 @@
 const DB = {
   anime: null,
   async load() {
+    if (this.anime) return this.anime;
+    const inPages = window.location.pathname.split('/').some(p => p === 'pages');
+    const path = (inPages ? '../data/anime.json' : 'data/anime.json') + '?t=' + Date.now();
+    try {
+      const res = await fetch(path, { cache: 'no-store' });
+      if (res.ok) {
+        this.anime = await res.json();
+        localStorage.setItem('anime_db', JSON.stringify(this.anime));
+        return this.anime;
+      }
+    } catch (e) {
+      console.warn('Gagal fetch server, fallback cache:', e);
+    }
     const cached = localStorage.getItem('anime_db');
     if (cached) {
       try {
@@ -14,13 +27,7 @@ const DB = {
         console.error('Failed to parse cached DB', e);
       }
     }
-    if (this.anime) return this.anime;
-    const inPages = window.location.pathname.split('/').some(p => p === 'pages');
-    const path = inPages ? '../data/anime.json' : 'data/anime.json';
-    const res = await fetch(path);
-    this.anime = await res.json();
-    localStorage.setItem('anime_db', JSON.stringify(this.anime));
-    return this.anime;
+    return [];
   },
   save(list) {
     this.anime = list;

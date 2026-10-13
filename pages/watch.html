@@ -76,7 +76,7 @@
     </div>
   </div>
 </main>
-<script src="../assets/js/main.js"></script>
+<script src="../assets/js/main.js?v=2"></script>
 <script src="../assets/js/ads.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const slug    = params.get('slug');
   const epNum   = parseInt(params.get('ep')) || 1;
   const data    = await DB.load();
-  const anime   = data.find(a => a.slug === slug);
+  const anime   = data.find(a => a.slug === slug || String(a.id) === slug || (a.slug && slug && a.slug.toLowerCase() === slug.toLowerCase()));
   const content = document.getElementById('watch-content');
 
   if (!anime) {

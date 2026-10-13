@@ -17,13 +17,13 @@
     </div>
   </div>
 </main>
-<script src="../assets/js/main.js"></script>
+<script src="../assets/js/main.js?v=2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const slug   = params.get('slug');
   const data   = await DB.load();
-  const anime  = data.find(a => a.slug === slug);
+  const anime  = data.find(a => a.slug === slug || String(a.id) === slug || (a.slug && slug && a.slug.toLowerCase() === slug.toLowerCase()));
   const content = document.getElementById('anime-content');
 
   if (!anime) {
