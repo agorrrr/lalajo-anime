@@ -8,26 +8,33 @@ const DB = {
     if (this.anime) return this.anime;
     const inPages = window.location.pathname.split('/').some(p => p === 'pages');
     const path = (inPages ? '../data/anime.json' : 'data/anime.json') + '?t=' + Date.now();
+    let serverAnime = [];
     try {
       const res = await fetch(path, { cache: 'no-store' });
       if (res.ok) {
-        this.anime = await res.json();
-        localStorage.setItem('anime_db', JSON.stringify(this.anime));
-        return this.anime;
+        serverAnime = await res.json();
       }
     } catch (e) {
       console.warn('Gagal fetch server, fallback cache:', e);
     }
+
     const cached = localStorage.getItem('anime_db');
     if (cached) {
       try {
-        this.anime = JSON.parse(cached);
+        const localAnime = JSON.parse(cached);
+        // Merge: pertahankan anime hasil scrap manual di local yang belum ada di anime.json
+        const serverSlugs = new Set(serverAnime.map(a => a.slug));
+        const newLocal = localAnime.filter(a => !serverSlugs.has(a.slug));
+        this.anime = [...newLocal, ...serverAnime];
+        localStorage.setItem('anime_db', JSON.stringify(this.anime));
         return this.anime;
       } catch (e) {
         console.error('Failed to parse cached DB', e);
       }
     }
-    return [];
+    this.anime = serverAnime;
+    if (serverAnime.length) localStorage.setItem('anime_db', JSON.stringify(serverAnime));
+    return this.anime;
   },
   save(list) {
     this.anime = list;

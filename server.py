@@ -232,6 +232,31 @@ class AppHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"status": "success", "activity": activity})
             return
 
+        # 1g. Universal Anime Scraper API (GET)
+        elif path == "/api/scrape":
+            params = urllib.parse.parse_qs(parsed.query)
+            target_url = params.get("url", [""])[0]
+            if not target_url:
+                self.send_json({"status": "error", "message": "Parameter 'url' dibutuhkan"}, status=400)
+                return
+            try:
+                import re
+                import scripts.scrape_samehadaku as scraper
+                slug_m = re.search(r'/anime/([^/]+)/?', target_url)
+                if slug_m:
+                    slug = slug_m.group(1)
+                else:
+                    slug = target_url.rstrip('/').split('/')[-1] or "scraped-anime"
+                slug = re.sub(r'[^a-zA-Z0-9-_]', '-', slug).lower()
+                anime_data = scraper.scrape_anime_detail(slug, target_url, max_eps=12)
+                if not anime_data:
+                    self.send_json({"status": "error", "message": "Gagal mengambil data dari URL tersebut"}, status=400)
+                    return
+                self.send_json({"status": "success", "anime": anime_data})
+            except Exception as e:
+                self.send_json({"status": "error", "message": str(e)}, status=500)
+            return
+
         # 2. OAuth Callback (Google Drive Admin & Google User Login)
         elif path == "/oauth2callback":
             params = urllib.parse.parse_qs(parsed.query)

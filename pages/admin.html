@@ -945,7 +945,7 @@ async function runSingleScrape() {
   statusEl.style.background = 'rgba(51,132,214,0.12)';
   statusEl.style.color = '#3384d6';
   statusEl.style.border = '1px solid rgba(51,132,214,0.3)';
-  statusEl.innerHTML = 'Mengambil data dari Samehadaku... Harap tunggu sebentar.';
+  statusEl.innerHTML = 'Mengambil data anime dari web... Harap tunggu sebentar.';
 
   try {
     const res = await fetch(`/api/scrape?url=${encodeURIComponent(url)}`);
@@ -978,7 +978,7 @@ async function runSingleScrape() {
     statusEl.style.background = 'rgba(239,68,68,0.12)';
     statusEl.style.color = '#ef4444';
     statusEl.style.border = '1px solid rgba(239,68,68,0.3)';
-    statusEl.innerHTML = `<strong>Gagal:</strong> ${err.message}. Pastikan URL anime Samehadaku benar.`;
+    statusEl.innerHTML = `<strong>Gagal:</strong> ${err.message}. Pastikan URL yang dimasukkan benar.`;
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<span class="fa fa-download"></span> Scrape & Masukkan ke Web';
