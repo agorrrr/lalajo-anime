@@ -144,7 +144,7 @@
         <span class="fa fa-bullhorn"></span> Banner & Iklan
       </button>
       <button class="admin-nav-btn" data-tab="tab-scraper">
-        <span class="fa fa-refresh"></span> Auto Scraper
+        <span class="fa fa-bolt" style="color: #f59e0b;"></span> Scrape Manual & Auto
       </button>
       <button class="admin-nav-btn" data-tab="tab-vip">
         <span class="fa fa-star" style="color: #f59e0b;"></span> Kelola User & VIP (<span id="vip-count-badge">0</span>)
@@ -156,7 +156,10 @@
       <div class="admin-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
           <input type="text" id="search-anime-input" class="form-control" placeholder="Cari anime..." style="max-width: 280px;">
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" onclick="openManualScrapeModal()" class="btn btn-success" style="font-size: 13px; padding: 8px 14px;">
+              <span class="fa fa-bolt"></span> ⚡ Scrape Manual
+            </button>
             <button id="quick-sync-btn" class="btn btn-brand" style="font-size: 13px; padding: 8px 14px;">
               <span class="fa fa-refresh"></span> Sync dari Google Drive
             </button>
@@ -760,6 +763,42 @@
 
   </div> <!-- Tutup dashboard-section -->
 
+  <!-- Modal Scrape Manual Anime (Overlay Mandiri) -->
+  <div id="manual-scrape-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999999; align-items: center; justify-content: center; padding: 16px;">
+    <div class="admin-card" style="max-width: 580px; width: 100%; margin: auto; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-dark, #e5e7eb); padding-bottom: 12px;">
+        <h3 style="font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+          <span class="fa fa-bolt" style="color: #f59e0b;"></span> ⚡ Scrape Manual Anime
+        </h3>
+        <button type="button" onclick="closeManualScrapeModal()" class="btn btn-secondary" style="padding: 4px 10px; font-size: 13px;">
+          <span class="fa fa-times"></span>
+        </button>
+      </div>
+
+      <div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+          Masukkan link anime dari <strong>Samehadaku</strong>, <strong>Sokuja</strong>, atau situs anime lainnya. Sistem akan otomatis membaca judul, poster, sinopsis, dan episode video langsung ke web:
+        </p>
+
+        <div class="form-group">
+          <label style="font-size: 12px; font-weight: 700;">URL / Link Halaman Anime:</label>
+          <input type="text" id="modal-scrape-url" class="form-control" placeholder="Contoh: https://x6.sokuja.uk/anime/.../ atau https://v2.samehadaku.how/anime/.../">
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;">
+          <button type="button" id="modal-scrape-submit-btn" class="btn btn-success" onclick="executeModalScrape()" style="flex: 1; justify-content: center;">
+            <span class="fa fa-download"></span> Mulai Scrape & Simpan
+          </button>
+          <a href="https://github.com/agorrrr/lalajo-anime/actions/workflows/sync_anime.yml" target="_blank" class="btn btn-secondary" style="text-decoration: none;">
+            <span class="fa fa-github"></span> Run Cloud Sync
+          </a>
+        </div>
+
+        <div id="modal-scrape-status" style="display: none; margin-top: 14px; padding: 12px; border-radius: 8px; font-size: 13px;"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Edit Anime Lengkap (Overlay Mandiri di Luar Tab) -->
   <div id="edit-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999999; align-items: center; justify-content: center; padding: 16px;">
     <div class="admin-card" style="max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; margin: auto; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
@@ -1004,6 +1043,78 @@ document.querySelectorAll('.admin-nav-btn').forEach(btn => {
     if (tabId === 'tab-vip') loadUsersTable();
   });
 });
+
+// ── Manual Scrape Modal Logic ──
+function openManualScrapeModal() {
+  const modal = document.getElementById('manual-scrape-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    const input = document.getElementById('modal-scrape-url');
+    if (input) input.focus();
+  }
+}
+
+function closeManualScrapeModal() {
+  const modal = document.getElementById('manual-scrape-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function executeModalScrape() {
+  const input = document.getElementById('modal-scrape-url');
+  const btn = document.getElementById('modal-scrape-submit-btn');
+  const statusEl = document.getElementById('modal-scrape-status');
+  const url = input ? input.value.trim() : '';
+
+  if (!url) {
+    alert('Masukkan URL atau slug anime terlebih dahulu!');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="fa fa-spinner fa-spin"></span> Sedang Men-scrape...';
+  statusEl.style.display = 'block';
+  statusEl.style.background = 'rgba(51,132,214,0.12)';
+  statusEl.style.color = '#3384d6';
+  statusEl.style.border = '1px solid rgba(51,132,214,0.3)';
+  statusEl.innerHTML = 'Mengambil data anime & video stream... Harap tunggu sebentar.';
+
+  try {
+    const res = await fetch(`/api/scrape?url=${encodeURIComponent(url)}`);
+    const data = await res.json();
+    if (!res.ok || data.status !== 'success') {
+      throw new Error(data.message || 'Gagal mengambil data dari URL tersebut.');
+    }
+
+    const newAnime = data.anime;
+    const currentList = await DB.load();
+    const idx = currentList.findIndex(a => a.slug === newAnime.slug);
+    if (idx >= 0) {
+      newAnime.id = currentList[idx].id;
+      currentList[idx] = newAnime;
+    } else {
+      newAnime.id = Date.now();
+      currentList.unshift(newAnime);
+    }
+
+    await DriveService.saveAnimeData(currentList);
+    loadAnimeTable();
+    updateScraperAnimeCount();
+
+    statusEl.style.background = 'rgba(16,185,129,0.12)';
+    statusEl.style.color = '#10b981';
+    statusEl.style.border = '1px solid rgba(16,185,129,0.3)';
+    statusEl.innerHTML = `<strong>Berhasil!</strong> Anime <strong>${newAnime.title}</strong> (${newAnime.episodes_list.length} episode) berhasil di-scrape & masuk ke web! <a href="watch?slug=${newAnime.slug}&ep=1" target="_blank" style="color:#10b981;font-weight:700;margin-left:8px;text-decoration:underline;">Tonton Sekarang →</a>`;
+    input.value = '';
+  } catch (err) {
+    statusEl.style.background = 'rgba(239,68,68,0.12)';
+    statusEl.style.color = '#ef4444';
+    statusEl.style.border = '1px solid rgba(239,68,68,0.3)';
+    statusEl.innerHTML = `<strong>Gagal:</strong> ${err.message}. Pastikan URL yang dimasukkan benar.`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="fa fa-download"></span> Mulai Scrape & Simpan';
+  }
+}
 
 // ── Scraper Tab Logic ──
 async function updateScraperAnimeCount() {

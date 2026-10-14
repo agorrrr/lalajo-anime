@@ -227,11 +227,14 @@ export default async function handler(req, res) {
     const seenEp = new Set();
     const episodeLinks = [];
 
-    // Pola A: URL dengan episode/eps
-    const epRegex = /href=["'](https?:\/\/[^"'#\s]*(?:-episode-|\/episode\/|\/eps\/|-eps-)[^"'#\s]*)["']/gi;
+    // Pola A: URL dengan episode/eps (absolute atau relative)
+    const epRegex = /href=["']((?:https?:\/\/[^"'#\s]*|\/)[^"'#\s]*(?:-episode-|\/episode\/|\/eps\/|-eps-)[^"'#\s]*)["']/gi;
     const allEpLinks = [...html.matchAll(epRegex)];
     allEpLinks.forEach(m => {
-      const epUrl = m[1];
+      let epUrl = m[1];
+      if (!epUrl.startsWith('http')) {
+        epUrl = new URL(epUrl, targetUrl).href;
+      }
       const epNumM = epUrl.match(/(?:episode|eps)[-_/ ]?(\d+)/i) || epUrl.match(/-(\d+)(?:-sub-indo|\/)?$/i);
       const epNum = epNumM ? parseInt(epNumM[1]) : (episodeLinks.length + 1);
       if (!seenEp.has(epNum)) {
