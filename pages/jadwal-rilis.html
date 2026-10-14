@@ -75,11 +75,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       <ul class="schedule-day-list">
         ${animes.length ? animes.sort((a,b) => (a.time||'').localeCompare(b.time||'')).map(a => {
           const cleanTime = (a.time || '20:00').replace(/WIB/gi, '').trim();
+          const poster = a.thumbnail || 'https://placehold.co/38x52/1e293b/fff?text=N%2FA';
           return `
-          <li>
-            <a href="anime.html?slug=${a.slug}" title="${a.title}">
-              ${a.title.length > 32 ? a.title.slice(0,32)+'...' : a.title}
-              <span class="time-badge">${cleanTime} WIB</span>
+          <li style="padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,0.1);">
+            <a href="anime.html?slug=${a.slug}" title="${a.title}" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit;">
+              <img src="${poster}" alt="${a.title}" loading="lazy" style="width: 38px; height: 52px; object-fit: cover; border-radius: 4px; flex-shrink: 0;" onerror="this.src='https://placehold.co/38x52/1e293b/fff?text=N%2FA'">
+              <div style="flex-grow: 1; min-width: 0;">
+                <div style="font-size: 13px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${a.title}</div>
+                <span class="time-badge" style="display: inline-block; margin-top: 4px;">${cleanTime} WIB</span>
+              </div>
             </a>
           </li>`;
         }).join('') : '<li style="padding:12px;color:#9ca3af;font-size:12px;">Tidak ada anime</li>'}

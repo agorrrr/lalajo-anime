@@ -140,6 +140,25 @@ def scrape_anime_detail(slug, url, max_eps=12):
         fb_thumb = re.search(r'src=[\"\'](https?://[^\"\']+\.(?:jpg|jpeg|png|webp))[\"\']', html)
         thumbnail = fb_thumb.group(1) if fb_thumb else ""
 
+    # Auto-search internet (Kitsu API) jika foto/banner tidak kebawa dari scraper
+    banner = ""
+    if not thumbnail or thumbnail.startswith('/') or 'placehold.co' in thumbnail:
+        try:
+            import urllib.parse
+            clean_t = re.sub(r'(\s*Season\s*\d+|\s*Part\s*\d+|\s*Cour\s*\d+|:\s*.*$|\".*?\")', '', title).strip()
+            k_url = 'https://kitsu.io/api/edge/anime?filter[text]=' + urllib.parse.quote(clean_t) + '&page[limit]=1'
+            k_req = urllib.request.Request(k_url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(k_req, timeout=5) as k_res:
+                k_data = json.loads(k_res.read().decode('utf-8'))
+                if k_data.get('data'):
+                    k_attrs = k_data['data'][0]['attributes']
+                    p_obj = k_attrs.get('posterImage') or {}
+                    b_obj = k_attrs.get('coverImage') or {}
+                    thumbnail = p_obj.get('original') or p_obj.get('large') or thumbnail
+                    banner = b_obj.get('original') or b_obj.get('large') or ''
+        except Exception:
+            pass
+
     # Score
     score_m = re.search(r'class=[\"\'][^\"\']*(?:font-extrabold|score|rating|skor)[^\"\']*[\"\']>([\d\.]+)</span>', html, re.I) \
         or re.search(r'(?:Skor|Rating)\s*:\s*(?:</b>\s*)?([\d\.]+)', html, re.I)
@@ -248,6 +267,7 @@ def scrape_anime_detail(slug, url, max_eps=12):
         "title": title,
         "slug": slug,
         "thumbnail": thumbnail,
+        "banner": banner or thumbnail,
         "type": anime_type,
         "status": status,
         "episodes": max(len(episodes_list), 12),

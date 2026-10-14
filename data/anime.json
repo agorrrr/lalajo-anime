@@ -16,7 +16,7 @@
       "Action",
       "Adventure"
     ],
-    "thumbnail": "../assets/images/1791872877_Black-Clover-Season-2.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/poster_images/13209/original.png",
     "day": "Sabtu",
     "time": "22:20",
     "drive_folder_id": "1lUsErOd24W7Owez6YlzURauZ3RbcIb2r",
@@ -33,7 +33,8 @@
         "date": "2026-10-13",
         "drive_file_id": "1agHrWz4enA4WLC8OQc-q26S6z37ahsi1"
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/cover_images/13209/original.jpg"
   },
   {
     "id": 1791810139914,
@@ -54,7 +55,7 @@
       "Fantasy",
       "Shounen"
     ],
-    "thumbnail": "../assets/images/1791810417_138006l.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/46474/poster_image/99d7df09d8cb9360b1e02825372ce612.jpg",
     "day": "Senin",
     "time": "19:00",
     "drive_folder_id": "17AXgx4allNYmQRbdH8XuFzjSCotomwCA",
@@ -227,12 +228,13 @@
         "date": "2026-10-13",
         "drive_file_id": "1jA6vkh5wMG3MtJB5CtoXTrTsZgzbHdCN"
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/46474/cover_image/883c308356a4db76a9c0af900ada96ed.jpg"
   },
   {
     "title": "Honzuki no Gekokujou Season 4",
     "slug": "honzuki-no-gekokujou-season-4",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/04/Honzuki-no-Gekokujou-Season-4.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/poster_images/42241/original.jpg",
     "type": "TV",
     "status": "Finished Airing",
     "episodes": 12,
@@ -465,12 +467,13 @@
     "views": 1200,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814456
+    "id": 1791872814456,
+    "banner": "https://media.kitsu.app/anime/cover_images/42241/original.png"
   },
   {
     "title": "Tsuihou sareta Tensei Juukishi wa Game",
     "slug": "tsuihou-sareta-tensei-juukishi-wa-game",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/07/Tsuihou-sareta-Tensei-Juukishi-wa-Game.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/49183/poster_image/b32303eb7dcb47154212b278c30be241.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -699,12 +702,13 @@
     "rating": "PG-13",
     "id": 1791872814457,
     "day": "Kamis",
-    "time": "23:50"
+    "time": "23:50",
+    "banner": "https://media.kitsu.app/anime/49183/poster_image/b32303eb7dcb47154212b278c30be241.jpg"
   },
   {
     "title": "Ao Ashi S2",
     "slug": "ao-ashi-s2",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/10/bx191788-XC6F24LdX6a4.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/44629/poster_image/4f89be2f85a04bab7fcd8bcaaca511bc.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -770,12 +774,13 @@
     "views": 1200,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814458
+    "id": 1791872814458,
+    "banner": "https://media.kitsu.app/anime/44629/cover_image/a78362581ad3fae2e998109bb6b33b34.png"
   },
   {
     "title": "Yowaki Max",
     "slug": "yowaki-max",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/10/bx200455-P3XStRQMJ7Di.png",
+    "thumbnail": "https://media.kitsu.app/anime/51020/poster_image/57fda64c7ee9f1ad948bc9df9e670b94.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -840,12 +845,13 @@
     "rating": "PG-13",
     "id": 1791872814459,
     "day": "Minggu",
-    "time": "22:50"
+    "time": "22:50",
+    "banner": "https://media.kitsu.app/anime/51020/poster_image/57fda64c7ee9f1ad948bc9df9e670b94.jpg"
   },
   {
     "title": "Tsuihou sareta Cheat Fuyo Majutsushi",
     "slug": "tsuihou-sareta-cheat-fuyo-majutsushi",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/10/160339.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/51014/poster_image/4ed55a667ee94f66df17041638807348.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -895,12 +901,13 @@
     "rating": "PG-13",
     "id": 1791872814460,
     "day": "Selasa",
-    "time": "22:50"
+    "time": "22:50",
+    "banner": "https://media.kitsu.app/anime/51014/poster_image/4ed55a667ee94f66df17041638807348.jpg"
   },
   {
     "title": "Diamond no Ace Act II Season 2 Cour 2",
     "slug": "diamond-no-ace-act-ii-season-2-cour-2",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/10/DAceC2.png",
+    "thumbnail": "https://media.kitsu.app/anime/poster_images/42160/original.jpeg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -934,12 +941,13 @@
     "views": 1500,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814461
+    "id": 1791872814461,
+    "banner": "https://media.kitsu.app/anime/poster_images/42160/original.jpeg"
   },
   {
     "title": "Tensei shita Daiseijo wa, Seijo de Aru Koto wo Hitakakusu",
     "slug": "tensei-shita-daiseijo-wa-seijo-de-aru-koto-wo-hitakakusu",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/10/Tensei-shita-Daiseijo-wa-Seijo-de-Aru-Koto-wo-Hitakakusu.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/50850/poster_image/17ed41a9bd88d39379b46922dd065545.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -1014,12 +1022,13 @@
     "rating": "PG-13",
     "id": 1791872814462,
     "day": "Sabtu",
-    "time": "20:20"
+    "time": "20:20",
+    "banner": "https://media.kitsu.app/anime/50850/poster_image/17ed41a9bd88d39379b46922dd065545.jpg"
   },
   {
     "title": "Tokyo Revengers S4",
     "slug": "tokyo-revengers-s4",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/10/bx178083-bg7pg6TCHwtG.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/poster_images/43321/original.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -1082,12 +1091,13 @@
     "views": 1500,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814463
+    "id": 1791872814463,
+    "banner": "https://media.kitsu.app/anime/cover_images/43321/original.png"
   },
   {
     "title": "Overgeared",
     "slug": "overgeared",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/09/bx212888-NhyvqPt5aIuJ.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/50743/poster_image/6ee1292532fefeaeb60538d1accbe2ce.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -1170,12 +1180,13 @@
     "rating": "PG-13",
     "id": 1791872814464,
     "day": "Minggu",
-    "time": "22:00"
+    "time": "22:00",
+    "banner": "https://media.kitsu.app/anime/50743/poster_image/6ee1292532fefeaeb60538d1accbe2ce.jpg"
   },
   {
     "title": "Sora wa Akai Kawa no Hotori",
     "slug": "sora-wa-akai-kawa-no-hotori",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/07/158138.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/50562/poster_image/1e79247cd4248dc08ec6e0c63afd462f.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -1413,12 +1424,13 @@
     "views": 1500,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814465
+    "id": 1791872814465,
+    "banner": "https://media.kitsu.app/anime/50562/poster_image/1e79247cd4248dc08ec6e0c63afd462f.jpg"
   },
   {
     "title": "Kashita Maryoku",
     "slug": "kashita-maryoku",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/10/sdasdasdasdasd.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/50993/poster_image/ff8b593c59dd05daccc20da0a683dbb8.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -1484,12 +1496,13 @@
     "rating": "PG-13",
     "id": 1791872814466,
     "day": "Minggu",
-    "time": "01:20"
+    "time": "01:20",
+    "banner": "https://media.kitsu.app/anime/50993/poster_image/ff8b593c59dd05daccc20da0a683dbb8.jpg"
   },
   {
     "title": "Psyren",
     "slug": "psyren",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/10/Psyren.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/50392/poster_image/7cc25fd383e2662a8599612ccb3eb50c.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -1554,12 +1567,13 @@
     "rating": "PG-13",
     "id": 1791872814467,
     "day": "Senin",
-    "time": "22:00"
+    "time": "22:00",
+    "banner": "https://media.kitsu.app/anime/50392/poster_image/7cc25fd383e2662a8599612ccb3eb50c.jpg"
   },
   {
     "title": "Tensei Goblin dakedo Shitsumon Aru?",
     "slug": "tensei-goblin-dakedo-shitsumon-aru",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/10/Tensei-Goblin-dakedo-Shitsumon-Aru.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/50607/poster_image/6951112fb74a2391d4407bdce70d3c8b.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -1637,12 +1651,13 @@
     "rating": "PG-13",
     "id": 1791872814468,
     "day": "Senin",
-    "time": "20:20"
+    "time": "20:20",
+    "banner": "https://media.kitsu.app/anime/50607/poster_image/6951112fb74a2391d4407bdce70d3c8b.jpg"
   },
   {
     "title": "Doumo, Suki na Hito ni Horegusuri wo Irai sareta Majo desu.",
     "slug": "doumo-suki-na-hito-ni-horegusuri-wo-irai-sareta-majo-desu",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/10/Doumo-Suki-na-Hito-ni-Horegusuri-wo-Irai-sareta-Majo-desu.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/50520/poster_image/c0d71e77f90ed9704e2d68b26f65e8ab.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -1705,12 +1720,13 @@
     "rating": "PG-13",
     "id": 1791872814469,
     "day": "Senin",
-    "time": "20:00"
+    "time": "20:00",
+    "banner": "https://media.kitsu.app/anime/50520/poster_image/c0d71e77f90ed9704e2d68b26f65e8ab.jpg"
   },
   {
     "title": "Kanata kara",
     "slug": "kanata-kara",
-    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/10/Kanata-kara.jpg",
+    "thumbnail": "https://media.kitsu.app/anime/50610/poster_image/6f96f1143c75d5cd8a2804cdad270593.jpg",
     "type": "TV",
     "status": "Currently Airing",
     "episodes": 12,
@@ -1772,7 +1788,8 @@
     "views": 1500,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814470
+    "id": 1791872814470,
+    "banner": "https://media.kitsu.app/anime/50610/poster_image/6f96f1143c75d5cd8a2804cdad270593.jpg"
   },
   {
     "id": 2806978210801,
@@ -1791,7 +1808,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Kyouran Reijou Nia L",
+    "thumbnail": "https://media.kitsu.app/anime/50764/poster_image/127d1e58d3becc2682a0d3347af04a47.jpg",
     "day": "Selasa",
     "time": "20:15",
     "drive_folder_id": "",
@@ -1806,7 +1823,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/50764/poster_image/127d1e58d3becc2682a0d3347af04a47.jpg"
   },
   {
     "id": 8635113449301,
@@ -1825,7 +1843,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Shiotaiou no Satou-s",
+    "thumbnail": "https://media.kitsu.app/anime/51012/poster_image/a766f56d62c9312ec5a52d9cb3668525.jpg",
     "day": "Selasa",
     "time": "21:20",
     "drive_folder_id": "",
@@ -1840,7 +1858,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/51012/poster_image/a766f56d62c9312ec5a52d9cb3668525.jpg"
   },
   {
     "id": 5217481980766,
@@ -1859,7 +1878,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Chitose-kun wa Ramun",
+    "thumbnail": "https://media.kitsu.app/anime/49122/poster_image/2733baa5518506446305fde8dc751b67.png",
     "day": "Selasa",
     "time": "23:50",
     "drive_folder_id": "",
@@ -1874,7 +1893,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/49122/poster_image/2733baa5518506446305fde8dc751b67.png"
   },
   {
     "id": 3661403796629,
@@ -1893,7 +1913,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Sasaki to Pii-chan S",
+    "thumbnail": "https://media.kitsu.app/anime/48651/poster_image/07577794e3295b9d3ca29c9230b07d5e.jpg",
     "day": "Rabu",
     "time": "20:20",
     "drive_folder_id": "",
@@ -1908,7 +1928,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/48651/poster_image/07577794e3295b9d3ca29c9230b07d5e.jpg"
   },
   {
     "id": 18068060780,
@@ -1927,7 +1948,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Sekai Saikyou no Maj",
+    "thumbnail": "https://media.kitsu.app/anime/50697/poster_image/69bbd980ddf5e9c80c50aebacf7b861a.jpg",
     "day": "Rabu",
     "time": "20:30",
     "drive_folder_id": "",
@@ -1942,7 +1963,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/50697/poster_image/69bbd980ddf5e9c80c50aebacf7b861a.jpg"
   },
   {
     "id": 9095218154450,
@@ -1961,7 +1983,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Tensei shitara Ken d",
+    "thumbnail": "https://media.kitsu.app/anime/45242/poster_image/72240fce0cca784af8dd52244d69703d.jpg",
     "day": "Rabu",
     "time": "22:50",
     "drive_folder_id": "",
@@ -1976,7 +1998,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/45242/cover_image/64e9dd37bedcc92f6619573f3050154d.png"
   },
   {
     "id": 8309322557506,
@@ -1995,7 +2018,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Kikansha no Mahou wa",
+    "thumbnail": "https://media.kitsu.app/anime/47240/poster_image/9f277723235a03d821b674c8c12ef0af.png",
     "day": "Kamis",
     "time": "00:35",
     "drive_folder_id": "",
@@ -2010,7 +2033,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/47240/cover_image/1a90726ac192f8c782d106f6a6287513.png"
   },
   {
     "id": 9533366205705,
@@ -2029,7 +2053,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Koori no Jouheki Sea",
+    "thumbnail": "https://media.kitsu.app/anime/50465/poster_image/cb84dbfaa421b01efc8489050d26589f.jpg",
     "day": "Kamis",
     "time": "23:00",
     "drive_folder_id": "",
@@ -2044,7 +2068,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/50465/poster_image/cb84dbfaa421b01efc8489050d26589f.jpg"
   },
   {
     "id": 1108199666546,
@@ -2063,7 +2088,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Hyouken no Majutsush",
+    "thumbnail": "https://media.kitsu.app/anime/50723/poster_image/12426fda684e2b0e7dcd978bddbf8457.jpg",
     "day": "Jumat",
     "time": "00:20",
     "drive_folder_id": "",
@@ -2078,7 +2103,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/50723/poster_image/12426fda684e2b0e7dcd978bddbf8457.jpg"
   },
   {
     "id": 8934403643672,
@@ -2097,7 +2123,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Tokyo Revengers: San",
+    "thumbnail": "https://media.kitsu.app/anime/poster_images/43321/original.jpg",
     "day": "Jumat",
     "time": "18:50",
     "drive_folder_id": "",
@@ -2112,7 +2138,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/cover_images/43321/original.png"
   },
   {
     "id": 6535204183659,
@@ -2131,7 +2158,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Kusuriya no Hitorigo",
+    "thumbnail": "https://media.kitsu.app/anime/47083/poster_image/1e25d26e74707ada861514620f630da8.jpg",
     "day": "Jumat",
     "time": "22:20",
     "drive_folder_id": "",
@@ -2146,7 +2173,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/47083/cover_image/34f7e35b6c451a66d2c67458a0c0dd7b.jpg"
   },
   {
     "id": 8436048349032,
@@ -2165,7 +2193,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Toaru Anbu no Item",
+    "thumbnail": "https://media.kitsu.app/anime/49564/poster_image/d6de04fb14b7593c26f96e6221babb80.jpg",
     "day": "Jumat",
     "time": "22:50",
     "drive_folder_id": "",
@@ -2180,7 +2208,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/49564/poster_image/d6de04fb14b7593c26f96e6221babb80.jpg"
   },
   {
     "id": 3340073607530,
@@ -2199,7 +2228,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Tougen Anki: Nikko K",
+    "thumbnail": "https://media.kitsu.app/anime/48834/poster_image/98c36adc82798a7fa7523dab399de919.jpg",
     "day": "Jumat",
     "time": "23:50",
     "drive_folder_id": "",
@@ -2214,7 +2243,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/48834/poster_image/98c36adc82798a7fa7523dab399de919.jpg"
   },
   {
     "id": 8571009658337,
@@ -2233,7 +2263,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Hotaru no Yomeiri",
+    "thumbnail": "https://media.kitsu.app/anime/50471/poster_image/97fae571c9185347f19b670ca44b6013.jpg",
     "day": "Jumat",
     "time": "23:50",
     "drive_folder_id": "",
@@ -2248,7 +2278,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/50471/cover_image/fc51d49842c57143427befb20b025136.jpg"
   },
   {
     "id": 9679296227107,
@@ -2267,7 +2298,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Romelia Senki",
+    "thumbnail": "https://media.kitsu.app/anime/49196/poster_image/a6ad56d31093d06c3b024f1a85dda6e2.jpg",
     "day": "Sabtu",
     "time": "20:30",
     "drive_folder_id": "",
@@ -2282,7 +2313,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/49196/poster_image/a6ad56d31093d06c3b024f1a85dda6e2.jpg"
   },
   {
     "id": 7359554788203,
@@ -2301,7 +2333,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Yasei no Last Boss g",
+    "thumbnail": "https://media.kitsu.app/anime/49147/poster_image/ec5f15aa4eb9fe9e8fb9dcde675233be.jpg",
     "day": "Sabtu",
     "time": "21:00",
     "drive_folder_id": "",
@@ -2316,7 +2348,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/49147/poster_image/ec5f15aa4eb9fe9e8fb9dcde675233be.jpg"
   },
   {
     "id": 1350779593840,
@@ -2335,7 +2368,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Seitokai ni mo Ana w",
+    "thumbnail": "https://kitsu-production-media.s3.us-west-002.backblazeb2.com/anime/49877/poster_image/4850b0a42082f0554af1dd38bf4e7bfe.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=002d6013655cdc00000000003%2F20261014%2Fus-west-002%2Fs3%2Faws4_request&X-Amz-Date=20261014T120758Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=f6a59f813419ba36276c90b154cf6376540c7b695e5101956d702330322cf865",
     "day": "Minggu",
     "time": "00:20",
     "drive_folder_id": "",
@@ -2350,7 +2383,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://kitsu-production-media.s3.us-west-002.backblazeb2.com/anime/49877/poster_image/4850b0a42082f0554af1dd38bf4e7bfe.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=002d6013655cdc00000000003%2F20261014%2Fus-west-002%2Fs3%2Faws4_request&X-Amz-Date=20261014T120758Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=f6a59f813419ba36276c90b154cf6376540c7b695e5101956d702330322cf865"
   },
   {
     "id": 113154917105,
@@ -2369,7 +2403,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Ao no Hako Season 2",
+    "thumbnail": "https://media.kitsu.app/anime/48239/poster_image/5a0d7616b5783a5cfd502d9643648ae9.jpg",
     "day": "Minggu",
     "time": "15:30",
     "drive_folder_id": "",
@@ -2384,7 +2418,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/48239/cover_image/a446a00e332f40b2a631e877983eb0e6.jpg"
   },
   {
     "id": 2491146779973,
@@ -2403,7 +2438,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Yozakura-san Chi no ",
+    "thumbnail": "https://media.kitsu.app/anime/46869/poster_image/01757daeabbea1fbcc76fff96775e3c8.jpg",
     "day": "Minggu",
     "time": "16:00",
     "drive_folder_id": "",
@@ -2418,7 +2453,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/46869/cover_image/a34253428dc1a2b1c58e4c95ddc6bd2d.png"
   },
   {
     "id": 9799187640663,
@@ -2437,7 +2473,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Ao Ashi Season 2",
+    "thumbnail": "https://media.kitsu.app/anime/44629/poster_image/4f89be2f85a04bab7fcd8bcaaca511bc.jpg",
     "day": "Minggu",
     "time": "16:30",
     "drive_folder_id": "",
@@ -2452,7 +2488,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/44629/cover_image/a78362581ad3fae2e998109bb6b33b34.png"
   },
   {
     "id": 9037449986405,
@@ -2471,7 +2508,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Mezametara Saikyou S",
+    "thumbnail": "https://media.kitsu.app/anime/51005/poster_image/584fc5b72dd59516029bcaf36ecc6ee7.jpg",
     "day": "Minggu",
     "time": "22:10",
     "drive_folder_id": "",
@@ -2486,7 +2523,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/51005/poster_image/584fc5b72dd59516029bcaf36ecc6ee7.jpg"
   },
   {
     "id": 4446634502595,
@@ -2505,7 +2543,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Tensei Kizoku Kantei",
+    "thumbnail": "https://media.kitsu.app/anime/47481/poster_image/f31663e556d8dcb7ad52fa6d71dfc50e.jpg",
     "day": "Minggu",
     "time": "22:20",
     "drive_folder_id": "",
@@ -2520,7 +2558,8 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/47481/cover_image/81b88f19aba7a58b6ff1c0018cc212bd.jpg"
   },
   {
     "id": 4964516278952,
@@ -2539,7 +2578,7 @@
       "Action",
       "Fantasy"
     ],
-    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Dark Summoner to Dek",
+    "thumbnail": "https://media.kitsu.app/anime/50990/poster_image/f6be2a6127d782b594c17294af7df1c4.jpg",
     "day": "Minggu",
     "time": "23:50",
     "drive_folder_id": "",
@@ -2554,6 +2593,7 @@
         ],
         "drive_file_id": ""
       }
-    ]
+    ],
+    "banner": "https://media.kitsu.app/anime/50990/poster_image/f6be2a6127d782b594c17294af7df1c4.jpg"
   }
 ]

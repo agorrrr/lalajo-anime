@@ -168,13 +168,34 @@ export default async function handler(req, res) {
       .trim();
     if (!title) title = slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-    // 3. Thumbnail
+    // 3. Thumbnail & Banner (dengan auto-search internet via Kitsu/AniList jika foto tidak kebawa)
     const ogImgMatch = html.match(/<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image)["'][^>]+content=["']([^"']+)["']/i)
       || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image|twitter:image)["']/i);
     const thumbClassMatch = html.match(/class=["'][^"']*(?:w-48|fotoanime|thumb|poster|cover|featured-image)[^"']*["'][^>]*>.*?<img[^>]+(?:src|data-src)=["']([^"']+)["']/is);
     const anyImgMatch = html.match(/<img[^>]+(?:src|data-src)=["'](https?:\/\/[^"']+\.(?:jpg|jpeg|png|webp))["']/i);
 
     let thumbnail = ogImgMatch ? ogImgMatch[1].trim() : (thumbClassMatch ? thumbClassMatch[1].trim() : (anyImgMatch ? anyImgMatch[1].trim() : ''));
+    let banner = '';
+
+    // Fitur Otomatis Cari Foto di Internet jika hasil scrape tidak membawa foto yang valid
+    if (!thumbnail || thumbnail.startsWith('/') || thumbnail.includes('placehold.co')) {
+      try {
+        const cleanTitle = title.replace(/\s*(?:Season\s*\d+|Part\s*\d+|Cour\s*\d+|:\s*.*$)/i, '').trim();
+        const kitsuUrl = `https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(cleanTitle)}&page[limit]=1`;
+        const kResp = await fetch(kitsuUrl, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(5000) });
+        if (kResp.ok) {
+          const kData = await kResp.json();
+          if (kData.data && kData.data.length > 0) {
+            const attrs = kData.data[0].attributes;
+            const pObj = attrs.posterImage || {};
+            const bObj = attrs.coverImage || {};
+            thumbnail = pObj.original || pObj.large || pObj.medium || thumbnail;
+            banner = bObj.original || bObj.large || '';
+          }
+        }
+      } catch (e) {}
+    }
+
     if (!thumbnail || thumbnail.startsWith('/')) {
       thumbnail = `https://placehold.co/212x300/1e293b/fff?text=${encodeURIComponent(title.slice(0, 30))}`;
     }
@@ -310,6 +331,7 @@ export default async function handler(req, res) {
       title,
       slug,
       thumbnail,
+      banner: banner || thumbnail,
       type: animeType,
       status,
       episodes: Math.max(episodes_list.length, 12),
