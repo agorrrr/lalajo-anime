@@ -17,8 +17,8 @@
       "Adventure"
     ],
     "thumbnail": "../assets/images/1791872877_Black-Clover-Season-2.jpg",
-    "day": "Senin",
-    "time": "19:00",
+    "day": "Sabtu",
+    "time": "22:20",
     "drive_folder_id": "1lUsErOd24W7Owez6YlzURauZ3RbcIb2r",
     "episodes_list": [
       {
@@ -697,7 +697,9 @@
     "views": 1200,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814457
+    "id": 1791872814457,
+    "day": "Kamis",
+    "time": "23:50"
   },
   {
     "title": "Ao Ashi S2",
@@ -836,7 +838,9 @@
     "views": 1200,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814459
+    "id": 1791872814459,
+    "day": "Minggu",
+    "time": "22:50"
   },
   {
     "title": "Tsuihou sareta Cheat Fuyo Majutsushi",
@@ -889,7 +893,9 @@
     "views": 1200,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814460
+    "id": 1791872814460,
+    "day": "Selasa",
+    "time": "22:50"
   },
   {
     "title": "Diamond no Ace Act II Season 2 Cour 2",
@@ -1006,7 +1012,9 @@
     "views": 1500,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814462
+    "id": 1791872814462,
+    "day": "Sabtu",
+    "time": "20:20"
   },
   {
     "title": "Tokyo Revengers S4",
@@ -1160,7 +1168,9 @@
     "views": 1500,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814464
+    "id": 1791872814464,
+    "day": "Minggu",
+    "time": "22:00"
   },
   {
     "title": "Sora wa Akai Kawa no Hotori",
@@ -1472,7 +1482,9 @@
     "views": 1500,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814466
+    "id": 1791872814466,
+    "day": "Minggu",
+    "time": "01:20"
   },
   {
     "title": "Psyren",
@@ -1540,7 +1552,9 @@
     "views": 1500,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814467
+    "id": 1791872814467,
+    "day": "Senin",
+    "time": "22:00"
   },
   {
     "title": "Tensei Goblin dakedo Shitsumon Aru?",
@@ -1621,7 +1635,9 @@
     "views": 1500,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814468
+    "id": 1791872814468,
+    "day": "Senin",
+    "time": "20:20"
   },
   {
     "title": "Doumo, Suki na Hito ni Horegusuri wo Irai sareta Majo desu.",
@@ -1687,7 +1703,9 @@
     "views": 1500,
     "release_year": 2026,
     "rating": "PG-13",
-    "id": 1791872814469
+    "id": 1791872814469,
+    "day": "Senin",
+    "time": "20:00"
   },
   {
     "title": "Kanata kara",
@@ -1755,5 +1773,787 @@
     "release_year": 2026,
     "rating": "PG-13",
     "id": 1791872814470
+  },
+  {
+    "id": 2806978210801,
+    "slug": "kyouran-reijou-nia-liston-byoujaku-reijou-ni-tensei-shita-kamigoroshi-no-bujin-no-karei-naru-musouroku",
+    "title": "Kyouran Reijou Nia Liston: Byoujaku Reijou ni Tensei shita Kamigoroshi no Bujin no Karei Naru Musouroku",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Kyouran Reijou Nia Liston: Byoujaku Reijou ni Tensei shita Kamigoroshi no Bujin no Karei Naru Musouroku sedang tayang (ongoing) setiap hari Selasa pukul 20:15 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Kyouran Reijou Nia L",
+    "day": "Selasa",
+    "time": "20:15",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Kyouran Reijou Nia Liston: Byoujaku Reijou ni Tensei shita Kamigoroshi no Bujin no Karei Naru Musouroku Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/kyouran-reijou-nia-liston-byoujaku-reijou-ni-tensei-shita-kamigoroshi-no-bujin-no-karei-naru-musouroku-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/kyouran-reijou-nia-liston-byoujaku-reijou-ni-tensei-shita-kamigoroshi-no-bujin-no-karei-naru-musouroku-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 8635113449301,
+    "slug": "shiotaiou-no-satou-san-ga-ore-ni-dake-amai",
+    "title": "Shiotaiou no Satou-san ga Ore ni dake Amai",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Shiotaiou no Satou-san ga Ore ni dake Amai sedang tayang (ongoing) setiap hari Selasa pukul 21:20 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Shiotaiou no Satou-s",
+    "day": "Selasa",
+    "time": "21:20",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Shiotaiou no Satou-san ga Ore ni dake Amai Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/shiotaiou-no-satou-san-ga-ore-ni-dake-amai-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/shiotaiou-no-satou-san-ga-ore-ni-dake-amai-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 5217481980766,
+    "slug": "chitose-kun-wa-ramune-bin-no-naka-part-2",
+    "title": "Chitose-kun wa Ramune Bin no Naka Part 2",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Chitose-kun wa Ramune Bin no Naka Part 2 sedang tayang (ongoing) setiap hari Selasa pukul 23:50 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Chitose-kun wa Ramun",
+    "day": "Selasa",
+    "time": "23:50",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Chitose-kun wa Ramune Bin no Naka Part 2 Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/chitose-kun-wa-ramune-bin-no-naka-part-2-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/chitose-kun-wa-ramune-bin-no-naka-part-2-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 3661403796629,
+    "slug": "sasaki-to-pii-chan-season-2",
+    "title": "Sasaki to Pii-chan Season 2",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Sasaki to Pii-chan Season 2 sedang tayang (ongoing) setiap hari Rabu pukul 20:20 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Sasaki to Pii-chan S",
+    "day": "Rabu",
+    "time": "20:20",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Sasaki to Pii-chan Season 2 Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/sasaki-to-pii-chan-season-2/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/sasaki-to-pii-chan-season-2/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 18068060780,
+    "slug": "sekai-saikyou-no-majo-hajimemashita",
+    "title": "Sekai Saikyou no Majo, Hajimemashita",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Sekai Saikyou no Majo, Hajimemashita sedang tayang (ongoing) setiap hari Rabu pukul 20:30 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Sekai Saikyou no Maj",
+    "day": "Rabu",
+    "time": "20:30",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Sekai Saikyou no Majo, Hajimemashita Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/sekai-saikyou-no-majo-hajimemashita-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/sekai-saikyou-no-majo-hajimemashita-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 9095218154450,
+    "slug": "tensei-shitara-ken-deshita-ii",
+    "title": "Tensei shitara Ken deshita II",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Tensei shitara Ken deshita II sedang tayang (ongoing) setiap hari Rabu pukul 22:50 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Tensei shitara Ken d",
+    "day": "Rabu",
+    "time": "22:50",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Tensei shitara Ken deshita II Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/tensei-shitara-ken-deshita-ii-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/tensei-shitara-ken-deshita-ii-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 8309322557506,
+    "slug": "kikansha-no-mahou-wa-tokubetsu-desu-season-2",
+    "title": "Kikansha no Mahou wa Tokubetsu desu Season 2",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Kikansha no Mahou wa Tokubetsu desu Season 2 sedang tayang (ongoing) setiap hari Kamis pukul 00:35 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Kikansha no Mahou wa",
+    "day": "Kamis",
+    "time": "00:35",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Kikansha no Mahou wa Tokubetsu desu Season 2 Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/kikansha-no-mahou-wa-tokubetsu-desu-season-2-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/kikansha-no-mahou-wa-tokubetsu-desu-season-2-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 9533366205705,
+    "slug": "koori-no-jouheki-season-2",
+    "title": "Koori no Jouheki Season 2",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Koori no Jouheki Season 2 sedang tayang (ongoing) setiap hari Kamis pukul 23:00 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Koori no Jouheki Sea",
+    "day": "Kamis",
+    "time": "23:00",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Koori no Jouheki Season 2 Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/koori-no-jouheki-season-2-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/koori-no-jouheki-season-2-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 1108199666546,
+    "slug": "hyouken-no-majutsushi-ga-sekai-wo-suberu-ii",
+    "title": "Hyouken no Majutsushi ga Sekai wo Suberu II",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Hyouken no Majutsushi ga Sekai wo Suberu II sedang tayang (ongoing) setiap hari Jumat pukul 00:20 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Hyouken no Majutsush",
+    "day": "Jumat",
+    "time": "00:20",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Hyouken no Majutsushi ga Sekai wo Suberu II Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/hyouken-no-majutsushi-ga-sekai-wo-suberu-ii-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 8934403643672,
+    "slug": "tokyo-revengers-santen-sensou-hen",
+    "title": "Tokyo Revengers: Santen Sensou-hen",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Tokyo Revengers: Santen Sensou-hen sedang tayang (ongoing) setiap hari Jumat pukul 18:50 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Tokyo Revengers: San",
+    "day": "Jumat",
+    "time": "18:50",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Tokyo Revengers: Santen Sensou-hen Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/tokyo-revengers-santen-sensou-hen-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/tokyo-revengers-santen-sensou-hen-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 6535204183659,
+    "slug": "kusuriya-no-hitorigoto-season-3",
+    "title": "Kusuriya no Hitorigoto Season 3",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Kusuriya no Hitorigoto Season 3 sedang tayang (ongoing) setiap hari Jumat pukul 22:20 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Kusuriya no Hitorigo",
+    "day": "Jumat",
+    "time": "22:20",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Kusuriya no Hitorigoto Season 3 Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/kusuriya-no-hitorigoto-season-3-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/kusuriya-no-hitorigoto-season-3-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 8436048349032,
+    "slug": "toaru-anbu-no-item",
+    "title": "Toaru Anbu no Item",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Toaru Anbu no Item sedang tayang (ongoing) setiap hari Jumat pukul 22:50 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Toaru Anbu no Item",
+    "day": "Jumat",
+    "time": "22:50",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Toaru Anbu no Item Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/toaru-anbu-no-item-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/toaru-anbu-no-item-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 3340073607530,
+    "slug": "tougen-anki-nikko-kegon-no-taki-hen",
+    "title": "Tougen Anki: Nikko Kegon no Taki-hen",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Tougen Anki: Nikko Kegon no Taki-hen sedang tayang (ongoing) setiap hari Jumat pukul 23:50 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Tougen Anki: Nikko K",
+    "day": "Jumat",
+    "time": "23:50",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Tougen Anki: Nikko Kegon no Taki-hen Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/tougen-anki-nikko-kegon-no-taki-hen-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/tougen-anki-nikko-kegon-no-taki-hen-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 8571009658337,
+    "slug": "hotaru-no-yomeiri",
+    "title": "Hotaru no Yomeiri",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Hotaru no Yomeiri sedang tayang (ongoing) setiap hari Jumat pukul 23:50 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Hotaru no Yomeiri",
+    "day": "Jumat",
+    "time": "23:50",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Hotaru no Yomeiri Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/hotaru-no-yomeiri-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/hotaru-no-yomeiri-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 9679296227107,
+    "slug": "romelia-senki",
+    "title": "Romelia Senki",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Romelia Senki sedang tayang (ongoing) setiap hari Sabtu pukul 20:30 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Romelia Senki",
+    "day": "Sabtu",
+    "time": "20:30",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Romelia Senki Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/romelia-senki-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/romelia-senki-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 7359554788203,
+    "slug": "yasei-no-last-boss-ga-arawareta-season-2",
+    "title": "Yasei no Last Boss ga Arawareta Season 2",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Yasei no Last Boss ga Arawareta Season 2 sedang tayang (ongoing) setiap hari Sabtu pukul 21:00 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Yasei no Last Boss g",
+    "day": "Sabtu",
+    "time": "21:00",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Yasei no Last Boss ga Arawareta Season 2 Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/yasei-no-last-boss-ga-arawareta-season-2-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/yasei-no-last-boss-ga-arawareta-season-2-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 1350779593840,
+    "slug": "seitokai-ni-mo-ana-wa-aru",
+    "title": "Seitokai ni mo Ana wa Aru",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Seitokai ni mo Ana wa Aru sedang tayang (ongoing) setiap hari Minggu pukul 00:20 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Seitokai ni mo Ana w",
+    "day": "Minggu",
+    "time": "00:20",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Seitokai ni mo Ana wa Aru Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/seitokai-ni-mo-ana-wa-aru-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/seitokai-ni-mo-ana-wa-aru-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 113154917105,
+    "slug": "ao-no-hako-season-2",
+    "title": "Ao no Hako Season 2",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Ao no Hako Season 2 sedang tayang (ongoing) setiap hari Minggu pukul 15:30 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Ao no Hako Season 2",
+    "day": "Minggu",
+    "time": "15:30",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Ao no Hako Season 2 Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/ao-no-hako-season-2-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/ao-no-hako-season-2-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 2491146779973,
+    "slug": "yozakura-san-chi-no-daisakusen-season-2-part-2",
+    "title": "Yozakura-san Chi no Daisakusen Season 2 Part 2",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Yozakura-san Chi no Daisakusen Season 2 Part 2 sedang tayang (ongoing) setiap hari Minggu pukul 16:00 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Yozakura-san Chi no ",
+    "day": "Minggu",
+    "time": "16:00",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Yozakura-san Chi no Daisakusen Season 2 Part 2 Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/yozakura-san-chi-no-daisakusen-season-2-part-2-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/yozakura-san-chi-no-daisakusen-season-2-part-2-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 9799187640663,
+    "slug": "ao-ashi-season-2",
+    "title": "Ao Ashi Season 2",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Ao Ashi Season 2 sedang tayang (ongoing) setiap hari Minggu pukul 16:30 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Ao Ashi Season 2",
+    "day": "Minggu",
+    "time": "16:30",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Ao Ashi Season 2 Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/ao-ashi-season-2-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/ao-ashi-season-2-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 9037449986405,
+    "slug": "mezametara-saikyou-soubi-to-uchuusenmochi-datta-node-ikkodate-mezashite-youhei-toshite-jiyuu-ni-ikitai",
+    "title": "Mezametara Saikyou Soubi to Uchuusenmochi Datta node, Ikkodate Mezashite Youhei toshite Jiyuu ni Ikitai",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Mezametara Saikyou Soubi to Uchuusenmochi Datta node, Ikkodate Mezashite Youhei toshite Jiyuu ni Ikitai sedang tayang (ongoing) setiap hari Minggu pukul 22:10 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Mezametara Saikyou S",
+    "day": "Minggu",
+    "time": "22:10",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Mezametara Saikyou Soubi to Uchuusenmochi Datta node, Ikkodate Mezashite Youhei toshite Jiyuu ni Ikitai Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/mezametara-saikyou-soubi-to-uchuusenmochi-datta-node-ikkodate-mezashite-youhei-toshite-jiyuu-ni-ikitai-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/mezametara-saikyou-soubi-to-uchuusenmochi-datta-node-ikkodate-mezashite-youhei-toshite-jiyuu-ni-ikitai-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 4446634502595,
+    "slug": "tensei-kizoku-kantei-skill-de-nariagaru-season-3",
+    "title": "Tensei Kizoku Kantei Skill de Nariagaru Season 3",
+    "type": "TV",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Tensei Kizoku Kantei Skill de Nariagaru Season 3 sedang tayang (ongoing) setiap hari Minggu pukul 22:20 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Tensei Kizoku Kantei",
+    "day": "Minggu",
+    "time": "22:20",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Tensei Kizoku Kantei Skill de Nariagaru Season 3 Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/tensei-kizoku-kantei-skill-de-nariagaru-season-3-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/tensei-kizoku-kantei-skill-de-nariagaru-season-3-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
+  },
+  {
+    "id": 4964516278952,
+    "slug": "dark-summoner-to-dekiteiru",
+    "title": "Dark Summoner to Dekiteiru",
+    "type": "ONA",
+    "status": "Currently Airing",
+    "score": 8.0,
+    "views": 150,
+    "episodes": 12,
+    "year": 2026,
+    "season": "Fall",
+    "studio": "Animation Studio",
+    "synopsis": "Anime Dark Summoner to Dekiteiru sedang tayang (ongoing) setiap hari Minggu pukul 23:50 WIB.",
+    "genres": [
+      "Action",
+      "Fantasy"
+    ],
+    "thumbnail": "https://placehold.co/212x300/1e293b/fff?text=Dark Summoner to Dek",
+    "day": "Minggu",
+    "time": "23:50",
+    "drive_folder_id": "",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Dark Summoner to Dekiteiru Episode 1",
+        "date": "2026-10-14",
+        "stream_url": "https://x6.sokuja.uk/anime/dark-summoner-to-dekiteiru-subtitle-indonesia/",
+        "servers": [
+          "https://x6.sokuja.uk/anime/dark-summoner-to-dekiteiru-subtitle-indonesia/"
+        ],
+        "drive_file_id": ""
+      }
+    ]
   }
 ]

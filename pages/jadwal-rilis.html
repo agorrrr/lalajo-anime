@@ -24,7 +24,35 @@
 const DAYS = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const data = await DB.load();
+  let data = await DB.load();
+
+  // Load data/jadwal.json jika ada untuk memastikan jadwal tayang selalu lengkap
+  try {
+    const jRes = await fetch('../data/jadwal.json?t=' + Date.now());
+    if (jRes.ok) {
+      const jData = await jRes.json();
+      const existingTitles = new Set((data || []).map(a => (a.title || '').toLowerCase()));
+      for (const [day, items] of Object.entries(jData)) {
+        if (day === 'Hiatus' || !Array.isArray(items)) continue;
+        for (const it of items) {
+          const tLower = (it.title || '').toLowerCase();
+          if (!existingTitles.has(tLower)) {
+            const slug = (it.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            data.push({
+              slug: slug,
+              title: it.title,
+              day: day,
+              time: (it.time || '20:00').replace(/WIB/gi, '').trim(),
+              status: 'Currently Airing',
+              type: it.type || 'TV'
+            });
+            existingTitles.add(tLower);
+          }
+        }
+      }
+    }
+  } catch (e) {}
+
   const ongoing = data.filter(a => a.status === 'Currently Airing' && a.day);
 
   // group by day
@@ -45,14 +73,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         ${day} ${isToday ? '🔴 Hari Ini' : ''}
       </div>
       <ul class="schedule-day-list">
-        ${animes.length ? animes.sort((a,b) => (a.time||'').localeCompare(b.time||'')).map(a => `
+        ${animes.length ? animes.sort((a,b) => (a.time||'').localeCompare(b.time||'')).map(a => {
+          const cleanTime = (a.time || '20:00').replace(/WIB/gi, '').trim();
+          return `
           <li>
             <a href="anime.html?slug=${a.slug}" title="${a.title}">
-              ${a.title.length > 30 ? a.title.slice(0,30)+'...' : a.title}
-              <span class="time-badge">${a.time || ''} WIB</span>
+              ${a.title.length > 32 ? a.title.slice(0,32)+'...' : a.title}
+              <span class="time-badge">${cleanTime} WIB</span>
             </a>
-          </li>
-        `).join('') : '<li style="padding:12px;color:#9ca3af;font-size:12px;">Tidak ada anime</li>'}
+          </li>`;
+        }).join('') : '<li style="padding:12px;color:#9ca3af;font-size:12px;">Tidak ada anime</li>'}
       </ul>
     </div>`;
   }).join('');
