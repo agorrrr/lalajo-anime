@@ -955,14 +955,8 @@
         "ep": 1,
         "title": "Episode 1",
         "date": "Terbaru",
-        "stream_url": "https://www.blogger.com/video.g?token=AD6v5dyJ1LhEkjOusiCmCPLttGVdJywSGuhYSvssev8x8clEtNL4N9WzIuYK6LBRukJ4L3pNP7l-fYNxHEaZy8A5VYB2ExIddHsBSBA7ZdPPtPP1VDA260Mk7bmno4Y5hJMq9OYJl3SW&origin=sameguru2.blogspot.com",
-        "servers": [
-          "https://www.blogger.com/video.g?token=AD6v5dyJ1LhEkjOusiCmCPLttGVdJywSGuhYSvssev8x8clEtNL4N9WzIuYK6LBRukJ4L3pNP7l-fYNxHEaZy8A5VYB2ExIddHsBSBA7ZdPPtPP1VDA260Mk7bmno4Y5hJMq9OYJl3SW&origin=sameguru2.blogspot.com",
-          "https://mega.nz/embed/u8wxRLyZ#31gHwXP1O6gEwx0KcZarfdS5G5D0i8tGZL-aRQXaNjE",
-          "https://mega.nz/embed/25wk3aqY#YUtsA2wPgiKrY3mQKVlpwygWH7F-DkNzEycMZ1VYyFs",
-          "https://mega.nz/embed/68oCjLDK#WPT3ptM8IfxzQ86cSMTobCQCpQ0dyVDK2iXEdc58ssk",
-          "https://www.blogger.com/video.g?token=AD6v5dyJ1LhEkjOusiCmCPLttGVdJywSGuhYSvssev8x8clEtNL4N9WzIuYK6LBRukJ4L3pNP7l-fYNxHEaZy8A5VYB2ExIddHsBSBA7ZdPPtPP1VDA260Mk7bmno4Y5hJMq9OYJl3SW&#038;origin=sameguru2.blogspot.com"
-        ],
+        "stream_url": "",
+        "servers": [],
         "drive_file_id": ""
       }
     ],
@@ -3645,5 +3639,58 @@
     "release_year": 2026,
     "rating": "PG-13",
     "id": 9799187640677
+  },
+  {
+    "title": "Shuiro no Kamen",
+    "slug": "shuiro-no-kamen",
+    "thumbnail": "https://v2.samehadaku.how/wp-content/uploads/2026/10/bx195571-fvj7u5GI7BRT.jpg",
+    "banner": "https://v2.samehadaku.how/wp-content/uploads/2026/10/bx195571-fvj7u5GI7BRT.jpg",
+    "type": "TV",
+    "status": "Currently Airing",
+    "episodes": 12,
+    "score": 7.5,
+    "studio": "100studio",
+    "genres": [
+      "Adventure",
+      "Fantasy",
+      "Reincarnation",
+      "School",
+      "Action",
+      "Comedy",
+      "Drama",
+      "Music",
+      "Performing Arts",
+      "Gag Humor",
+      "Historical",
+      "Parody",
+      "Samurai",
+      "Sci-Fi",
+      "Shounen",
+      "Isekai",
+      "Supernatural",
+      "Gore",
+      "Urban Fantasy"
+    ],
+    "synopsis": "Sinopsis: Topeng yang membawa malapetaka. Topeng yang haus akan pembantaian. Topeng yang memiliki kehendaknya sendiri&#8230; Peru, seorang pedagang topeng keliling, memiliki kemampuan menciptakan topeng-topeng misterius yang memberikan kekuatan unik kepada para pemakainya. Di sebuah kota yang diselimuti suasana mencekam, ia bertemu dengan Sona, seorang gadis yang misterius. Seiring terungkapnya berbagai rahasia dan munculnya pergolakan batin, seorang anak laki-laki pun melangkah maju! Nikmati fantasi pertarungan topeng yang mendebarkan ini!",
+    "episodes_list": [
+      {
+        "ep": 1,
+        "title": "Shuiro no Kamen Episode 1",
+        "date": "10 October 2026",
+        "stream_url": "https://www.blogger.com/video.g?token=AD6v5dxqboaQN2eOQBbCORmom4IyOZL9j7dCblTFIyV9zg5sQulpkef0VWBg9TSgkxiDvj6CwQH3luEmOJzjQZ_oPPXW7JwQk62CUVamQJ0cwwd-Vuo5NgFEFBJihp4RzJpH7Q-sPQ&origin=sameguru2.blogspot.com",
+        "servers": [
+          "https://www.blogger.com/video.g?token=AD6v5dxqboaQN2eOQBbCORmom4IyOZL9j7dCblTFIyV9zg5sQulpkef0VWBg9TSgkxiDvj6CwQH3luEmOJzjQZ_oPPXW7JwQk62CUVamQJ0cwwd-Vuo5NgFEFBJihp4RzJpH7Q-sPQ&origin=sameguru2.blogspot.com",
+          "https://mega.nz/embed/ugx1kCgZ#00K4KulztFks0vJFb7M_NP9pSx0PYi_VggRjv_rKwGs",
+          "https://mega.nz/embed/L9gn2QTZ#UhBpApsHaibL9AfwXZRK1EAFsxHzp8TdQdaM6bwf40o",
+          "https://mega.nz/embed/71hATbTB#2H8rxUS3YOfVaXdz4fGMNMXX8WB7VMPCcmzPJeI9WVI",
+          "https://www.blogger.com/video.g?token=AD6v5dxqboaQN2eOQBbCORmom4IyOZL9j7dCblTFIyV9zg5sQulpkef0VWBg9TSgkxiDvj6CwQH3luEmOJzjQZ_oPPXW7JwQk62CUVamQJ0cwwd-Vuo5NgFEFBJihp4RzJpH7Q-sPQ&#038;origin=sameguru2.blogspot.com"
+        ],
+        "drive_file_id": ""
+      }
+    ],
+    "views": 1500,
+    "release_year": 2026,
+    "rating": "PG-13",
+    "id": 9799187640678
   }
 ]
