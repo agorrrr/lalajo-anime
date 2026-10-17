@@ -110,7 +110,7 @@ export default async function handler(req, res) {
     const servers = [];
     if (!html) return servers;
 
-    const embeds = [...html.matchAll(/(?:data-embed|data-src)=["']([^"']+)["']/gi)];
+    const embeds = [...html.matchAll(/(?:data-embed|data-src|data-video)=["']([^"']+)["']/gi)];
     embeds.forEach(em => {
       let raw = em[1].replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
       const srcM = raw.match(/src=["']([^"']+)["']/i);
@@ -287,31 +287,34 @@ export default async function handler(req, res) {
     let episodes_list = [];
 
     if (episodeLinks.length > 0) {
-      // Fetch stream episode paralel (maksimal 15 episode agar cepat & tidak timeout)
-      const targetBatch = episodeLinks.slice(0, 15);
-      episodes_list = await Promise.all(targetBatch.map(async (ep) => {
+      // Pre-fetch stream servers untuk batch episode terbaru (maksimal 15 episode terbaru)
+      const targetBatch = episodeLinks.slice(-15);
+      const prefetchMap = new Map();
+
+      await Promise.all(targetBatch.map(async (ep) => {
         try {
           const epHtml = await fetchHtmlWithFallback(ep.url);
           const servers = extractStreams(epHtml);
-          return {
-            ep: ep.num,
-            title: `Episode ${ep.num}`,
-            date: 'Terbaru',
-            stream_url: servers[0] || '',
-            servers: servers,
-            drive_file_id: ''
-          };
-        } catch (e) {
-          return {
-            ep: ep.num,
-            title: `Episode ${ep.num}`,
-            date: 'Terbaru',
-            stream_url: '',
-            servers: [],
-            drive_file_id: ''
-          };
-        }
+          if (servers && servers.length > 0) {
+            prefetchMap.set(ep.num, servers);
+          }
+        } catch (e) {}
       }));
+
+      // Sertakan SEMUA episode dalam episodes_list
+      const maxEpNum = episodeLinks[episodeLinks.length - 1].num;
+      episodes_list = episodeLinks.map(ep => {
+        const servers = prefetchMap.get(ep.num) || [];
+        return {
+          ep: ep.num,
+          title: `Episode ${ep.num}`,
+          date: ep.num >= (maxEpNum - 5) ? 'Terbaru' : 'Lengkap',
+          ep_url: ep.url,
+          stream_url: servers[0] || '',
+          servers: servers,
+          drive_file_id: ''
+        };
+      });
     } else {
       // Halaman yang diinput adalah halaman nonton langsung (single episode / player)
       const currentStreams = extractStreams(html);
@@ -319,6 +322,7 @@ export default async function handler(req, res) {
         ep: 1,
         title: title || 'Episode 1',
         date: 'Terbaru',
+        ep_url: targetUrl,
         stream_url: currentStreams[0] || '',
         servers: currentStreams,
         drive_file_id: ''

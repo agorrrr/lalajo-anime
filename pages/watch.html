@@ -321,34 +321,101 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    if (activeServer === 'html5') {
-      const videoSrc = ep.drive_file_id
-        ? `/api/video/stream?id=${ep.drive_file_id}`
-        : sampleVideoUrl;
-      const fallbackIframe = ep.drive_file_id
-        ? `this.outerHTML='<iframe src=\\'https://drive.google.com/file/d/${ep.drive_file_id}/preview\\' allow=\\'autoplay; fullscreen; picture-in-picture\\' allowfullscreen=\\'true\\' webkitallowfullscreen=\\'true\\' mozallowfullscreen=\\'true\\' style=\\'width:100%;height:100%;border:none;background:#000;position:relative;z-index:10;\\'></iframe>';`
-        : ``;
+    // On-demand fetch jika episode memiliki ep_url tapi server stream belum di-cache
+    if (ep.ep_url) {
       vArea.innerHTML = `
-        <video controls autoplay playsinline style="width:100%;height:100%;object-fit:contain;background:#000;position:relative;z-index:10;" onerror="${fallbackIframe}">
-          <source src="${videoSrc}" type="video/mp4" onerror="${fallbackIframe}">
-          Browser tidak mendukung pemutaran video.
-        </video>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#fff;gap:12px;background:#000;">
+          <i class="fa fa-spinner fa-spin" style="font-size:36px;color:#3384d6;"></i>
+          <span style="font-size:14px;font-weight:600;">Mengambil video stream Episode ${ep.ep}...</span>
+        </div>
       `;
-    } else {
-      if (ep.drive_file_id) {
+      fetch(`/api/scrape?url=${encodeURIComponent(ep.ep_url)}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(d => {
+          if (d && d.anime && d.anime.episodes_list && d.anime.episodes_list.length > 0) {
+            const fetched = d.anime.episodes_list[0];
+            if (fetched.servers && fetched.servers.length > 0) {
+              ep.servers = fetched.servers;
+              ep.stream_url = fetched.servers[0];
+              streamServers.push(...fetched.servers);
+
+              // Update tab server di UI
+              const sTabs = document.querySelector('.server-tabs');
+              if (sTabs) {
+                sTabs.innerHTML = streamServers.map((s, idx) => `
+                  <button class="server-tab ${idx===0?'active':''}" data-server-idx="${idx}">
+                    <i class="fa fa-play-circle"></i> Server ${idx + 1}
+                  </button>
+                `).join('');
+                sTabs.querySelectorAll('.server-tab[data-server-idx]').forEach(btn => {
+                  btn.addEventListener('click', () => {
+                    sTabs.querySelectorAll('.server-tab[data-server-idx]').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeServerIdx = parseInt(btn.dataset.serverIdx) || 0;
+                    loadVideo();
+                  });
+                });
+              }
+
+              // Update cache local anime_db
+              try {
+                const cached = localStorage.getItem('anime_db');
+                if (cached) {
+                  const dbList = JSON.parse(cached);
+                  const aMatch = dbList.find(x => x.slug === slug);
+                  if (aMatch && aMatch.episodes_list) {
+                    const eMatch = aMatch.episodes_list.find(e => e.ep === ep.ep);
+                    if (eMatch) {
+                      eMatch.servers = ep.servers;
+                      eMatch.stream_url = ep.stream_url;
+                      localStorage.setItem('anime_db', JSON.stringify(dbList));
+                    }
+                  }
+                }
+              } catch (e) {}
+
+              loadVideo();
+              return;
+            }
+          }
+          renderFallbackPlayer();
+        })
+        .catch(() => renderFallbackPlayer());
+      return;
+    }
+
+    renderFallbackPlayer();
+
+    function renderFallbackPlayer() {
+      if (activeServer === 'html5') {
+        const videoSrc = ep.drive_file_id
+          ? `/api/video/stream?id=${ep.drive_file_id}`
+          : sampleVideoUrl;
+        const fallbackIframe = ep.drive_file_id
+          ? `this.outerHTML='<iframe src=\\'https://drive.google.com/file/d/${ep.drive_file_id}/preview\\' allow=\\'autoplay; fullscreen; picture-in-picture\\' allowfullscreen=\\'true\\' webkitallowfullscreen=\\'true\\' mozallowfullscreen=\\'true\\' style=\\'width:100%;height:100%;border:none;background:#000;position:relative;z-index:10;\\'></iframe>';`
+          : ``;
         vArea.innerHTML = `
-          <iframe src="https://drive.google.com/file/d/${ep.drive_file_id}/preview"
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"
-                  style="width:100%;height:100%;border:none;background:#000;position:relative;z-index:10;"></iframe>
-        `;
-      } else {
-        vArea.innerHTML = `
-          <video controls autoplay playsinline style="width:100%;height:100%;object-fit:contain;background:#000;position:relative;z-index:10;">
-            <source src="${sampleVideoUrl}" type="video/mp4">
+          <video controls autoplay playsinline style="width:100%;height:100%;object-fit:contain;background:#000;position:relative;z-index:10;" onerror="${fallbackIframe}">
+            <source src="${videoSrc}" type="video/mp4" onerror="${fallbackIframe}">
             Browser tidak mendukung pemutaran video.
           </video>
         `;
+      } else {
+        if (ep.drive_file_id) {
+          vArea.innerHTML = `
+            <iframe src="https://drive.google.com/file/d/${ep.drive_file_id}/preview"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"
+                    style="width:100%;height:100%;border:none;background:#000;position:relative;z-index:10;"></iframe>
+          `;
+        } else {
+          vArea.innerHTML = `
+            <video controls autoplay playsinline style="width:100%;height:100%;object-fit:contain;background:#000;position:relative;z-index:10;">
+              <source src="${sampleVideoUrl}" type="video/mp4">
+              Browser tidak mendukung pemutaran video.
+            </video>
+          `;
+        }
       }
     }
   }
