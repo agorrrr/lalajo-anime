@@ -1,4 +1,4 @@
-name: Auto-Sync Samehadaku Anime
+name: Auto-Sync Multi-Source Anime
 
 on:
   schedule:
@@ -7,17 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       url:
-        description: 'URL Anime spesifik (dari web mana saja: Samehadaku, Otakudesu, dll)'
+        description: 'URL Anime spesifik (dari web mana saja: Samehadaku, Anime-Indo, Sokuja, Oploverz, dll)'
         required: false
         default: ''
-      pages:
-        description: 'Jumlah halaman untuk di-scrape (1-57) jika url kosong'
-        required: false
-        default: '2'
-      limit:
-        description: 'Batas maksimal anime (kosongkan jika sesuai halaman)'
-        required: false
-        default: '30'
 
 jobs:
   sync:
@@ -33,14 +25,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Jalankan Scraper
+      - name: Jalankan Multi-Source Scraper
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            if [ -n "${{ github.event.inputs.url }}" ]; then
-              python scripts/scrape_samehadaku.py --url "${{ github.event.inputs.url }}"
-            else
-              python scripts/scrape_samehadaku.py --pages ${{ github.event.inputs.pages }} --limit ${{ github.event.inputs.limit }}
-            fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.url }}" ]; then
+            python scripts/scrape_samehadaku.py --url "${{ github.event.inputs.url }}"
           else
             python scripts/scrape_samehadaku.py --hourly
           fi
@@ -50,4 +38,4 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
           git add data/anime.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-sync anime data dari Samehadaku [skip ci]" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-sync multi-source anime (Samehadaku, Anime-Indo, Sokuja, Oploverz) [skip ci]" && git push)

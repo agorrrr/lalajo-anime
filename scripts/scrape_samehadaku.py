@@ -1,4 +1,5 @@
 import urllib.request
+import urllib.parse
 import re
 import html as html_lib
 import json
@@ -6,74 +7,75 @@ import time
 import os
 import sys
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 DB_FILE = os.path.join(DATA_DIR, "anime.json")
 BACKUP_FILE = os.path.join(DATA_DIR, "anime_manual_backup.json")
 
 HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
-    'Referer': 'https://v2.samehadaku.how/',
 }
+
+# 5 Sumber Utama untuk Auto-Sync Setiap Jam
+HOURLY_SOURCES = [
+    {
+        "name": "Samehadaku",
+        "url": "https://v2.samehadaku.how/anime-terbaru/",
+        "base": "https://v2.samehadaku.how",
+        "pattern": r'href=["\'](https?://v2\.samehadaku\.how/anime/[^/?"\'\s]+/?)(?:\?[^"\'\s]*)?["\']'
+    },
+    {
+        "name": "Anime-Indo",
+        "url": "https://anime-indo.lol/",
+        "base": "https://anime-indo.lol",
+        "pattern": r'href=["\'](/anime/[^/?"\'\s]+/?)(?:\?[^"\'\s]*)?["\']'
+    },
+    {
+        "name": "Sokuja",
+        "url": "https://x6.sokuja.uk/anime/?status=ongoing&order=update",
+        "base": "https://x6.sokuja.uk",
+        "pattern": r'href=["\']((?:https?://x6\.sokuja\.uk)?/anime/[^/?"\'\s]+/?)(?:\?[^"\'\s]*)?["\']'
+    },
+    {
+        "name": "Oploverz Site",
+        "url": "https://oploverz.site/",
+        "base": "https://oploverz.site",
+        "pattern": r'href=["\'](/series/[^/?"\'\s]+/?)(?:\?[^"\'\s]*)?["\']'
+    },
+    {
+        "name": "Oploverz AM",
+        "url": "https://oploverz.am/anime/?status=&type=&order=update",
+        "base": "https://oploverz.am",
+        "pattern": r'href=["\'](https?://oploverz\.am/anime/[^/?"\'\s]+/?)(?:\?[^"\'\s]*)?["\']'
+    }
+]
 
 def fetch_url(url, retries=2):
     req = urllib.request.Request(url, headers=HEADERS)
     for i in range(retries):
         try:
-            with urllib.request.urlopen(req, timeout=15) as res:
+            with urllib.request.urlopen(req, timeout=12) as res:
                 return res.read().decode('utf-8', errors='ignore')
-        except Exception as e:
+        except Exception:
             if i == retries - 1:
                 return ""
             time.sleep(1)
     return ""
 
-def get_anime_from_url(listing_url):
-    html = fetch_url(listing_url)
-    if not html:
-        return []
-    raw = re.findall(r'href=[\"\'](https?://v2\.samehadaku\.how/anime/([^/\"\'\s]+)/?)[\"\']', html)
-    seen = set()
-    anime_list = []
-    for full_url, slug in raw:
-        if slug in seen:
-            continue
-        seen.add(slug)
-        anime_list.append((slug, full_url if full_url.endswith('/') else full_url + '/'))
-    return anime_list
-
-def collect_anime_list(pages=1, fetch_all=False, limit=None):
-    seen = set()
-    all_anime = []
-
-    # Always grab homepage recent updates first
-    hp = get_anime_from_url('https://v2.samehadaku.how/')
-    for item in hp:
-        if item[0] not in seen:
-            seen.add(item[0])
-            all_anime.append(item)
-
-    max_p = 57 if fetch_all else pages
-    for p in range(1, max_p + 1):
-        if limit and len(all_anime) >= limit:
-            break
-        page_url = f'https://v2.samehadaku.how/anime/page/{p}/'
-        print(f"[Crawling Listing] Page {p}: {page_url}")
-        items = get_anime_from_url(page_url)
-        if not items:
-            break
-        for item in items:
-            if item[0] not in seen:
-                seen.add(item[0])
-                all_anime.append(item)
-                if limit and len(all_anime) >= limit:
-                    break
-        time.sleep(0.5)
-
-    if limit:
-        all_anime = all_anime[:limit]
-    return all_anime
+def normalize_title(title):
+    if not title:
+        return ""
+    t = title.lower()
+    t = re.sub(r'\(.*?\)|\[.*?\]', '', t)
+    t = re.sub(r'(subtitle\s*indonesia|sub\s*indo|samehadaku|sokuja|oploverz|animeindo|anime\s*indo)', '', t)
+    t = re.sub(r'\s*season\s*(\d+)', r' s\1', t)
+    t = re.sub(r'\s*2nd\s*season', ' s2', t)
+    t = re.sub(r'\s*3rd\s*season', ' s3', t)
+    t = re.sub(r'\s*4th\s*season', ' s4', t)
+    t = re.sub(r'[^a-z0-9]', '', t)
+    return t
 
 def extract_episode_stream(ep_url):
     html = fetch_url(ep_url)
@@ -81,22 +83,32 @@ def extract_episode_stream(ep_url):
         return "", []
     
     servers = []
-    embeds = re.findall(r'data-embed=[\"\']([^\"\']+)[\"\']', html)
+    # 1. data-video (Anime-Indo / Sokuja / Oploverz)
+    d_vids = re.findall(r'data-video=["\']([^"\']+)["\']', html)
+    for dv in d_vids:
+        dv = dv.strip()
+        if dv.startswith('http') and dv not in servers:
+            servers.append(dv)
+
+    # 2. data-embed
+    embeds = re.findall(r'data-embed=["\']([^"\']+)["\']', html)
     for emb in embeds:
         decoded = html_lib.unescape(emb)
-        m = re.search(r'src=[\"\']([^\"\']+)[\"\']', decoded)
+        m = re.search(r'src=["\']([^"\']+)["\']', decoded)
         if m:
             s_url = m.group(1).strip()
-            if s_url and s_url not in servers:
+            if s_url and s_url not in servers and s_url.startswith('http'):
                 servers.append(s_url)
 
-    iframes = re.findall(r'<iframe[^>]+src=[\"\']([^\"\']+)[\"\']', html, re.I)
+    # 3. iframe tontonin / player iframe
+    iframes = re.findall(r'<iframe[^>]+src=["\']([^"\']+)["\']', html, re.I)
     for ifr in iframes:
         ifr = ifr.strip()
-        if ifr and ifr not in servers and not ifr.startswith('chrome') and 'ads' not in ifr:
+        if ifr and ifr not in servers and not ifr.startswith('chrome') and not any(x in ifr for x in ['ads', 'analytics', 'googletagmanager', 'facebook']):
             servers.append(ifr)
 
-    sources = re.findall(r'<source[^>]+src=[\"\']([^\"\']+)[\"\']', html, re.I)
+    # 4. video source
+    sources = re.findall(r'<source[^>]+src=["\']([^"\']+)["\']', html, re.I)
     for src in sources:
         src = src.strip()
         if src and src not in servers:
@@ -111,10 +123,10 @@ def scrape_anime_detail(slug, url, max_eps=12):
         return None
 
     # Title: OG -> H1 -> Fallback
-    og_title = re.search(r'<meta[^>]+property=[\"\']og:title[\"\'][^>]+content=[\"\']([^\"\']+)[\"\']', html, re.I) \
-        or re.search(r'<meta[^>]+content=[\"\']([^\"\']+)[\"\'][^>]+property=[\"\']og:title[\"\']', html, re.I)
-    h1_title = re.search(r'<h1[^>]*itemprop=[\"\']headline[\"\'][^>]*>(.*?)</h1>', html, re.DOTALL) \
-        or re.search(r'<h1[^>]*class=[\"\'][^\"\']*jdlcontent[^\"\']*[\"\'][^>]*>(.*?)</h1>', html, re.DOTALL) \
+    og_title = re.search(r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']', html, re.I) \
+        or re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:title["\']', html, re.I)
+    h1_title = re.search(r'<h1[^>]*itemprop=["\']headline["\'][^>]*>(.*?)</h1>', html, re.DOTALL) \
+        or re.search(r'<h1[^>]*class=["\'][^"\']*(?:jdlcontent|entry-title|title)[^"\']*["\'][^>]*>(.*?)</h1>', html, re.DOTALL) \
         or re.search(r'<h1[^>]*>(.*?)</h1>', html, re.DOTALL)
 
     if og_title:
@@ -124,27 +136,31 @@ def scrape_anime_detail(slug, url, max_eps=12):
     else:
         title = slug.replace('-', ' ').title()
 
-    title = re.sub(r'(?i)(?:Subtitle\s*Indonesia|Sub\s*Indo|Samehadaku|Otakudesu|Kuramanime)', '', title)
+    title = re.sub(r'(?i)(?:Subtitle\s*Indonesia|Sub\s*Indo|Samehadaku|Otakudesu|Kuramanime|Oploverz|Animeindo|Sokuja)', '', title)
     title = re.sub(r'[\s\-_|:]+$', '', title).strip()
 
-    # Thumbnail: OG -> CSS -> First Upload Image
-    og_thumb = re.search(r'<meta[^>]+property=[\"\']og:image[\"\'][^>]+content=[\"\']([^\"\']+)[\"\']', html, re.I) \
-        or re.search(r'<meta[^>]+content=[\"\']([^\"\']+)[\"\'][^>]+property=[\"\']og:image[\"\']', html, re.I)
-    thumb_m = re.search(r'class=[\"\'][^\"\']*(?:w-48|fotoanime|thumb|poster|cover)[^\"\']*[\"\'][^>]*>.*?<img[^>]+(?:src|data-src)=[\"\']([^\"\']+)[\"\']', html, re.DOTALL)
+    # Thumbnail
+    og_thumb = re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']', html, re.I) \
+        or re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']', html, re.I)
+    thumb_m = re.search(r'class=["\'][^"\']*(?:w-48|fotoanime|thumb|poster|cover|detail)[^"\']*["\'][^>]*>.*?<img[^>]+(?:src|data-src)=["\']([^"\']+)["\']', html, re.DOTALL)
 
+    thumbnail = ""
     if og_thumb:
         thumbnail = og_thumb.group(1).strip()
     elif thumb_m:
         thumbnail = thumb_m.group(1).strip()
     else:
-        fb_thumb = re.search(r'src=[\"\'](https?://[^\"\']+\.(?:jpg|jpeg|png|webp))[\"\']', html)
+        fb_thumb = re.search(r'src=["\'](https?://[^"\']+\.(?:jpg|jpeg|png|webp))["\']', html)
         thumbnail = fb_thumb.group(1) if fb_thumb else ""
 
-    # Auto-search internet (Kitsu API) jika foto/banner tidak kebawa dari scraper
+    if thumbnail.startswith('/'):
+        url_obj = urllib.parse.urlparse(url)
+        thumbnail = f"{url_obj.scheme}://{url_obj.netloc}{thumbnail}"
+
+    # Auto-search internet (Kitsu API) jika foto/banner tidak kebawa
     banner = ""
     if not thumbnail or thumbnail.startswith('/') or 'placehold.co' in thumbnail:
         try:
-            import urllib.parse
             clean_t = re.sub(r'(\s*Season\s*\d+|\s*Part\s*\d+|\s*Cour\s*\d+|:\s*.*$|\".*?\")', '', title).strip()
             k_url = 'https://kitsu.io/api/edge/anime?filter[text]=' + urllib.parse.quote(clean_t) + '&page[limit]=1'
             k_req = urllib.request.Request(k_url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -160,20 +176,22 @@ def scrape_anime_detail(slug, url, max_eps=12):
             pass
 
     # Score
-    score_m = re.search(r'class=[\"\'][^\"\']*(?:font-extrabold|score|rating|skor)[^\"\']*[\"\']>([\d\.]+)</span>', html, re.I) \
+    score_m = re.search(r'class=["\'][^"\']*(?:font-extrabold|score|rating|skor)[^"\']*["\']>([\d\.]+)</span>', html, re.I) \
         or re.search(r'(?:Skor|Rating)\s*:\s*(?:</b>\s*)?([\d\.]+)', html, re.I)
     try:
-        score = float(score_m.group(1)) if score_m else 7.5
+        score = float(score_m.group(1)) if score_m else 7.8
     except:
-        score = 7.5
+        score = 7.8
 
     # Genres
     genres = []
-    g_matches = re.findall(r'href=[\"\']https?://[^/]+/genres?/[^/\"\'\s]+/?[\"\'][^>]*>(.*?)</a>', html, re.I)
+    g_matches = re.findall(r'href=["\']https?://[^/]+/genres?/[^/\"\'\s]+/?["\'][^>]*>(.*?)</a>', html, re.I)
     for g in g_matches:
         cg = re.sub(r'<[^>]+>', '', g).strip()
         if cg and cg not in genres:
             genres.append(cg)
+    if not genres:
+        genres = ["Action", "Animation"]
 
     # Status, Type, Studio
     status_raw = "Ongoing"
@@ -198,9 +216,9 @@ def scrape_anime_detail(slug, url, max_eps=12):
         studio = re.sub(r'<[^>]+>', '', studio_m.group(1)).strip()
 
     # Synopsis
-    syn_m = re.search(r'<div[^>]*class=[\"\'][^\"\']*(?:entry-content|sinopc|synopsis|desc)[^\"\']*[\"\'][^>]*>(.*?)</div>', html, re.DOTALL)
-    og_desc = re.search(r'<meta[^>]+property=[\"\']og:description[\"\'][^>]+content=[\"\']([^\"\']+)[\"\']', html, re.I) \
-        or re.search(r'<meta[^>]+name=[\"\']description[\"\'][^>]+content=[\"\']([^\"\']+)[\"\']', html, re.I)
+    syn_m = re.search(r'<div[^>]*class=["\'][^"\']*(?:entry-content|sinopc|synopsis|desc|detail)[^"\']*["\'][^>]*>(.*?)</div>', html, re.DOTALL)
+    og_desc = re.search(r'<meta[^>]+property=["\']og:description["\'][^>]+content=["\']([^"\']+)["\']', html, re.I) \
+        or re.search(r'<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']+)["\']', html, re.I)
 
     if syn_m:
         synopsis = re.sub(r'<[^>]+>', '', syn_m.group(1)).strip()
@@ -208,19 +226,22 @@ def scrape_anime_detail(slug, url, max_eps=12):
     elif og_desc:
         synopsis = og_desc.group(1).strip()
     else:
-        synopsis = "Sinopsis belum tersedia."
+        synopsis = f"Sinopsis {title}."
 
     # Episodes Finder
     ep_blocks = []
     # Pattern 1: Samehadaku blocks
-    sh_blocks = re.findall(r'<div[^>]*class=[\"\']flex items-center gap-3 p-2[^\"\']*[\"\']>.*?<a[^>]+href=[\"\'](https?://[^/\"\'\s]+/[^/\"\'\s]+-episode-[^/\"\'\s]+/?)[^>]*>.*?</a>.*?<h4[^>]*>.*?<a[^>]*>(.*?)</a>.*?<span[^>]*class=[\"\'][^\"\']*text-\[11px\][^\"\']*[\"\']>(.*?)</span>', html, re.DOTALL)
+    sh_blocks = re.findall(r'<div[^>]*class=["\']flex items-center gap-3 p-2[^"\']*["\']>.*?<a[^>]+href=["\'](https?://[^/\"\'\s]+/[^/\"\'\s]+-episode-[^/\"\'\s]+/?)[^>]*>.*?</a>.*?<h4[^>]*>.*?<a[^>]*>(.*?)</a>.*?<span[^>]*class=["\'][^"\']*text-\[11px\][^"\']*["\']>(.*?)</span>', html, re.DOTALL)
     if sh_blocks:
         ep_blocks = sh_blocks
     else:
         # Pattern 2: Generic links with episode/eps
-        raw_eps = re.findall(r'href=[\"\'](https?://[^\"\'#\s]*(?:-episode-|\/episode\/|\/eps\/|-eps-)[^\"\'#\s]*)[\"\']', html, re.I)
+        raw_eps = re.findall(r'href=["\']((?:https?://[^"\'#\s]*|/)(?:[^"\'#\s]+-episode-\d+|[^"\'#\s]+-eps-\d+|[^"\'#\s]+/episode/\d+)[^"\'#\s]*)["\']', html, re.I)
         seen_ep = set()
         for ep_u in raw_eps:
+            if ep_u.startswith('/'):
+                url_obj = urllib.parse.urlparse(url)
+                ep_u = f"{url_obj.scheme}://{url_obj.netloc}{ep_u}"
             num_m = re.search(r'(?:episode|eps)[-_/ ]?(\d+)', ep_u, re.I) or re.search(r'-(\d+)(?:-sub-indo|/)?$', ep_u)
             ep_n = int(num_m.group(1)) if num_m else None
             if ep_n and ep_n not in seen_ep:
@@ -229,19 +250,23 @@ def scrape_anime_detail(slug, url, max_eps=12):
 
         # Pattern 3: Anchor text Episode X
         if not ep_blocks:
-            generic_anchors = re.findall(r'<a[^>]+href=[\"\']([^\"\']+)[\"\'][^>]*>(.*?)</a>', html, re.DOTALL | re.I)
+            generic_anchors = re.findall(r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)</a>', html, re.DOTALL | re.I)
             seen_a = set()
             for u, t in generic_anchors:
                 num_m = re.search(r'Episode\s*(\d+)', t, re.I) or re.search(r'(?:episode|eps)[-_/ ]?(\d+)', u, re.I)
                 if num_m:
                     n = int(num_m.group(1))
-                    if n not in seen_a and u.startswith('http'):
+                    if n not in seen_a and not u.startswith('#'):
                         seen_a.add(n)
+                        if u.startswith('/'):
+                            url_obj = urllib.parse.urlparse(url)
+                            u = f"{url_obj.scheme}://{url_obj.netloc}{u}"
                         ep_blocks.append((u, f"Episode {n}", "Terbaru"))
 
     episodes_list = []
-    blocks_to_process = ep_blocks if (max_eps == 0 or max_eps is None) else ep_blocks[:max_eps]
-    for idx, item in enumerate(blocks_to_process):
+    # Fetch streams for latest batch of episodes
+    target_eps = ep_blocks if (max_eps == 0 or max_eps is None) else ep_blocks[:max_eps]
+    for idx, item in enumerate(target_eps):
         ep_url = item[0]
         raw_title = re.sub(r'<[^>]+>', '', item[1]).strip()
         ep_date = re.sub(r'<[^>]+>', '', item[2]).strip()
@@ -255,11 +280,12 @@ def scrape_anime_detail(slug, url, max_eps=12):
             "ep": ep_num,
             "title": raw_title,
             "date": ep_date,
+            "ep_url": ep_url,
             "stream_url": stream_url,
             "servers": servers,
             "drive_file_id": ""
         })
-        time.sleep(0.2)
+        time.sleep(0.1)
 
     episodes_list.sort(key=lambda x: x["ep"])
 
@@ -281,15 +307,86 @@ def scrape_anime_detail(slug, url, max_eps=12):
         "rating": "PG-13"
     }
 
-def save_current_data(data):
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+def merge_anime_entry(existing, scraped):
+    """
+    Logika Merge Cerdas:
+    - Jika di A (existing) ada yang kurang, ambil dari B (scraped).
+    - Episode digabung berdasarkan nomor episode (tanpa duplikat).
+    - Jika episode sudah ada tapi server streaming di B lebih lengkap, tambahkan server baru.
+    """
+    # 1. Merge episodes
+    ep_map = {e["ep"]: e for e in existing.get("episodes_list", [])}
+    for new_ep in scraped.get("episodes_list", []):
+        ep_num = new_ep["ep"]
+        if ep_num not in ep_map:
+            # Episode baru yang belum ada di database -> tambahkan langsung!
+            ep_map[ep_num] = new_ep
+        else:
+            cur_ep = ep_map[ep_num]
+            # Jika episode ada tapi stream_url belum ada, ambil dari scraped
+            if not cur_ep.get("stream_url") and new_ep.get("stream_url"):
+                cur_ep["stream_url"] = new_ep["stream_url"]
+            if not cur_ep.get("ep_url") and new_ep.get("ep_url"):
+                cur_ep["ep_url"] = new_ep["ep_url"]
+            # Gabungkan server streaming tanpa duplikasi
+            cur_servers = set(cur_ep.get("servers", []))
+            for s in new_ep.get("servers", []):
+                if s and s not in cur_servers:
+                    cur_ep.setdefault("servers", []).append(s)
+                    cur_servers.add(s)
 
-def run_sync(pages=1, fetch_all=False, limit=None, max_eps=12, single_url=None):
-    if not os.path.exists(BACKUP_FILE) and os.path.exists(DB_FILE):
-        import shutil
-        shutil.copyfile(DB_FILE, BACKUP_FILE)
+    merged_eps = sorted(ep_map.values(), key=lambda x: x["ep"])
+    existing["episodes_list"] = merged_eps
+    existing["episodes"] = max(len(merged_eps), existing.get("episodes", 12))
+    
+    # 2. Update status / score jika ada info lebih baru
+    if scraped.get("status"):
+        existing["status"] = scraped["status"]
+    if scraped.get("score") and scraped["score"] > 7.0:
+        existing["score"] = scraped["score"]
+    if not existing.get("thumbnail") and scraped.get("thumbnail"):
+        existing["thumbnail"] = scraped["thumbnail"]
+    if not existing.get("banner") and scraped.get("banner"):
+        existing["banner"] = scraped["banner"]
 
+    return existing
+
+def collect_multi_source_links():
+    """Mengumpulkan daftar anime terbaru dari 5 sumber sekaligus."""
+    anime_queue = []
+    seen_urls = set()
+
+    for src in HOURLY_SOURCES:
+        print(f"[Fetching Source] {src['name']} ({src['url']})...")
+        html = fetch_url(src["url"])
+        if not html:
+            print(f"  -> Gagal mengakses {src['name']}")
+            continue
+        
+        matches = re.findall(src["pattern"], html)
+        count = 0
+        for u in matches:
+            if u.startswith('/'):
+                u = f"{src['base']}{u}"
+            # Bersihkan slug
+            slug_m = re.search(r'/(?:anime|series)/([^/]+)/?', u)
+            slug = slug_m.group(1) if slug_m else u.rstrip('/').split('/')[-1]
+            slug = re.sub(r'[^a-zA-Z0-9-_]', '-', slug).lower()
+            
+            # Abaikan URL non-anime
+            if slug in ['feed', 'anime', 'series', 'page', 'jadwal']:
+                continue
+            
+            if u not in seen_urls:
+                seen_urls.add(u)
+                anime_queue.append((slug, u, src["name"]))
+                count += 1
+        print(f"  -> {count} link anime ditemukan dari {src['name']}")
+
+    return anime_queue
+
+def run_multi_source_sync(limit_per_source=6):
+    print("Memuat database anime.json...")
     current_data = []
     if os.path.exists(DB_FILE):
         with open(DB_FILE, "r", encoding="utf-8") as f:
@@ -298,72 +395,85 @@ def run_sync(pages=1, fetch_all=False, limit=None, max_eps=12, single_url=None):
             except:
                 current_data = []
 
-    existing_slugs = {a["slug"]: a for a in current_data}
+    # Map normalisasi untuk pencarian judul duplikat
+    existing_by_norm = {}
+    existing_by_slug = {}
+    for a in current_data:
+        existing_by_slug[a["slug"]] = a
+        norm = normalize_title(a.get("title", ""))
+        if norm:
+            existing_by_norm[norm] = a
+
     max_id = max([a.get("id", 0) for a in current_data], default=0)
 
-    if single_url:
-        slug_m = re.search(r'/anime/([^/]+)/?', single_url)
-        if slug_m:
-            slug = slug_m.group(1)
-        else:
-            slug = single_url.rstrip('/').split('/')[-1] or "scraped-anime"
-        slug = re.sub(r'[^a-zA-Z0-9-_]', '-', slug).lower()
-        target_list = [(slug, single_url)]
-    else:
-        print(f"Mengumpulkan daftar anime (Pages: {pages}, All: {fetch_all}, Limit: {limit})...")
-        target_list = collect_anime_list(pages=pages, fetch_all=fetch_all, limit=limit)
-
-    total_target = len(target_list)
-    print(f"Total anime untuk diproses: {total_target}")
+    # Kumpulkan target dari 5 sumber
+    raw_targets = collect_multi_source_links()
+    print(f"\nTotal anime terkumpul dari 5 sumber: {len(raw_targets)} link")
 
     new_count = 0
     updated_count = 0
 
-    for i, (slug, url) in enumerate(target_list, 1):
-        print(f"[{i}/{total_target}] Scraping: {slug}...")
-        scraped = scrape_anime_detail(slug, url, max_eps=max_eps)
-        if not scraped:
+    for i, (slug, url, src_name) in enumerate(raw_targets, 1):
+        print(f"\n[{i}/{len(raw_targets)}] Scrape {slug} ({src_name})...")
+        scraped = scrape_anime_detail(slug, url, max_eps=6)
+        if not scraped or not scraped.get("title"):
             continue
 
-        if slug in existing_slugs:
-            target = existing_slugs[slug]
-            ep_dict = {e["ep"]: e for e in target.get("episodes_list", [])}
-            for new_ep in scraped["episodes_list"]:
-                ep_dict[new_ep["ep"]] = new_ep
-            merged_eps = sorted(ep_dict.values(), key=lambda x: x["ep"])
-            target["episodes_list"] = merged_eps
-            target["episodes"] = max(len(merged_eps), target.get("episodes", 12))
-            target["score"] = scraped["score"]
-            target["thumbnail"] = scraped["thumbnail"] or target["thumbnail"]
+        norm_title = normalize_title(scraped["title"])
+        
+        # Cek apakah judul sudah ada di database (berdasarkan norm title atau slug)
+        matched_existing = existing_by_slug.get(slug) or existing_by_norm.get(norm_title)
+        
+        if matched_existing:
+            # SUDAH ADA -> LAKUKAN SMART MERGE (tambah episode kurang, merge server)
+            print(f"  -> Judul cocok dengan '{matched_existing['title']}'! Melakukan Smart Merge...")
+            merge_anime_entry(matched_existing, scraped)
             updated_count += 1
         else:
+            # BELUM ADA -> TAMBAHKAN SEBAGAI ANIME BARU
             max_id += 1
             scraped["id"] = max_id
             current_data.append(scraped)
-            existing_slugs[slug] = scraped
+            existing_by_slug[slug] = scraped
+            if norm_title:
+                existing_by_norm[norm_title] = scraped
             new_count += 1
+            print(f"  -> Ditambahkan anime baru: {scraped['title']} (ID: {max_id})")
 
-        # Progressive save every anime
-        save_current_data(current_data)
+        # Simpan progres langsung ke database
+        with open(DB_FILE, "w", encoding="utf-8") as f:
+            json.dump(current_data, f, ensure_ascii=False, indent=2)
 
-    print(f"Sync sukses! Baru: {new_count}, Diupdate: {updated_count}. Total Anime di DB: {len(current_data)}")
+    print(f"\n==========================================")
+    print(f"MULTI-SOURCE SYNC SELESAI!")
+    print(f"Anime Baru Ditambah: {new_count}")
+    print(f"Anime Dimutakhirkan/Dimerge: {updated_count}")
+    print(f"Total Anime di Database Sekarang: {len(current_data)}")
+    print(f"==========================================")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Samehadaku Scraper & Syncer")
-    parser.add_argument("--all", action="store_true", help="Scrape seluruh halaman anime (57 halaman)")
-    parser.add_argument("--pages", type=int, default=1, help="Jumlah halaman anime untuk discrape")
-    parser.add_argument("--limit", type=int, default=None, help="Maksimal anime yang diproses")
-    parser.add_argument("--eps", type=int, default=12, help="Maksimal episode per anime")
+    parser = argparse.ArgumentParser(description="Multi-Source Anime Scraper & Syncer")
+    parser.add_argument("--hourly", action="store_true", help="Mode cron per jam dari 5 sumber resmi")
     parser.add_argument("--url", type=str, default=None, help="Scrape 1 anime spesifik dari URL")
-    parser.add_argument("--hourly", action="store_true", help="Mode cron per jam (20 update terbaru)")
+    parser.add_argument("--eps", type=int, default=12, help="Maksimal episode per anime")
 
     args = parser.parse_args()
 
     if args.hourly:
-        run_sync(pages=1, limit=20, max_eps=6)
-    elif args.all:
-        run_sync(fetch_all=True, max_eps=args.eps)
+        run_multi_source_sync()
     elif args.url:
-        run_sync(single_url=args.url, max_eps=args.eps)
+        print(f"Scraping manual single URL: {args.url}")
+        # single scrape fallback
+        slug_m = re.search(r'/(?:anime|series)/([^/]+)/?', args.url)
+        slug = slug_m.group(1) if slug_m else args.url.rstrip('/').split('/')[-1]
+        slug = re.sub(r'[^a-zA-Z0-9-_]', '-', slug).lower()
+        detail = scrape_anime_detail(slug, args.url, max_eps=args.eps)
+        if detail:
+            with open(DB_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            data = [detail] + [a for a in data if a.get("slug") != slug]
+            with open(DB_FILE, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            print("Berhasil disimpan!")
     else:
-        run_sync(pages=args.pages, limit=args.limit, max_eps=args.eps)
+        run_multi_source_sync()
