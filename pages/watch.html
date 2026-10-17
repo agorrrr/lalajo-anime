@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tonton Anime - Lalajo Anime</title>
   <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/style.css?v=1.0.3">
   <style>
     .video-area {
       background:#111; border-radius:10px; overflow:hidden;
@@ -67,7 +67,7 @@
   </style>
 </head>
 <body>
-<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/layout.js?v=1.0.3"></script>
 <main id="content">
   <div id="watch-content">
     <div style="text-align:center;padding:80px;color:#9ca3af;">
@@ -76,7 +76,7 @@
     </div>
   </div>
 </main>
-<script src="../assets/js/main.js?v=2"></script>
+<script src="../assets/js/main.js?v=1.0.3"></script>
 <script src="../assets/js/ads.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
@@ -501,7 +501,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!modal) {
       modal = document.createElement('div');
       modal.id = 'emoji-picker-modal';
-      modal.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:99999;width:320px;max-width:90vw;background:var(--bg-card,#fff);border:1px solid var(--border-dark,#e5e7eb);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.2);padding:14px;display:none;';
+      modal.style.css?v=1.0.3Text = 'position:fixed;bottom:20px;right:20px;z-index:99999;width:320px;max-width:90vw;background:var(--bg-card,#fff);border:1px solid var(--border-dark,#e5e7eb);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.2);padding:14px;display:none;';
       document.body.appendChild(modal);
     }
 

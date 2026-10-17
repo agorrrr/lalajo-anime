@@ -3,6 +3,15 @@
 // Dipanggil dari setiap halaman
 // ============================================
 
+(function cleanCorruptedAnimeCache() {
+  try {
+    const raw = localStorage.getItem('anime_db');
+    if (raw && (raw.includes('tooltip_action') || raw.includes('POST') || raw.includes('{'))) {
+      localStorage.removeItem('anime_db');
+    }
+  } catch(e) {}
+})();
+
 (function syncTheme() {
   var m = localStorage.getItem('theme-mode') || 'darkmode';
   if (m === 'darkmode' || m === 'dark') {
