@@ -587,3 +587,62 @@ body:not(.darkmode) .footer-inner a { color: #2563eb; }
 /* ── Utility ── */
 .hidden { display: none !important; }
 .text-muted { color: var(--text-muted); }
+
+/* ── Native App Mode Styles (Khusus Tampilan APK Android) ── */
+body.app-mode, html.app-mode {
+  background: #0b0f19 !important;
+  color: #f1f5f9 !important;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+body.app-mode #masthead,
+body.app-mode footer,
+body.app-mode #mobile-menu-drawer,
+body.app-mode #mobile-menu-overlay {
+  display: none !important;
+}
+body.app-mode main#content,
+body.app-mode .container,
+body.app-mode .user-profile-container,
+body.app-mode .post-body {
+  max-width: 100% !important;
+  padding: 10px 12px 28px 12px !important;
+  margin: 0 !important;
+}
+body.app-mode .page-title-bar {
+  padding: 8px 0 12px 0 !important;
+  margin-bottom: 12px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+body.app-mode .page-title-bar h1 {
+  font-size: 19px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+}
+body.app-mode .page-title-bar p {
+  display: none !important;
+}
+body.app-mode .anime-grid {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+  gap: 12px !important;
+}
+body.app-mode .anime-card {
+  border-radius: 10px !important;
+  background: #151c2c !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+  overflow: hidden !important;
+}
+body.app-mode .profile-card {
+  background: #151c2c !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  padding: 18px !important;
+}
+body.app-mode .batch-item {
+  background: #151c2c !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px !important;
+  padding: 12px !important;
+}
+

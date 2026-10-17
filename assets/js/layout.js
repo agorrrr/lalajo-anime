@@ -219,10 +219,24 @@ function renderFooter() {
 `);
 }
 
+function isAppMode() {
+  return typeof window !== 'undefined' && (
+    window.IS_ANDROID_APK === true ||
+    (navigator && navigator.userAgent && navigator.userAgent.includes('LalajoAnimeApp')) ||
+    (window.location && window.location.search && window.location.search.includes('app=android'))
+  );
+}
+
 // Auto-render saat DOM siap
 document.addEventListener('DOMContentLoaded', () => {
-  renderHeader();
-  renderFooter();
+  if (isAppMode()) {
+    document.documentElement.classList.add('app-mode');
+    if (document.body) document.body.classList.add('app-mode');
+    // Mode APK Android: Tidak merender header & footer web agar tampilan 100% murni aplikasi native
+  } else {
+    renderHeader();
+    renderFooter();
+  }
 
   // Sinkronisasi status VIP user terbaru dari server secara berkala
   try {

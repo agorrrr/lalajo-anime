@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -11,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.SafeBrowsingResponse
-import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -20,13 +20,24 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.RelativeLayout
+import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var nativeTopBar: RelativeLayout
+    private lateinit var btnBack: ImageButton
+    private lateinit var imgAppLogo: ImageView
+    private lateinit var tvAppTitle: TextView
+    private lateinit var btnNavSearch: ImageButton
+    private lateinit var btnNavRefresh: ImageButton
 
     private lateinit var swipeRefresh: SwipeRefreshLayout
     private lateinit var webView: WebView
@@ -35,13 +46,53 @@ class MainActivity : ComponentActivity() {
     private lateinit var btnRetry: Button
     private lateinit var fullscreenContainer: FrameLayout
 
+    private lateinit var nativeBottomBar: LinearLayout
+    private lateinit var tabHome: LinearLayout
+    private lateinit var tabList: LinearLayout
+    private lateinit var tabJadwal: LinearLayout
+    private lateinit var tabProfile: LinearLayout
+
+    private lateinit var tabHomeIcon: ImageView
+    private lateinit var tabHomeText: TextView
+    private lateinit var tabListIcon: ImageView
+    private lateinit var tabListText: TextView
+    private lateinit var tabJadwalIcon: ImageView
+    private lateinit var tabJadwalText: TextView
+    private lateinit var tabProfileIcon: ImageView
+    private lateinit var tabProfileText: TextView
+
     private var customView: View? = null
     private var customViewCallback: WebChromeClient.CustomViewCallback? = null
+
+    private val COLOR_ACTIVE = Color.parseColor("#38BDF8")
+    private val COLOR_INACTIVE = Color.parseColor("#94A3B8")
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        initViews()
+        setupSecurityAndSettings()
+        setupClients()
+        setupTopBarListeners()
+        setupBottomNavListeners()
+        setupBackNavigation()
+
+        if (savedInstanceState != null) {
+            webView.restoreState(savedInstanceState)
+        } else {
+            loadTab("home")
+        }
+    }
+
+    private fun initViews() {
+        nativeTopBar = findViewById(R.id.native_top_bar)
+        btnBack = findViewById(R.id.btn_back)
+        imgAppLogo = findViewById(R.id.img_app_logo)
+        tvAppTitle = findViewById(R.id.tv_app_title)
+        btnNavSearch = findViewById(R.id.btn_nav_search)
+        btnNavRefresh = findViewById(R.id.btn_nav_refresh)
 
         swipeRefresh = findViewById(R.id.swipe_refresh)
         webView = findViewById(R.id.web_view)
@@ -50,44 +101,42 @@ class MainActivity : ComponentActivity() {
         btnRetry = findViewById(R.id.btn_retry)
         fullscreenContainer = findViewById(R.id.fullscreen_container)
 
-        setupSecurityAndSettings()
-        setupClients()
-        setupListeners()
-        setupBackNavigation()
+        nativeBottomBar = findViewById(R.id.native_bottom_bar)
+        tabHome = findViewById(R.id.tab_home)
+        tabList = findViewById(R.id.tab_list)
+        tabJadwal = findViewById(R.id.tab_jadwal)
+        tabProfile = findViewById(R.id.tab_profile)
 
-        if (savedInstanceState != null) {
-            webView.restoreState(savedInstanceState)
-        } else {
-            loadServerUrl()
-        }
+        tabHomeIcon = findViewById(R.id.tab_home_icon)
+        tabHomeText = findViewById(R.id.tab_home_text)
+        tabListIcon = findViewById(R.id.tab_list_icon)
+        tabListText = findViewById(R.id.tab_list_text)
+        tabJadwalIcon = findViewById(R.id.tab_jadwal_icon)
+        tabJadwalText = findViewById(R.id.tab_jadwal_text)
+        tabProfileIcon = findViewById(R.id.tab_profile_icon)
+        tabProfileText = findViewById(R.id.tab_profile_text)
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupSecurityAndSettings() {
         val s = webView.settings
 
-        // 1. Core Web Capabilities
         s.javaScriptEnabled = true
         s.domStorageEnabled = true
-        s.databaseEnabled = true
         s.useWideViewPort = true
         s.loadWithOverviewMode = true
         s.mediaPlaybackRequiresUserGesture = false
 
-        // 2. Play Store Security Hardening (Zero Arbitrary File Access)
+        // Security Hardening (Zero Arbitrary File Access)
         s.allowFileAccess = false
         s.allowContentAccess = false
-        s.allowFileAccessFromFileURLs = false
-        s.allowUniversalAccessFromFileURLs = false
 
-        // 3. Safe Browsing & Strict HTTPS
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             s.safeBrowsingEnabled = true
         }
         s.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
         s.cacheMode = WebSettings.LOAD_DEFAULT
 
-        // 4. Custom User-Agent for APK identification (Banner-only mode)
         val defaultUa = s.userAgentString
         s.userAgentString = "$defaultUa ${AppConfig.APP_USER_AGENT}"
     }
@@ -98,12 +147,10 @@ class MainActivity : ComponentActivity() {
                 val url = request?.url?.toString() ?: return false
                 val uri = request.url
 
-                // Only allow HTTP/HTTPS links
                 if (url.startsWith("http://") || url.startsWith("https://")) {
-                    return false // Let WebView load internally
+                    return false
                 }
 
-                // Handle external safe communication schemes (mailto, whatsapp, tel)
                 val scheme = uri.scheme?.lowercase()
                 if (scheme in listOf("mailto", "whatsapp", "tel", "sms")) {
                     try {
@@ -116,7 +163,6 @@ class MainActivity : ComponentActivity() {
                     return true
                 }
 
-                // Block any other unknown/dangerous schemes
                 return true
             }
 
@@ -131,8 +177,13 @@ class MainActivity : ComponentActivity() {
                 progressBar.visibility = View.GONE
                 swipeRefresh.isRefreshing = false
 
-                // Inject client-side APK banner mode flag
-                view?.evaluateJavascript("window.IS_ANDROID_APK = true;", null)
+                // Inject client-side APK banner mode & app mode class
+                view?.evaluateJavascript(
+                    "window.IS_ANDROID_APK = true; document.body.classList.add('app-mode');",
+                    null
+                )
+
+                updateUiForUrl(url ?: "")
             }
 
             override fun onReceivedError(
@@ -154,7 +205,6 @@ class MainActivity : ComponentActivity() {
                 threatType: Int,
                 callback: SafeBrowsingResponse?
             ) {
-                // Let Android safe browsing show threat warning
                 callback?.backToSafety(true)
             }
         }
@@ -186,8 +236,10 @@ class MainActivity : ComponentActivity() {
                 )
                 fullscreenContainer.visibility = View.VISIBLE
                 swipeRefresh.visibility = View.GONE
+                nativeTopBar.visibility = View.GONE
+                nativeBottomBar.visibility = View.GONE
 
-                // Set fullscreen mode
+                @Suppress("DEPRECATION")
                 window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
             }
 
@@ -197,31 +249,121 @@ class MainActivity : ComponentActivity() {
                 fullscreenContainer.removeView(customView)
                 fullscreenContainer.visibility = View.GONE
                 swipeRefresh.visibility = View.VISIBLE
+                nativeTopBar.visibility = View.VISIBLE
+                nativeBottomBar.visibility = View.VISIBLE
 
                 customView = null
                 customViewCallback?.onCustomViewHidden()
                 customViewCallback = null
 
+                @Suppress("DEPRECATION")
                 window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
             }
         }
     }
 
-    private fun setupListeners() {
-        swipeRefresh.setColorSchemeColors(0xFF3384D6.toInt(), 0xFF10B981.toInt())
+    private fun setupTopBarListeners() {
+        btnBack.setOnClickListener {
+            handleBackNavigation()
+        }
+
+        btnNavSearch.setOnClickListener {
+            loadTab("list")
+        }
+
+        btnNavRefresh.setOnClickListener {
+            errorView.visibility = View.GONE
+            webView.reload()
+        }
+
+        swipeRefresh.setColorSchemeColors(COLOR_ACTIVE, Color.parseColor("#10B981"))
         swipeRefresh.setOnRefreshListener {
             errorView.visibility = View.GONE
             webView.reload()
         }
 
-        // Only allow swipe-to-refresh at the top of the web content
         webView.viewTreeObserver.addOnScrollChangedListener {
             swipeRefresh.isEnabled = webView.scrollY == 0 && customView == null
         }
 
         btnRetry.setOnClickListener {
             errorView.visibility = View.GONE
-            loadServerUrl()
+            webView.reload()
+        }
+    }
+
+    private fun setupBottomNavListeners() {
+        tabHome.setOnClickListener { loadTab("home") }
+        tabList.setOnClickListener { loadTab("list") }
+        tabJadwal.setOnClickListener { loadTab("jadwal") }
+        tabProfile.setOnClickListener { loadTab("profile") }
+    }
+
+    private fun loadTab(tab: String) {
+        val targetUrl = when (tab) {
+            "list" -> "${AppConfig.WEB_URL}/pages/anime-list.html"
+            "jadwal" -> "${AppConfig.WEB_URL}/pages/jadwal-rilis.html"
+            "profile" -> "${AppConfig.WEB_URL}/pages/user.html"
+            else -> "${AppConfig.WEB_URL}/index.html"
+        }
+        highlightTab(tab)
+        webView.loadUrl(targetUrl)
+    }
+
+    private fun highlightTab(tab: String) {
+        tabHomeIcon.setColorFilter(if (tab == "home") COLOR_ACTIVE else COLOR_INACTIVE)
+        tabHomeText.setTextColor(if (tab == "home") COLOR_ACTIVE else COLOR_INACTIVE)
+
+        tabListIcon.setColorFilter(if (tab == "list") COLOR_ACTIVE else COLOR_INACTIVE)
+        tabListText.setTextColor(if (tab == "list") COLOR_ACTIVE else COLOR_INACTIVE)
+
+        tabJadwalIcon.setColorFilter(if (tab == "jadwal") COLOR_ACTIVE else COLOR_INACTIVE)
+        tabJadwalText.setTextColor(if (tab == "jadwal") COLOR_ACTIVE else COLOR_INACTIVE)
+
+        tabProfileIcon.setColorFilter(if (tab == "profile") COLOR_ACTIVE else COLOR_INACTIVE)
+        tabProfileText.setTextColor(if (tab == "profile") COLOR_ACTIVE else COLOR_INACTIVE)
+    }
+
+    private fun updateUiForUrl(url: String) {
+        val lower = url.lowercase()
+        val isDetailOrWatch = lower.contains("watch.html") || lower.contains("anime.html")
+
+        if (isDetailOrWatch) {
+            btnBack.visibility = View.VISIBLE
+            imgAppLogo.visibility = View.GONE
+            tvAppTitle.text = if (lower.contains("watch")) "Tonton Anime" else "Detail Anime"
+        } else {
+            btnBack.visibility = View.GONE
+            imgAppLogo.visibility = View.VISIBLE
+
+            when {
+                lower.contains("anime-list") -> {
+                    highlightTab("list")
+                    tvAppTitle.text = "Daftar Anime"
+                }
+                lower.contains("jadwal-rilis") -> {
+                    highlightTab("jadwal")
+                    tvAppTitle.text = "Jadwal Rilis"
+                }
+                lower.contains("user.html") || lower.contains("login.html") || lower.contains("admin.html") -> {
+                    highlightTab("profile")
+                    tvAppTitle.text = "Akun & VIP"
+                }
+                else -> {
+                    highlightTab("home")
+                    tvAppTitle.text = "Lalajo Anime"
+                }
+            }
+        }
+    }
+
+    private fun handleBackNavigation() {
+        if (customView != null) {
+            webView.webChromeClient?.onHideCustomView()
+        } else if (webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            loadTab("home")
         }
     }
 
@@ -230,6 +372,8 @@ class MainActivity : ComponentActivity() {
             override fun handleOnBackPressed() {
                 if (customView != null) {
                     webView.webChromeClient?.onHideCustomView()
+                } else if (btnBack.visibility == View.VISIBLE && webView.canGoBack()) {
+                    webView.goBack()
                 } else if (webView.canGoBack()) {
                     webView.goBack()
                 } else {
@@ -238,11 +382,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         })
-    }
-
-    private fun loadServerUrl() {
-        progressBar.visibility = View.VISIBLE
-        webView.loadUrl(AppConfig.WEB_URL)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
