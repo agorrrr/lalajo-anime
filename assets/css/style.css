@@ -594,11 +594,19 @@ body.app-mode, html.app-mode {
   color: #f1f5f9 !important;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+body.app-mode ::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 body.app-mode #masthead,
 body.app-mode footer,
 body.app-mode #mobile-menu-drawer,
-body.app-mode #mobile-menu-overlay {
+body.app-mode #mobile-menu-overlay,
+body.app-mode .hero-banner {
   display: none !important;
 }
 body.app-mode main#content,
@@ -606,43 +614,133 @@ body.app-mode .container,
 body.app-mode .user-profile-container,
 body.app-mode .post-body {
   max-width: 100% !important;
-  padding: 10px 12px 28px 12px !important;
+  padding: 8px 12px 28px 12px !important;
   margin: 0 !important;
 }
+
+/* Quick Category / Filter Pills Bar */
+.app-quick-nav { display: none; }
+body.app-mode .app-quick-nav {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  padding: 4px 2px 14px 2px !important;
+  margin-bottom: 6px !important;
+  -webkit-overflow-scrolling: touch !important;
+  white-space: nowrap !important;
+}
+body.app-mode .app-quick-nav .app-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: #151c2c !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 8px 14px !important;
+  border-radius: 20px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  flex-shrink: 0 !important;
+  transition: all 0.15s ease !important;
+}
+body.app-mode .app-quick-nav .app-pill:active {
+  transform: scale(0.95) !important;
+}
+body.app-mode .app-quick-nav .app-pill.active {
+  background: #3384d6 !important;
+  color: #ffffff !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 2px 8px rgba(51, 132, 214, 0.4) !important;
+}
+
+body.app-mode .section-header {
+  margin: 16px 0 10px 0 !important;
+  padding: 0 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+body.app-mode .section-header h2 {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+}
+body.app-mode .section-header .see-all {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #38bdf8 !important;
+  text-decoration: none !important;
+  background: rgba(56, 189, 248, 0.1) !important;
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+}
+
 body.app-mode .page-title-bar {
-  padding: 8px 0 12px 0 !important;
+  padding: 6px 0 10px 0 !important;
   margin-bottom: 12px !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 body.app-mode .page-title-bar h1 {
-  font-size: 19px !important;
+  font-size: 18px !important;
   font-weight: 800 !important;
   color: #ffffff !important;
 }
 body.app-mode .page-title-bar p {
   display: none !important;
 }
+
 body.app-mode .anime-grid {
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
   gap: 12px !important;
 }
 body.app-mode .anime-card {
-  border-radius: 10px !important;
+  border-radius: 12px !important;
   background: #151c2c !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3) !important;
   overflow: hidden !important;
+  transition: transform 0.12s ease !important;
 }
+body.app-mode .anime-card:active {
+  transform: scale(0.96) !important;
+}
+body.app-mode .anime-card .poster {
+  border-radius: 10px 10px 0 0 !important;
+  aspect-ratio: 3/4 !important;
+  object-fit: cover !important;
+}
+
+body.app-mode .filter-box {
+  background: #151c2c !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+  margin-bottom: 14px !important;
+}
+body.app-mode .sort-pill {
+  border-radius: 20px !important;
+  font-size: 12px !important;
+  padding: 6px 14px !important;
+}
+body.app-mode .filter-group select {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+}
+
 body.app-mode .profile-card {
   background: #151c2c !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 12px !important;
+  border-radius: 14px !important;
   padding: 18px !important;
 }
 body.app-mode .batch-item {
   background: #151c2c !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 10px !important;
+  border-radius: 12px !important;
   padding: 12px !important;
 }
 body.app-mode .auth-container {
@@ -653,8 +751,9 @@ body.app-mode .auth-container {
 body.app-mode .auth-card {
   background: #151c2c !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 14px !important;
+  border-radius: 16px !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
+
 
 

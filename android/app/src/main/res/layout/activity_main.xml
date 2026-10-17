@@ -52,7 +52,7 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Right: Action Icons (Search, Reload) -->
+        <!-- Right: Action Icons (Search, Toolbox, Reload) -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="56dp"
@@ -68,6 +68,15 @@
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_search"
                 android:contentDescription="Cari Anime"
+                android:tint="#CBD5E1" />
+
+            <ImageButton
+                android:id="@+id/btn_nav_toolbox"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_toolbox"
+                android:contentDescription="Kotak Alat"
                 android:tint="#CBD5E1" />
 
             <ImageButton
@@ -90,7 +99,7 @@
         android:indeterminate="true"
         android:visibility="gone" />
 
-    <!-- 2. Main Content Area (Pull to Refresh + WebView) -->
+    <!-- 2. Main Content Area (Pull to Refresh + WebView & Native Panels) -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -162,9 +171,381 @@
                 android:textColor="#FFFFFF"
                 android:textStyle="bold" />
         </LinearLayout>
+
+        <!-- 3. NATIVE TOOLBOX & NEW FEATURES HUB OVERLAY -->
+        <ScrollView
+            android:id="@+id/toolbox_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#0B0F19"
+            android:visibility="gone"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="40dp">
+
+                <!-- Header Panel -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_alignParentStart="true"
+                        android:layout_toStartOf="@id/btn_close_toolbox">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🧰 Kotak Alat &amp; Fitur Baru"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Utilitas performa, server &amp; fitur khusus aplikasi"
+                            android:textColor="#94A3B8"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageButton
+                        android:id="@+id/btn_close_toolbox"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_close"
+                        android:tint="#CBD5E1"
+                        android:contentDescription="Tutup" />
+                </RelativeLayout>
+
+                <!-- TOOL 1: Server Diagnostic & Latency Ping -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#151C2C"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_speed"
+                            android:tint="#38BDF8" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Status Server &amp; Kecepatan Ping"
+                            android:textColor="#F8FAFC"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_ping_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="• Server Utama: 🟢 ONLINE (36 ms)\n• CDN Video Streaming: 🟢 CEPAT (48 ms)"
+                        android:textColor="#94A3B8"
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="3dp" />
+
+                    <Button
+                        android:id="@+id/btn_test_ping"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginTop="10dp"
+                        android:backgroundTint="#1E293B"
+                        android:text="⚡ Uji Ulang Latensi"
+                        android:textColor="#38BDF8"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- TOOL 2: Cache & Memory Cleaner -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#151C2C"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_delete"
+                            android:tint="#F43F5E" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Pembersih Cache &amp; Memori"
+                            android:textColor="#F8FAFC"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="Hapus berkas penjelajahan sementara agar aplikasi tetap cepat &amp; hemat penyimpanan."
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btn_clear_cache"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginTop="10dp"
+                        android:backgroundTint="#F43F5E"
+                        android:text="🧹 Bersihkan Cache Sekarang"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- TOOL 3: VIP Membership & Expiration -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#151C2C"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_profile"
+                            android:tint="#F59E0B" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Status Akun &amp; Langganan VIP"
+                            android:textColor="#F8FAFC"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_vip_status_box"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="Masa Aktif VIP: Bebas Iklan Banner, Akses Server Super Cepat, Resolusi 1080p."
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btn_open_vip_page"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:backgroundTint="#F59E0B"
+                            android:text="👑 Perpanjang VIP"
+                            android:textColor="#0B0F19"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- TOOL 4: Streaming Quality Preset -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#151C2C"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📶 Preferensi Kualitas Streaming"
+                        android:textColor="#F8FAFC"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Pilih resolusi otomatis untuk menghemat paket data atau tonton kualitas tertinggi:"
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btn_quality_auto"
+                            android:layout_width="0dp"
+                            android:layout_height="34dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            android:backgroundTint="#3384D6"
+                            android:text="Auto"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp" />
+
+                        <Button
+                            android:id="@+id/btn_quality_360"
+                            android:layout_width="0dp"
+                            android:layout_height="34dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            android:backgroundTint="#1E293B"
+                            android:text="360p"
+                            android:textColor="#94A3B8"
+                            android:textSize="11sp" />
+
+                        <Button
+                            android:id="@+id/btn_quality_720"
+                            android:layout_width="0dp"
+                            android:layout_height="34dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            android:backgroundTint="#1E293B"
+                            android:text="720p"
+                            android:textColor="#94A3B8"
+                            android:textSize="11sp" />
+
+                        <Button
+                            android:id="@+id/btn_quality_1080"
+                            android:layout_width="0dp"
+                            android:layout_height="34dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="#1E293B"
+                            android:text="1080p"
+                            android:textColor="#94A3B8"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- TOOL 5: Request Anime & Contact Admin -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#151C2C"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💬 Request Anime &amp; Lapor Masalah"
+                        android:textColor="#F8FAFC"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Anime favorit belum ada atau link streaming rusak? Laporkan langsung ke admin via WhatsApp."
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btn_request_wa"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginTop="8dp"
+                        android:backgroundTint="#10B981"
+                        android:text="📱 Hubungi Admin WhatsApp"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- TOOL 6: Version & App Info -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#151C2C"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ℹ️ Informasi Aplikasi &amp; Pembaruan"
+                        android:textColor="#F8FAFC"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Lalajo Anime v1.0.2 • Play Store Ready Security\nTarget Android 15 (SDK 35) • Edge-to-Edge Optimized"
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp"
+                        android:lineSpacingExtra="2dp" />
+
+                    <Button
+                        android:id="@+id/btn_check_update"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginTop="8dp"
+                        android:backgroundTint="#1E293B"
+                        android:text="🔄 Periksa Versi Terbaru"
+                        android:textColor="#38BDF8"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
     </FrameLayout>
 
-    <!-- 3. Native Bottom Navigation Bar -->
+    <!-- 4. Native Bottom Navigation Bar (5 Tabs) -->
     <LinearLayout
         android:id="@+id/native_bottom_bar"
         android:layout_width="match_parent"
@@ -228,7 +609,7 @@
                 android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- Tab 3: Jadwal -->
+        <!-- Tab 3: Jadwal Rilis -->
         <LinearLayout
             android:id="@+id/tab_jadwal"
             android:layout_width="0dp"
@@ -255,7 +636,34 @@
                 android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- Tab 4: Akun / VIP -->
+        <!-- Tab 4: Toolbox / Kotak Alat -->
+        <LinearLayout
+            android:id="@+id/tab_toolbox"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:background="?android:attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/tab_toolbox_icon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_toolbox"
+                android:tint="#94A3B8" />
+
+            <TextView
+                android:id="@+id/tab_toolbox_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Toolbox"
+                android:textColor="#94A3B8"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- Tab 5: Akun / VIP -->
         <LinearLayout
             android:id="@+id/tab_profile"
             android:layout_width="0dp"
