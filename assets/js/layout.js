@@ -24,6 +24,28 @@ const BASE = (function() {
   return inPages ? '../' : './';
 })();
 
+(function setupFaviconAndMeta() {
+  if (!document.querySelector("link[rel*='icon']")) {
+    const link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/png';
+    link.href = `${BASE}assets/images/favicon.png`;
+    document.head.appendChild(link);
+  }
+  if (!document.querySelector("link[rel='apple-touch-icon']")) {
+    const apple = document.createElement('link');
+    apple.rel = 'apple-touch-icon';
+    apple.href = `${BASE}assets/images/icons/icon-192.png`;
+    document.head.appendChild(apple);
+  }
+  if (!document.querySelector("link[rel='manifest']")) {
+    const manifest = document.createElement('link');
+    manifest.rel = 'manifest';
+    manifest.href = `${BASE}manifest.json`;
+    document.head.appendChild(manifest);
+  }
+})();
+
 function getNavLinks(currentPage) {
   const links = [
     { href: 'anime-terbaru.html', label: 'Anime Terbaru' },
@@ -88,7 +110,7 @@ function renderHeader() {
 <aside id="mobile-menu-drawer" aria-label="Mobile Navigation">
   <div class="drawer-header">
     <a href="${BASE}index.html" title="Lalajo Anime">
-      <span style="color:#fff;font-size:18px;font-weight:800;letter-spacing:-0.5px;">⚡ Lalajo Anime</span>
+      <img src="${BASE}assets/images/logo.png" alt="Lalajo Anime" style="height:34px;width:auto;display:block;">
     </a>
     <button id="close-mobile-menu" aria-label="Close Menu"><span class="fa fa-times"></span></button>
   </div>
@@ -122,7 +144,7 @@ function renderHeader() {
           <div class="site-branding logox">
             <span class="logo">
               <a href="${BASE}index.html" title="Lalajo Anime - Nonton Streaming Anime Sub Indo">
-                <span style="color:#fff;font-size:20px;font-weight:800;letter-spacing:-0.5px;">⚡ Lalajo Anime</span>
+                <img src="${BASE}assets/images/logo.png" alt="Lalajo Anime" class="site-logo" style="height:36px;width:auto;display:block;">
               </a>
             </span>
           </div>
@@ -173,7 +195,11 @@ function renderFooter() {
   document.body.insertAdjacentHTML('beforeend', `
 <footer>
   <div class="footer-inner">
-    <p style="margin-bottom:6px;"><strong style="color:#fff;">⚡ Lalajo Anime</strong> — Nonton Streaming Anime Sub Indo</p>
+    <p style="margin-bottom:8px;">
+      <a href="${BASE}index.html" style="display:inline-block;">
+        <img src="${BASE}assets/images/logo.png" alt="Lalajo Anime" style="height:30px;width:auto;display:inline-block;vertical-align:middle;">
+      </a>
+    </p>
     <p>Platform nonton streaming anime subtitle Indonesia terlengkap dan terupdate.</p>
     <p style="margin-top:8px;">
       <a href="${BASE}pages/anime-list">Daftar Anime</a> ·
