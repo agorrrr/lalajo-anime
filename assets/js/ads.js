@@ -36,24 +36,42 @@ const AdsManager = {
     }
   },
 
+  isAppEnvironment() {
+    return typeof window !== 'undefined' && (
+      window.IS_ANDROID_APK === true ||
+      (navigator && navigator.userAgent && navigator.userAgent.includes('LalajoAnimeApp')) ||
+      (window.location && window.location.search && window.location.search.includes('app=android'))
+    );
+  },
+
   async load() {
+    let config = this.defaultConfig;
     try {
       const res = await fetch('/api/ads');
       if (res.ok) {
         const data = await res.json();
         if (data && Object.keys(data).length) {
+          config = data;
           localStorage.setItem('ads_config', jsonStringifySafe(data));
-          return data;
         }
       }
     } catch (e) {
       console.warn('Gagal memuat ads dari API, fallback ke localStorage:', e);
+      const saved = localStorage.getItem('ads_config');
+      if (saved) {
+        try { config = JSON.parse(saved); } catch (e) {}
+      }
     }
-    const saved = localStorage.getItem('ads_config');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+
+    // Di environment APK Android: hanya aktifkan iklan banner, nonaktifkan popunder & pop-up
+    if (this.isAppEnvironment() && config) {
+      config = JSON.parse(JSON.stringify(config));
+      if (config.popunder) config.popunder.enabled = false;
+      if (config.banner_floating) config.banner_floating.enabled = false;
+      if (config.banner_center) config.banner_center.enabled = false;
     }
-    return this.defaultConfig;
+
+    return config;
   },
 
   async save(config) {
