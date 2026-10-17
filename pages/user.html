@@ -118,6 +118,7 @@
             </div>
             <div id="u-email" style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">email@example.com</div>
             <div id="u-joined" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Bergabung: -</div>
+            <div id="u-vip-status" style="margin-top: 6px;"></div>
           </div>
         </div>
 
@@ -214,21 +215,55 @@ function renderUser(u) {
   document.getElementById('u-joined').textContent = 'Bergabung: ' + (u.created_at || 'Baru saja');
 
   const badge = document.getElementById('u-badge');
+  const vipStatusEl = document.getElementById('u-vip-status');
+  vipStatusEl.innerHTML = '';
+
   if (u.role === 'admin') {
     badge.className = 'role-badge role-admin';
     badge.innerHTML = '👑 Administrator';
     document.getElementById('btn-admin-panel').style.display = 'inline-flex';
+    vipStatusEl.innerHTML = '<span style="font-size:12px;color:#ef4444;font-weight:700;"><i class="fa fa-infinity"></i> Hak Akses: Penuh & Bebas Semua Iklan Selamanya</span>';
   } else if (u.role === 'vip') {
     badge.className = 'role-badge role-vip';
     badge.style.background = 'rgba(234, 179, 8, 0.2)';
     badge.style.color = '#eab308';
     badge.style.border = '1px solid rgba(234, 179, 8, 0.4)';
-    badge.innerHTML = '⭐ VIP Member (Bebas Semua Iklan)';
+    badge.innerHTML = '⭐ VIP Member (Bebas Iklan)';
     document.getElementById('btn-admin-panel').style.display = 'none';
+
+    if (!u.vip_expires_at) {
+      vipStatusEl.innerHTML = '<div style="font-size:12px;color:#9333ea;font-weight:700;"><i class="fa fa-infinity"></i> Masa Aktif VIP: Permanent (Selamanya)</div>';
+    } else {
+      const expTime = new Date(u.vip_expires_at).getTime();
+      const diff = expTime - Date.now();
+      const daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+      const expDateStr = new Date(u.vip_expires_at).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      
+      if (diff <= 0) {
+        badge.className = 'role-badge role-user';
+        badge.innerHTML = '👤 Penonton Reguler';
+        vipStatusEl.innerHTML = '<div style="font-size:12px;color:#ef4444;background:rgba(239,68,68,0.1);padding:6px 12px;border-radius:6px;border:1px solid rgba(239,68,68,0.25);"><i class="fa fa-exclamation-circle"></i> Masa aktif VIP telah habis. Hubungi Admin untuk perpanjangan.</div>';
+      } else {
+        vipStatusEl.innerHTML = `
+          <div style="font-size:12px;color:#10b981;font-weight:700;">
+            <i class="fa fa-hourglass-half"></i> Sisa Masa Aktif VIP: <strong>${daysLeft} Hari</strong> (Hingga ${expDateStr})
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">
+            *Perpanjangan masa aktif VIP dapat dilakukan kapan saja tanpa menunggu expired.
+          </div>
+        `;
+      }
+    }
   } else {
     badge.className = 'role-badge role-user';
     badge.innerHTML = '👤 Penonton Reguler';
     document.getElementById('btn-admin-panel').style.display = 'none';
+
+    if (u.vip_expired) {
+      vipStatusEl.innerHTML = '<div style="font-size:12px;color:#ef4444;background:rgba(239,68,68,0.1);padding:6px 12px;border-radius:6px;border:1px solid rgba(239,68,68,0.25);"><i class="fa fa-exclamation-circle"></i> Masa aktif VIP telah berakhir. Akun beralih ke Reguler. Hubungi Admin untuk perpanjangan.</div>';
+    } else {
+      vipStatusEl.innerHTML = '<span style="font-size:12px;color:var(--text-muted);">Status Iklan: Aktif (Upgrade VIP melalui Admin untuk bebas iklan)</span>';
+    }
   }
 }
 

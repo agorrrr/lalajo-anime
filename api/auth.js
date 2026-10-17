@@ -17,25 +17,100 @@ const DEFAULT_USERS = [
   }
 ];
 
+function checkAndExpireVip(user) {
+  if (user && user.role === 'vip') {
+    if (user.vip_expires_at) {
+      const expTime = new Date(user.vip_expires_at).getTime();
+      if (!isNaN(expTime) && expTime <= Date.now()) {
+        user.role = 'user'; // Otomatis beralih ke akun reguler saat expired
+        user.vip_expired = true;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function calculateVipExpiry(duration, currentExpiry) {
+  if (duration === 'permanent') {
+    return null; // Selamanya
+  }
+  const durationsMs = {
+    '1d': 1 * 24 * 60 * 60 * 1000,
+    '1w': 7 * 24 * 60 * 60 * 1000,
+    '1m': 30 * 24 * 60 * 60 * 1000,
+    '1y': 365 * 24 * 60 * 60 * 1000,
+  };
+  const addMs = durationsMs[duration] || durationsMs['1m'];
+
+  // Jika masa aktif masih berjalan, perpanjangan ditambahkan dari sisa waktu yang ada
+  // Jika sudah expired atau belum ada, ditambahkan dari sekarang
+  let baseTime = Date.now();
+  if (currentExpiry) {
+    const curTime = new Date(currentExpiry).getTime();
+    if (!isNaN(curTime) && curTime > Date.now()) {
+      baseTime = curTime;
+    }
+  }
+  return new Date(baseTime + addMs).toISOString();
+}
+
+function toSafeUser(u) {
+  checkAndExpireVip(u);
+  let daysLeft = null;
+  if (u.role === 'vip') {
+    if (!u.vip_expires_at) {
+      daysLeft = 'permanent';
+    } else {
+      const diff = new Date(u.vip_expires_at).getTime() - Date.now();
+      daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    }
+  }
+  return {
+    id: u.id,
+    username: u.username,
+    email: u.email || '',
+    role: u.role || 'user',
+    vip_duration: u.vip_duration || null,
+    vip_expires_at: u.vip_expires_at || null,
+    vip_expired: !!u.vip_expired,
+    vip_days_left: daysLeft,
+    avatar: u.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${u.username}`,
+    created_at: u.created_at || ''
+  };
+}
+
 function getUsers() {
+  let list = null;
   if (fs.existsSync(TMP_FILE)) {
     try {
       const data = fs.readFileSync(TMP_FILE, 'utf-8');
-      const list = JSON.parse(data);
-      if (Array.isArray(list) && list.length) return list;
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length) list = parsed;
     } catch (e) {}
   }
-  if (fs.existsSync(LOCAL_FILE)) {
+  if (!list && fs.existsSync(LOCAL_FILE)) {
     try {
       const data = fs.readFileSync(LOCAL_FILE, 'utf-8');
-      const list = JSON.parse(data);
-      if (Array.isArray(list) && list.length) {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length) {
+        list = parsed;
         try { fs.writeFileSync(TMP_FILE, JSON.stringify(list, null, 2)); } catch (e) {}
-        return list;
       }
     } catch (e) {}
   }
-  return DEFAULT_USERS;
+  if (!list) list = DEFAULT_USERS;
+
+  // Otomatis cek status expired VIP
+  let changed = false;
+  list.forEach(u => {
+    if (checkAndExpireVip(u)) changed = true;
+  });
+  if (changed) {
+    saveUsers(list);
+  }
+
+  return list;
 }
 
 function saveUsers(list) {
@@ -67,19 +142,28 @@ export default async function handler(req, res) {
   }
   body = body || {};
 
-  const action = req.query.action || body.action || '';
+  const query = req.query || {};
+  const action = query.action || body.action || '';
 
-  // 1. GET: Ambil Daftar Users (untuk Admin)
-  if (req.method === 'GET' || url.includes('/admin/users') || action === 'users') {
+  // 1. GET: Ambil Daftar Users (untuk Admin) atau Cek Status Diri
+  if (req.method === 'GET' || url.includes('/admin/users') || action === 'users' || action === 'me') {
     const list = getUsers();
-    const safeUsers = list.map(u => ({
-      id: u.id,
-      username: u.username,
-      email: u.email || '',
-      role: u.role || 'user',
-      avatar: u.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${u.username}`,
-      created_at: u.created_at || ''
-    }));
+
+    // Jika action === 'me'
+    if (action === 'me' || url.includes('/auth/me')) {
+      const authHeader = req.headers.authorization || '';
+      const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+      if (token) {
+        const parts = token.split('_');
+        const uid = parts[1] === 'admin' ? 1 : parseInt(parts[1]);
+        const user = list.find(u => u.id === uid);
+        if (user) {
+          return res.status(200).json({ status: 'success', user: toSafeUser(user) });
+        }
+      }
+    }
+
+    const safeUsers = list.map(toSafeUser);
     return res.status(200).json({ status: 'success', users: safeUsers });
   }
 
@@ -101,7 +185,7 @@ export default async function handler(req, res) {
         return (uMatch || eMatch) && String(u.password).trim() === passwordInput;
       });
 
-      // Akun hardcoded fallback jika belum ada di list
+      // Akun hardcoded fallback admin
       if (!user && usernameInput.toLowerCase() === 'ezakasep' && passwordInput === 'ezakasep') {
         const adminUser = {
           id: 1,
@@ -121,18 +205,14 @@ export default async function handler(req, res) {
         return res.status(401).json({ status: 'error', message: 'Username atau password salah' });
       }
 
-      const safeUser = {
-        id: user.id,
-        username: user.username,
-        email: user.email || '',
-        role: user.role || 'user',
-        avatar: user.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${user.username}`
-      };
+      // Pastikan cek expiry VIP saat login
+      checkAndExpireVip(user);
+      saveUsers(list);
 
       return res.status(200).json({
         status: 'success',
         token: 'token_' + user.id + '_' + Date.now(),
-        user: safeUser
+        user: toSafeUser(user)
       });
     }
 
@@ -142,6 +222,7 @@ export default async function handler(req, res) {
       const email = (body.email || '').trim();
       const password = (body.password || '').trim();
       const role = body.role || 'vip';
+      const duration = body.duration || '1m'; // 1d, 1w, 1m, 1y, permanent
 
       if (!username || !password) {
         return res.status(400).json({ status: 'error', message: 'Username dan password wajib diisi' });
@@ -150,11 +231,16 @@ export default async function handler(req, res) {
       let list = getUsers();
       const existingIndex = list.findIndex(u => (u.username || '').toLowerCase() === username.toLowerCase());
 
+      const expiresAt = calculateVipExpiry(duration, null);
+
       let createdUser = null;
       if (existingIndex >= 0) {
         list[existingIndex].role = role;
         list[existingIndex].password = password;
         if (email) list[existingIndex].email = email;
+        list[existingIndex].vip_duration = duration;
+        list[existingIndex].vip_expires_at = expiresAt;
+        list[existingIndex].vip_expired = false;
         createdUser = list[existingIndex];
       } else {
         createdUser = {
@@ -163,6 +249,9 @@ export default async function handler(req, res) {
           email: email || '',
           password,
           role,
+          vip_duration: duration,
+          vip_expires_at: expiresAt,
+          vip_expired: false,
           avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${username}`,
           created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
         };
@@ -171,26 +260,45 @@ export default async function handler(req, res) {
 
       saveUsers(list);
 
-      const safeUser = {
-        id: createdUser.id,
-        username: createdUser.username,
-        email: createdUser.email,
-        role: createdUser.role,
-        avatar: createdUser.avatar,
-        created_at: createdUser.created_at
-      };
-
       return res.status(200).json({
         status: 'success',
-        message: `Akun VIP ${username} berhasil didaftarkan`,
-        user: safeUser
+        message: `Akun VIP ${username} berhasil didaftarkan (${duration === 'permanent' ? 'Permanent' : duration})`,
+        user: toSafeUser(createdUser)
       });
     }
 
-    // 2c. UPDATE ROLE (Admin)
+    // 2c. PERPANJANG VIP (Admin / Kapan Saja)
+    if (url.includes('/admin/extend-vip') || action === 'extend-vip') {
+      const userId = parseInt(body.user_id);
+      const duration = body.duration || '1m'; // 1d, 1w, 1m, 1y, permanent
+
+      let list = getUsers();
+      const user = list.find(u => u.id === userId);
+      if (!user) {
+        return res.status(404).json({ status: 'error', message: 'User tidak ditemukan' });
+      }
+
+      // Perpanjangan: jika belum expired, tambah ke sisa waktu; jika sudah, mulai dari sekarang
+      const newExpiry = calculateVipExpiry(duration, user.vip_expires_at);
+      user.role = 'vip';
+      user.vip_duration = duration;
+      user.vip_expires_at = newExpiry;
+      user.vip_expired = false;
+
+      saveUsers(list);
+
+      return res.status(200).json({
+        status: 'success',
+        message: `VIP ${user.username} berhasil diperpanjang (${duration === 'permanent' ? 'Permanent' : duration})`,
+        user: toSafeUser(user)
+      });
+    }
+
+    // 2d. UPDATE ROLE (Admin)
     if (url.includes('/admin/update-role') || action === 'update-role') {
       const userId = parseInt(body.user_id);
       const newRole = body.role || 'user';
+      const duration = body.duration || '1m';
 
       let list = getUsers();
       const user = list.find(u => u.id === userId);
@@ -199,11 +307,19 @@ export default async function handler(req, res) {
       }
 
       user.role = newRole;
+      if (newRole === 'vip') {
+        user.vip_duration = duration;
+        user.vip_expires_at = calculateVipExpiry(duration, user.vip_expires_at);
+        user.vip_expired = false;
+      } else if (newRole === 'user') {
+        user.vip_expires_at = null;
+      }
+
       saveUsers(list);
-      return res.status(200).json({ status: 'success', message: 'Role user berhasil diperbarui' });
+      return res.status(200).json({ status: 'success', message: 'Role user berhasil diperbarui', user: toSafeUser(user) });
     }
 
-    // 2d. DELETE USER (Admin)
+    // 2e. DELETE USER (Admin)
     if (url.includes('/admin/delete-user') || action === 'delete-user') {
       const userId = parseInt(body.user_id);
       let list = getUsers();
@@ -212,7 +328,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ status: 'success', message: 'User berhasil dihapus' });
     }
 
-    // 2e. REGISTER PENONTON
+    // 2f. REGISTER PENONTON
     if (url.includes('/auth/register') || url.includes('/register') || action === 'register') {
       const username = (body.username || '').trim();
       const email = (body.email || '').trim();
@@ -240,18 +356,10 @@ export default async function handler(req, res) {
       list.push(newUser);
       saveUsers(list);
 
-      const safeUser = {
-        id: newUser.id,
-        username: newUser.username,
-        email: newUser.email,
-        role: newUser.role,
-        avatar: newUser.avatar
-      };
-
       return res.status(200).json({
         status: 'success',
         token: 'token_' + newUser.id + '_' + Date.now(),
-        user: safeUser
+        user: toSafeUser(newUser)
       });
     }
   }

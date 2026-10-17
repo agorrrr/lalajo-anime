@@ -77,8 +77,20 @@ const AdsManager = {
       const raw = localStorage.getItem('auth_user');
       if (raw) {
         const u = JSON.parse(raw);
-        if (u && (u.role === 'admin' || u.role === 'vip')) {
-          return true;
+        if (u) {
+          if (u.role === 'admin') return true;
+          if (u.role === 'vip') {
+            if (u.vip_expires_at) {
+              const exp = new Date(u.vip_expires_at).getTime();
+              if (!isNaN(exp) && exp <= Date.now()) {
+                u.role = 'user';
+                u.vip_expired = true;
+                localStorage.setItem('auth_user', JSON.stringify(u));
+                return false;
+              }
+            }
+            return true;
+          }
         }
       }
     } catch (e) {}

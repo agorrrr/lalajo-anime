@@ -717,7 +717,7 @@
             Buatkan username & password untuk member/donatur VIP. Akun langsung aktif dengan status bebas iklan.
           </p>
           <form id="form-add-vip" onsubmit="handleCreateVip(event)">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 14px;">
               <div>
                 <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Username VIP:</label>
                 <input type="text" id="vip-reg-username" class="form-control" placeholder="Contoh: member_vip1" required>
@@ -729,6 +729,16 @@
               <div>
                 <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Password Akun:</label>
                 <input type="text" id="vip-reg-password" class="form-control" placeholder="Password akun VIP" required>
+              </div>
+              <div>
+                <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px;">Masa Aktif VIP:</label>
+                <select id="vip-reg-duration" class="form-control" style="background: var(--bg-card, #fff);">
+                  <option value="1d">1 Hari</option>
+                  <option value="1w">1 Minggu (7 Hari)</option>
+                  <option value="1m" selected>1 Bulan (30 Hari)</option>
+                  <option value="1y">1 Tahun (365 Hari)</option>
+                  <option value="permanent">Permanent (Selamanya)</option>
+                </select>
               </div>
             </div>
             <button type="submit" id="btn-create-vip" class="btn btn-brand" style="background: #f59e0b; border-color: #f59e0b; color: #000; font-weight: 800;">
@@ -755,13 +765,14 @@
                   <th>Email</th>
                   <th>Tipe Role</th>
                   <th>Status Iklan</th>
+                  <th>Masa Aktif VIP</th>
                   <th>Tanggal</th>
                   <th style="text-align: right;">Aksi Admin</th>
                 </tr>
               </thead>
               <tbody id="users-table-body">
                 <tr>
-                  <td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">Memuat daftar user...</td>
+                  <td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);">Memuat daftar user...</td>
                 </tr>
               </tbody>
             </table>
@@ -772,6 +783,46 @@
     </div>
 
   </div> <!-- Tutup dashboard-section -->
+
+  <!-- Modal Perpanjang / Atur VIP -->
+  <div id="extend-vip-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999999; align-items: center; justify-content: center; padding: 16px;">
+    <div class="admin-card" style="max-width: 440px; width: 100%; margin: auto; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-dark, #e5e7eb); padding-bottom: 12px;">
+        <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+          <span class="fa fa-star" style="color: #f59e0b;"></span> Perpanjang / Atur VIP
+        </h3>
+        <button type="button" onclick="closeExtendVipModal()" class="btn btn-secondary" style="padding: 4px 10px; font-size: 13px;">
+          <span class="fa fa-times"></span>
+        </button>
+      </div>
+      <form id="form-extend-vip" onsubmit="handleExtendVipSubmit(event)">
+        <input type="hidden" id="extend-vip-userid">
+        <div style="margin-bottom: 14px;">
+          <div style="font-size: 13px; margin-bottom: 6px;">Pengguna: <strong id="extend-vip-username" style="color: var(--brand);"></strong></div>
+          <div id="extend-vip-current-info" style="font-size: 12px; color: var(--text-muted); background: var(--bg-card2, rgba(128,128,128,0.1)); padding: 8px 12px; border-radius: 6px;"></div>
+        </div>
+        <div class="form-group">
+          <label style="font-size: 13px; font-weight: 700;">Pilih Durasi Perpanjangan VIP:</label>
+          <select id="extend-vip-duration" class="form-control" style="background: var(--bg-card, #fff);">
+            <option value="1d">1 Hari (+1 Hari)</option>
+            <option value="1w">1 Minggu (+7 Hari)</option>
+            <option value="1m" selected>1 Bulan (+30 Hari)</option>
+            <option value="1y">1 Tahun (+365 Hari)</option>
+            <option value="permanent">Permanent (Selamanya)</option>
+          </select>
+          <small style="color: var(--text-muted); font-size: 11px; margin-top: 6px; display: block;">
+            *Jika VIP masih aktif, masa aktif akan diakumulasikan/ditambahkan dari tanggal kedaluwarsa saat ini. Perpanjangan bisa kapan saja.
+          </small>
+        </div>
+        <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px;">
+          <button type="button" onclick="closeExtendVipModal()" class="btn btn-secondary" style="font-size: 13px;">Batal</button>
+          <button type="submit" id="btn-submit-extend" class="btn btn-brand" style="background: #10b981; border-color: #10b981; color: #fff; font-size: 13px; font-weight: 700;">
+            <span class="fa fa-check"></span> Simpan & Aktifkan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Modal Scrape Manual Anime (Overlay Mandiri) -->
   <div id="manual-scrape-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999999; align-items: center; justify-content: center; padding: 16px;">
@@ -1214,7 +1265,7 @@ async function loadUsersTable() {
   const tbody = document.getElementById('users-table-body');
   if (!tbody) return;
 
-  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);"><span class="fa fa-spinner fa-spin"></span> Memuat daftar user...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);"><span class="fa fa-spinner fa-spin"></span> Memuat daftar user...</td></tr>';
 
   let users = [];
   try {
@@ -1270,42 +1321,78 @@ function updateVipBadgeCount() {
   badge.textContent = vipCount;
 }
 
+function calculateClientExpiry(duration, currentExp) {
+  if (duration === 'permanent') return null;
+  const ms = { '1d': 86400000, '1w': 604800000, '1m': 2592000000, '1y': 31536000000 };
+  const add = ms[duration] || ms['1m'];
+  let base = Date.now();
+  if (currentExp) {
+    const cur = new Date(currentExp).getTime();
+    if (!isNaN(cur) && cur > Date.now()) base = cur;
+  }
+  return new Date(base + add).toISOString();
+}
+
 function renderUsersTable(list) {
   const tbody = document.getElementById('users-table-body');
   if (!tbody) return;
 
   if (!list.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted);">Tidak ada pengguna ditemukan.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted);">Tidak ada pengguna ditemukan.</td></tr>';
     return;
   }
 
   tbody.innerHTML = list.map(u => {
+    // Client-side auto check expired
+    if (u.role === 'vip' && u.vip_expires_at) {
+      const expTime = new Date(u.vip_expires_at).getTime();
+      if (!isNaN(expTime) && expTime <= Date.now()) {
+        u.role = 'user';
+        u.vip_expired = true;
+      }
+    }
+
     const isVip = u.role === 'vip';
     const isAdmin = u.role === 'admin';
     const avatar = u.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=${u.username}`;
 
     let roleBadge = '<span class="badge badge-secondary" style="font-size:12px;">👤 User Reguler</span>';
     let adStatus = '<span style="color:#ef4444;font-size:12px;font-weight:600;"><i class="fa fa-bullhorn"></i> Ada Iklan</span>';
+    let vipTimeHtml = '<span style="color:var(--text-muted);font-size:12px;">-</span>';
 
     if (isAdmin) {
       roleBadge = '<span class="badge badge-danger" style="background:#ef4444;color:#fff;font-size:12px;">👑 Admin</span>';
       adStatus = '<span style="color:#10b981;font-size:12px;font-weight:700;"><i class="fa fa-check-circle"></i> Bebas Iklan</span>';
+      vipTimeHtml = '<span style="color:#ef4444;font-size:12px;font-weight:700;"><i class="fa fa-infinity"></i> Unlimited</span>';
     } else if (isVip) {
       roleBadge = '<span class="badge" style="background:rgba(234,179,8,0.2);color:#eab308;border:1px solid rgba(234,179,8,0.4);font-weight:800;font-size:12px;">⭐ VIP Member</span>';
       adStatus = '<span style="color:#10b981;font-size:12px;font-weight:700;"><i class="fa fa-check-circle"></i> Bebas Iklan</span>';
+      
+      if (!u.vip_expires_at) {
+        vipTimeHtml = '<span class="badge" style="background:rgba(147,51,234,0.18);color:#9333ea;font-weight:700;"><i class="fa fa-infinity"></i> Permanent</span>';
+      } else {
+        const diff = new Date(u.vip_expires_at).getTime() - Date.now();
+        const daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+        const expDate = new Date(u.vip_expires_at).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
+        vipTimeHtml = `<span class="badge badge-success" style="font-weight:700;"><i class="fa fa-hourglass-half"></i> Sisa ${daysLeft} Hari</span><br><small style="font-size:10px;color:var(--text-muted);">${expDate}</small>`;
+      }
+    } else if (u.vip_expired) {
+      vipTimeHtml = '<span class="badge" style="background:rgba(239,68,68,0.12);color:#ef4444;"><i class="fa fa-history"></i> VIP Habis</span>';
     }
 
     let actionBtns = '';
     if (isAdmin) {
       actionBtns = '<span style="font-size:12px;color:var(--text-muted);">Akun Utama</span>';
     } else {
+      const extendBtn = `<button type="button" onclick="openExtendVipModal(${u.id})" class="btn btn-brand" style="background:#10b981;border-color:#10b981;color:#fff;padding:4px 8px;font-size:12px;" title="Perpanjang / Atur Durasi VIP"><i class="fa fa-refresh"></i> Perpanjang</button>`;
+
       const toggleBtn = isVip
         ? `<button type="button" onclick="changeUserRole(${u.id}, 'user')" class="btn btn-secondary" style="padding:4px 8px;font-size:12px;" title="Ubah ke user reguler (ada iklan)"><i class="fa fa-arrow-down"></i> Jadi User</button>`
-        : `<button type="button" onclick="changeUserRole(${u.id}, 'vip')" class="btn btn-brand" style="background:#f59e0b;border-color:#f59e0b;color:#000;padding:4px 8px;font-size:12px;font-weight:700;" title="Jadikan VIP (Bebas Iklan)"><i class="fa fa-star"></i> Jadikan VIP</button>`;
+        : `<button type="button" onclick="openExtendVipModal(${u.id})" class="btn btn-brand" style="background:#f59e0b;border-color:#f59e0b;color:#000;padding:4px 8px;font-size:12px;font-weight:700;" title="Jadikan VIP (Bebas Iklan)"><i class="fa fa-star"></i> Jadi VIP</button>`;
 
       const deleteBtn = `<button type="button" onclick="deleteUserAccount(${u.id})" class="btn btn-danger" style="padding:4px 8px;font-size:12px;margin-left:4px;" title="Hapus User"><i class="fa fa-trash"></i></button>`;
 
-      actionBtns = `<div style="display:flex;justify-content:flex-end;gap:4px;">${toggleBtn}${deleteBtn}</div>`;
+      actionBtns = `<div style="display:flex;justify-content:flex-end;gap:4px;">${extendBtn}${toggleBtn}${deleteBtn}</div>`;
     }
 
     return `
@@ -1317,6 +1404,7 @@ function renderUsersTable(list) {
         <td><span style="font-size:13px;color:var(--text-muted);">${u.email || '-'}</span></td>
         <td>${roleBadge}</td>
         <td>${adStatus}</td>
+        <td>${vipTimeHtml}</td>
         <td><span style="font-size:12px;color:var(--text-muted);">${u.created_at || 'Baru'}</span></td>
         <td style="text-align:right;">${actionBtns}</td>
       </tr>
@@ -1336,11 +1424,104 @@ function filterUsersTable() {
   renderUsersTable(filtered);
 }
 
+function openExtendVipModal(id) {
+  const u = allUsersList.find(x => x.id === id);
+  if (!u) return;
+  document.getElementById('extend-vip-userid').value = id;
+  document.getElementById('extend-vip-username').textContent = u.username;
+  
+  const infoEl = document.getElementById('extend-vip-current-info');
+  if (u.role === 'vip') {
+    if (!u.vip_expires_at) {
+      infoEl.innerHTML = 'Status saat ini: <strong style="color:#9333ea;">VIP Permanent (Selamanya)</strong>';
+    } else {
+      const expTime = new Date(u.vip_expires_at).getTime();
+      const diff = expTime - Date.now();
+      const days = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+      const expDate = new Date(u.vip_expires_at).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+      if (diff <= 0) {
+        infoEl.innerHTML = 'Status saat ini: <strong style="color:#ef4444;">VIP Expired (Kedaluwarsa)</strong>';
+      } else {
+        infoEl.innerHTML = `Status saat ini: <strong style="color:#10b981;">VIP Aktif (Sisa ${days} Hari - s/d ${expDate})</strong>`;
+      }
+    }
+  } else {
+    infoEl.innerHTML = 'Status saat ini: <strong>User Reguler (Ada Iklan)</strong>';
+  }
+  
+  document.getElementById('extend-vip-modal').style.display = 'flex';
+}
+
+function closeExtendVipModal() {
+  document.getElementById('extend-vip-modal').style.display = 'none';
+}
+
+async function handleExtendVipSubmit(e) {
+  e.preventDefault();
+  const id = parseInt(document.getElementById('extend-vip-userid').value);
+  const duration = document.getElementById('extend-vip-duration').value;
+  const btn = document.getElementById('btn-submit-extend');
+  const u = allUsersList.find(x => x.id === id);
+  const name = u ? u.username : 'user';
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="fa fa-spinner fa-spin"></span> Memproses...';
+
+  try {
+    let serverUpdated = false;
+    try {
+      const res = await fetch('/api/admin/extend-vip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: id, duration })
+      });
+      if (res.ok) serverUpdated = true;
+    } catch (e) {}
+
+    // Simpan local_users
+    const users = JSON.parse(localStorage.getItem('local_users') || '[]');
+    const target = users.find(x => x.id === id);
+    if (target) {
+      target.role = 'vip';
+      target.vip_duration = duration;
+      target.vip_expires_at = calculateClientExpiry(duration, target.vip_expires_at);
+      target.vip_expired = false;
+      localStorage.setItem('local_users', JSON.stringify(users));
+    }
+
+    const currentAuth = JSON.parse(localStorage.getItem('auth_user') || 'null');
+    if (currentAuth && currentAuth.id === id) {
+      currentAuth.role = 'vip';
+      currentAuth.vip_duration = duration;
+      currentAuth.vip_expires_at = calculateClientExpiry(duration, currentAuth.vip_expires_at);
+      currentAuth.vip_expired = false;
+      localStorage.setItem('auth_user', JSON.stringify(currentAuth));
+    }
+
+    const durationLabels = {
+      '1d': '1 Hari',
+      '1w': '1 Minggu',
+      '1m': '1 Bulan',
+      '1y': '1 Tahun',
+      'permanent': 'Permanent'
+    };
+    alert(`🎉 VIP "${name}" berhasil diperpanjang / diaktifkan (${durationLabels[duration] || duration})!`);
+    closeExtendVipModal();
+    loadUsersTable();
+  } catch (err) {
+    alert('Gagal memperpanjang VIP: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="fa fa-check"></span> Simpan & Aktifkan';
+  }
+}
+
 async function handleCreateVip(e) {
   e.preventDefault();
   const username = document.getElementById('vip-reg-username').value.trim();
   const email = document.getElementById('vip-reg-email').value.trim();
   const password = document.getElementById('vip-reg-password').value.trim();
+  const duration = document.getElementById('vip-reg-duration').value || '1m';
   const btn = document.getElementById('btn-create-vip');
 
   if (!username || !password) {
@@ -1357,10 +1538,12 @@ async function handleCreateVip(e) {
       const res = await fetch('/api/admin/create-vip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password, role: 'vip' })
+        body: JSON.stringify({ username, email, password, role: 'vip', duration })
       });
       if (res.ok) ok = true;
     } catch (err) {}
+
+    const expiresAt = calculateClientExpiry(duration, null);
 
     // Simpan ke local_users
     const users = JSON.parse(localStorage.getItem('local_users') || '[]');
@@ -1369,6 +1552,9 @@ async function handleCreateVip(e) {
       existing.role = 'vip';
       existing.password = password;
       if (email) existing.email = email;
+      existing.vip_duration = duration;
+      existing.vip_expires_at = expiresAt;
+      existing.vip_expired = false;
     } else {
       users.push({
         id: Date.now(),
@@ -1376,13 +1562,23 @@ async function handleCreateVip(e) {
         email: email || '',
         password,
         role: 'vip',
+        vip_duration: duration,
+        vip_expires_at: expiresAt,
+        vip_expired: false,
         avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${username}`,
         created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
       });
     }
     localStorage.setItem('local_users', JSON.stringify(users));
 
-    alert(`🎉 Akun VIP "${username}" berhasil didaftarkan!\n\nUser VIP ini otomatis BEBAS DARI SEMUA IKLAN saat login dan menonton.`);
+    const durationLabels = {
+      '1d': '1 Hari',
+      '1w': '1 Minggu',
+      '1m': '1 Bulan',
+      '1y': '1 Tahun',
+      'permanent': 'Permanent'
+    };
+    alert(`🎉 Akun VIP "${username}" berhasil didaftarkan!\n\nDurasi: ${durationLabels[duration] || duration}\nStatus: Bebas Iklan.`);
     document.getElementById('form-add-vip').reset();
     loadUsersTable();
   } catch (err) {

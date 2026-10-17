@@ -66,6 +66,14 @@ function renderHeader() {
     const raw = localStorage.getItem('auth_user');
     if (raw) authUser = JSON.parse(raw);
   } catch(e) {}
+  if (authUser && authUser.role === 'vip' && authUser.vip_expires_at) {
+    const exp = new Date(authUser.vip_expires_at).getTime();
+    if (!isNaN(exp) && exp <= Date.now()) {
+      authUser.role = 'user';
+      authUser.vip_expired = true;
+      localStorage.setItem('auth_user', JSON.stringify(authUser));
+    }
+  }
   const authToken = localStorage.getItem('auth_token');
 
   let accountLink = `${BASE}pages/login.html`;
@@ -227,9 +235,13 @@ document.addEventListener('DOMContentLoaded', () => {
           .then(d => {
             if (d && Array.isArray(d.users)) {
               const matched = d.users.find(x => x.id === u.id || (x.username && x.username.toLowerCase() === (u.username || '').toLowerCase()));
-              if (matched && matched.role && matched.role !== u.role) {
-                u.role = matched.role;
-                localStorage.setItem('auth_user', JSON.stringify(u));
+              if (matched) {
+                let changed = false;
+                if (matched.role !== u.role) { u.role = matched.role; changed = true; }
+                if (matched.vip_expires_at !== u.vip_expires_at) { u.vip_expires_at = matched.vip_expires_at; changed = true; }
+                if (matched.vip_duration !== u.vip_duration) { u.vip_duration = matched.vip_duration; changed = true; }
+                if (matched.vip_expired !== u.vip_expired) { u.vip_expired = matched.vip_expired; changed = true; }
+                if (changed) localStorage.setItem('auth_user', JSON.stringify(u));
               }
             }
           })
