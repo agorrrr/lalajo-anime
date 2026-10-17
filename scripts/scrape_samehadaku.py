@@ -208,7 +208,13 @@ def scrape_anime_detail(slug, url, max_eps=12):
     type_m = re.search(r'Type\s*</span>\s*<span[^>]*>(.*?)</span>', html, re.DOTALL | re.I) \
         or re.search(r'(?:Type|Tipe)\s*:\s*(?:</b>\s*)?([^<]+)', html, re.I)
     if type_m:
-        anime_type = re.sub(r'<[^>]+>', '', type_m.group(1)).strip()
+        raw_t = type_m.group(1)
+        raw_t = re.sub(r'<script.*?</script>', '', raw_t, flags=re.DOTALL | re.I)
+        raw_t = re.sub(r'<[^>]+>', '', raw_t).strip()
+        if len(raw_t) > 15 or '{' in raw_t or '$' in raw_t or 'post' in raw_t.lower() or 'action=' in raw_t.lower():
+            anime_type = "TV"
+        else:
+            anime_type = raw_t or "TV"
 
     studio_m = re.search(r'Studio\s*</span>\s*<span[^>]*>(.*?)</span>', html, re.DOTALL | re.I) \
         or re.search(r'Studio\s*:\s*(?:</b>\s*)?([^<]+)', html, re.I)

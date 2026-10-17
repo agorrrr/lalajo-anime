@@ -524,7 +524,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Lalajo Anime v1.0.2 • Play Store Ready Security\nTarget Android 15 (SDK 35) • Edge-to-Edge Optimized"
+                        android:text="Lalajo Anime v1.0.3 • Play Store Ready Security\nTarget Android 15 (SDK 35) • Edge-to-Edge Optimized"
                         android:textColor="#94A3B8"
                         android:textSize="12sp"
                         android:lineSpacingExtra="2dp" />

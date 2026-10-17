@@ -2,6 +2,15 @@
 // Lalajo Anime - Main JavaScript
 // ============================================
 
+function sanitizeType(type) {
+  if (!type || typeof type !== 'string') return 'TV';
+  const clean = type.trim();
+  if (clean.length > 15 || clean.includes('{') || clean.includes('$') || clean.toLowerCase().includes('post') || clean.includes('action=')) {
+    return 'TV';
+  }
+  return clean;
+}
+
 const DB = {
   anime: null,
   async load() {
@@ -18,10 +27,13 @@ const DB = {
       console.warn('Gagal fetch server, fallback cache:', e);
     }
 
+    serverAnime.forEach(a => { a.type = sanitizeType(a.type); });
+
     const cached = localStorage.getItem('anime_db');
     if (cached) {
       try {
         const localAnime = JSON.parse(cached);
+        localAnime.forEach(a => { a.type = sanitizeType(a.type); });
         // Merge: pertahankan anime hasil scrap manual di local yang belum ada di anime.json
         const serverSlugs = new Set(serverAnime.map(a => a.slug));
         const newLocal = localAnime.filter(a => !serverSlugs.has(a.slug));
@@ -150,6 +162,7 @@ function initLiveSearch() {
 function animeCardHTML(a) {
   const inPages = window.location.pathname.split('/').some(p => p === 'pages');
   const statusLabel = a.status === 'Currently Airing' ? 'Ongoing' : 'Completed';
+  const safeType = sanitizeType(a.type);
   const genres = a.genres.slice(0, 4).map(g =>
     `<a href="${inPages ? 'anime-list.html' : 'pages/anime-list.html'}?genre=${encodeURIComponent(g)}">${g}</a>`).join('');
   return `
@@ -160,7 +173,7 @@ function animeCardHTML(a) {
             <div class="ply"><i class="fa fa-play"></i></div>
             <img src="${a.thumbnail}" class="anmsa" alt="${a.title}" loading="lazy"
                  onerror="this.src='https://placehold.co/212x300/333/fff?text=N%2FA'">
-            <div class="type ${a.type}">${a.type}</div>
+            <div class="type ${safeType}">${safeType}</div>
             <div class="score"><i class="fa fa-star">★</i> ${a.score.toFixed(2)}</div>
           </div>
           <div class="data">
@@ -173,7 +186,7 @@ function animeCardHTML(a) {
         <div class="title"><h4>${a.title}</h4></div>
         <div class="metadata">
           <span class="skor"><i class="fa fa-star">★</i> ${a.score.toFixed(2)}</span>
-          <span class="type-badge">${a.type}</span>
+          <span class="type-badge">${safeType}</span>
           <span class="views">${a.views.toLocaleString()} Views</span>
         </div>
         <div class="ttls">${a.synopsis}</div>
