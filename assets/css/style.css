@@ -645,4 +645,16 @@ body.app-mode .batch-item {
   border-radius: 10px !important;
   padding: 12px !important;
 }
+body.app-mode .auth-container {
+  max-width: 440px !important;
+  margin: 20px auto !important;
+  padding: 0 16px !important;
+}
+body.app-mode .auth-card {
+  background: #151c2c !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
 

@@ -12,5 +12,5 @@ object AppConfig {
      * Dipakai oleh frontend (ads.js) untuk mendeteksi aplikasi Android
      * dan otomatis HANYA mengaktifkan iklan banner (popunder & popup otomatis dimatikan).
      */
-    const val APP_USER_AGENT = "LalajoAnimeApp/1.0 (Android; Mobile; PlayStoreSafe)"
+    const val APP_USER_AGENT = "LalajoAnimeApp/1.0.1 (Android; Mobile; PlayStoreSafe)"
 }

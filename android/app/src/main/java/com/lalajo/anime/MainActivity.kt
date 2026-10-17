@@ -28,6 +28,8 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 class MainActivity : ComponentActivity() {
@@ -73,6 +75,7 @@ class MainActivity : ComponentActivity() {
         setContentView(R.layout.activity_main)
 
         initViews()
+        setupWindowInsets()
         setupSecurityAndSettings()
         setupClients()
         setupTopBarListeners()
@@ -114,7 +117,43 @@ class MainActivity : ComponentActivity() {
         tabJadwalIcon = findViewById(R.id.tab_jadwal_icon)
         tabJadwalText = findViewById(R.id.tab_jadwal_text)
         tabProfileIcon = findViewById(R.id.tab_profile_icon)
-        tabProfileText = findViewById(R.id.tab_profile_text)
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
+    }
+
+    private fun setupWindowInsets() {
+        val rootLayout = findViewById<View>(R.id.root_layout)
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { _, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+
+            // Padding top bar agar pas di bawah jam / status bar tablet
+            nativeTopBar.setPadding(
+                insets.left + dpToPx(12),
+                0,
+                insets.right + dpToPx(12),
+                0
+            )
+            val topParams = nativeTopBar.layoutParams
+            topParams.height = insets.top + dpToPx(56)
+            nativeTopBar.layoutParams = topParams
+
+            // Padding bottom bar agar pas di atas Taskbar Samsung / navigation bar
+            nativeBottomBar.setPadding(
+                insets.left,
+                0,
+                insets.right,
+                insets.bottom
+            )
+            val bottomParams = nativeBottomBar.layoutParams
+            bottomParams.height = dpToPx(58) + insets.bottom
+            nativeBottomBar.layoutParams = bottomParams
+
+            windowInsets
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
